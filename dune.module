@@ -1,0 +1,10 @@
+################################
+# Dune module information file #
+################################
+
+#Name of the module
+Module: proj-Hydrate-DG-2comp
+Version: 0.1
+Maintainer: apminaei@gmail.com
+#depending on
+Depends: dune-common dune-geometry dune-uggrid dune-grid dune-istl dune-localfunctions dune-matrix-vector dune-alugrid dune-solvers dune-typetree dune-functions dune-pdelab

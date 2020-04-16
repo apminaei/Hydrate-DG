@@ -1,0 +1,13 @@
+{
+    "cmake.configureOnOpen": true,
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "cmath": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "vector": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp"
+    }
+}

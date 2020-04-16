@@ -1,0 +1,12 @@
+#install headers
+install(FILES characteristicValues.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES eosPengRobinson.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES hydrate.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES hydraulicProperties.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES indices.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES methane.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES mixture.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES parameters.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES reactionKinetics.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES soil.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
+install(FILES water.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-Hydrate-DG-2comp/parameters)
