@@ -29,6 +29,8 @@ private:
 	double Xc_C;
 	double Xc_P;
 	double Xc_T;
+	double Xc_X;
+	double Xc_Y;
 
 public:
 	// pattern assembly flags
@@ -54,6 +56,8 @@ public:
 		Xc_C = paramclass.characteristicValue.specificheat_c;
 		Xc_P = paramclass.characteristicValue.P_c;
 		Xc_T = paramclass.characteristicValue.T_c;
+		Xc_X = paramclass.characteristicValue.x_c;
+		Xc_Y = paramclass.characteristicValue.x_c;
 	}
 
 	// volume integral depending on test and ansatz functions
@@ -81,6 +85,14 @@ public:
 		//Temperature
 		const auto &lfsv_T = lfsv.template child<Indices::PVId_T>();
 		const auto &lfsu_T = lfsu.template child<Indices::PVId_T>();
+
+		//Hydrate mole fraction
+    	const auto &lfsv_XCH4 = lfsv.template child<Indices::PVId_XCH4>();
+    	const auto &lfsu_XCH4 = lfsu.template child<Indices::PVId_XCH4>();
+
+    	//Water mole fraction
+    	const auto &lfsv_YH2O = lfsv.template child<Indices::PVId_YH2O>();
+    	const auto &lfsu_YH2O = lfsu.template child<Indices::PVId_YH2O>();
 
 		// define types
 		using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
@@ -137,6 +149,16 @@ public:
 			std::vector<RangeType> psi_T(lfsv_T.size());
 			lfsv_T.finiteElement().localBasis().evaluateFunction(ip.position(), psi_T);
 
+			std::vector<RangeType> phi_XCH4(lfsu_XCH4.size());
+			lfsu_XCH4.finiteElement().localBasis().evaluateFunction(ip.position(), phi_XCH4);
+			std::vector<RangeType> psi_XCH4(lfsv_XCH4.size());
+			lfsv_XCH4.finiteElement().localBasis().evaluateFunction(ip.position(), psi_XCH4);
+
+			std::vector<RangeType> phi_YH2O(lfsu_YH2O.size());
+			lfsu_YH2O.finiteElement().localBasis().evaluateFunction(ip.position(), phi_YH2O);
+			std::vector<RangeType> psi_YH2O(lfsv_YH2O.size());
+			lfsv_YH2O.finiteElement().localBasis().evaluateFunction(ip.position(), psi_YH2O);
+
 			auto ip_global = geo.global(ip.position());
 
 			// evaluate Pg
@@ -164,6 +186,16 @@ public:
 			for (size_type i = 0; i < lfsu_T.size(); i++)
 				T += x(lfsu_T, i) * phi_T[i];
 
+			// evaluate XCH4
+      		RF XCH4 = 0.0;
+      		for (size_type i = 0; i < lfsu_XCH4.size(); i++)
+        		XCH4 += x(lfsu_XCH4, i) * phi_XCH4[i];
+
+      		// evaluate YH2O
+      		RF YH2O = 0.0;
+      		for (size_type i = 0; i < lfsu_YH2O.size(); i++)
+        		YH2O += x(lfsu_YH2O, i) * phi_YH2O[i];
+
 			// evaluate Pw
 			RF Pw = Pg - Pc;
 			RF Peff = (Pg * (1. - Sw - Sh) + Pw * Sw) / (1. - Sh);
@@ -181,10 +213,10 @@ public:
 
 			//  adding terms regarding components
 			auto Sg = 1. - Sw - Sh;
-			auto XCH4 = paramclass.mixture.mole_x_CH4(T * Xc_T, Pg * Xc_P);
+			//auto XCH4 = paramclass.mixture.mole_x_CH4(T * Xc_T, Pg * Xc_P);
 			auto YCH4 = paramclass.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
 			auto XH2O = paramclass.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P);
-			auto YH2O = paramclass.mixture.mole_y_H2O(T * Xc_T, Pg * Xc_P);
+			//auto YH2O = paramclass.mixture.mole_y_H2O(T * Xc_T, Pg * Xc_P);
 			//std::cout << "----" << zCH4 << std::endl;
 			//  end of terms regarding components
 

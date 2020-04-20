@@ -50,8 +50,8 @@ public:
 	constexpr static double Z_length  	= 0.5	;
 	constexpr static double Y_length	= 1.	;		//only if dim=3
 
-	const static int X_cells	= 6 ;
-	const static int Z_cells	= 3 ;
+	const static int X_cells	= 8 ;
+	const static int Z_cells	= 4 ;
 	const static int Y_cells	= 1	 ;
 	/**********************************************************************/
 
@@ -205,6 +205,8 @@ public:
 		double Sw = 0.3;
 		double Sh = 0.4;
 		double T = 273.15+10.; /*K*/
+		double XCH4 = 0.1;
+		double YH2O = 0.1;
 		HydraulicProperties hydraulicProperty;
 		double Pc = hydraulicProperty.suctionPressure(Sw,Sh) * hydraulicProperty.PcSF1(Sh);
 
@@ -213,6 +215,8 @@ public:
 		icvalue[Indices::PVId_Sh] = Sh ;
 		icvalue[Indices::PVId_Pc] = Pc ;
 		icvalue[Indices::PVId_T ] = T  ;
+		icvalue[Indices::PVId_XCH4] = XCH4 ;
+		icvalue[Indices::PVId_YH2O ] = YH2O  ;
 
 		return icvalue;
 	}
@@ -232,6 +236,8 @@ public:
 			bctype[indices.PVId_Pc] = indices.BCId_neumann ;
 			bctype[indices.PVId_Sw] = indices.BCId_neumann ;
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann ;
+			bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
 		}
 		else if( isBottomBoundary(globalPos) ){
 
@@ -239,6 +245,8 @@ public:
 			bctype[indices.PVId_Pc] = indices.BCId_neumann ;
 			bctype[indices.PVId_Sw] = indices.BCId_neumann ;
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann ;
+			bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
 		}
 		else if( isLeftBoundary(globalPos) ){
 			//if( (globalPos[1] > Z_length*(3./8.) - eps) and (globalPos[1] < Z_length*(5./8.) + eps) ){
@@ -251,12 +259,16 @@ public:
 			// 	bctype[indices.PVId_Sw] = indices.BCId_neumann ;
 			// }
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
+			bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
 		}
 		else if( isRightBoundary(globalPos) ){
 			bctype[indices.PVId_Pg] = indices.BCId_neumann ;
 			bctype[indices.PVId_Pc] = indices.BCId_neumann ;
 			bctype[indices.PVId_Sw] = indices.BCId_neumann ;
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann ;
+			bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
 		}
 
 		return bctype;
@@ -276,12 +288,16 @@ public:
 			bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_Sw] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
+			bcvalue[indices.PVId_XCH4] = 0.;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_YH2O ] = 0.;
 		}
 		else if( isBottomBoundary(globalPos) ){
 			bcvalue[indices.PVId_Pg] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_Sw] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_T ] = 0.;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_XCH4] = 0.;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_YH2O ] = 0.;
 		}
 		else if( isLeftBoundary(globalPos) ){
 			HydraulicProperties hydraulicProperty;
@@ -294,13 +310,17 @@ public:
 			// 	bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
 			// 	bcvalue[indices.PVId_Sw] = 0.;//indices.BCId_neumann ;
 			// }
-			bcvalue[indices.PVId_T ] = 0.;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_T ] = 0.1;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_XCH4] = 0.1;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_YH2O ] = 0.1;
 		}
 		else if( isRightBoundary(globalPos) ){
 			bcvalue[indices.PVId_Pg] = 0.;//ProblemICValues(globalPos)[indices.PVId_Pg];//indices.BCId_dirichlet ;
 			bcvalue[indices.PVId_Pc] = 0.;//ProblemICValues(globalPos)[indices.PVId_Pc];//indices.BCId_dirichlet ;
 			bcvalue[indices.PVId_Sw] = 0.;//ProblemICValues(globalPos)[indices.PVId_Sw];//indices.BCId_dirichlet ;
 			bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
+			bcvalue[indices.PVId_XCH4] = 0.;//indices.BCId_neumann ;
+			bcvalue[indices.PVId_YH2O ] = 0.;
 		}
 
 		return bcvalue;

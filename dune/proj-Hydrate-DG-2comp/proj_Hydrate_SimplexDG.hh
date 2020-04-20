@@ -41,7 +41,8 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	const int degree_S = 1;
 	const int degree_P = 1;
 	const int degree_T = 1;
-
+	const int degree_X = 1;
+	const int degree_Y = 1;
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
@@ -49,32 +50,40 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	typedef Dune::PDELab::NoConstraints CON0;	// pure Neumann: no constraints
 #endif									
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;//OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::cube> FEM_P;// 
 	FEM_P fem_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_S;// basis function
 	FEM_S fem_S;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	FEM_T fem_T;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_X; 
+	FEM_X fem_x;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Y; 
+	FEM_Y fem_y;
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_S, CON0, VBE0> GFS_S; // gfs
 	GFS_S gfs_S(gv, fem_S);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_T, CON0, VBE0> GFS_T; // gfs
 	GFS_T gfs_T(gv, fem_T);
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_X, CON0, VBE0> GFS_X; // gfs
+	GFS_X gfs_x(gv, fem_x);
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Y, CON0, VBE0> GFS_Y; // gfs
+	GFS_Y gfs_y(gv, fem_y);
 
 	//	COMPOSITE GFS
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE; //  block size -> numOfFlowPVs
 
-	// gfs for composite system Pg,Pc,Sw,Sh,T
+	// gfs for composite system Pg,Pc,Sw,Sh,T,XCH4,YH2O
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE,
 													 Dune::PDELab::EntityBlockedOrderingTag,
 													 GFS_P,
 													 GFS_P,
 													 GFS_S,
 													 GFS_S,
-													 GFS_T>
+													 GFS_T,GFS_X,GFS_Y>
 		GFS;
-	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T);
+	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T, gfs_x, gfs_y);
 	//PowerGridFunctionSpace< GFS_P,
 	// 											  Indices::numOfFlowPVs,
 	// 											  VBE,
@@ -98,6 +107,10 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	SUBGFS_Sh subgfs_Sh(gfs);
 	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_T>> SUBGFS_T; //
 	SUBGFS_T subgfs_T(gfs);
+	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_XCH4>> SUBGFS_XCH4; //
+	SUBGFS_XCH4 subgfs_XCH4(gfs);
+	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_YH2O>> SUBGFS_YH2O; //
+	SUBGFS_YH2O subgfs_YH2O(gfs);
 
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
@@ -118,27 +131,37 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	Sh_InitialType Sh_initial(gv);
 	typedef T_Initial<GV, Real> T_InitialType;
 	T_InitialType T_initial(gv);
+	typedef XCH4_Initial<GV, Real> XCH4_InitialType;
+	XCH4_InitialType XCH4_initial(gv);
+	typedef YH2O_Initial<GV, Real> YH2O_InitialType;
+	YH2O_InitialType YH2O_initial(gv);
 	typedef Dune::PDELab::CompositeGridFunction<Pg_InitialType,
 												Pc_InitialType,
 												Sw_InitialType,
 												Sh_InitialType,
-												T_InitialType>
+												T_InitialType,
+												XCH4_InitialType,
+												YH2O_InitialType>
 		InitialType;
-	InitialType initial(Pg_initial, Pc_initial, Sw_initial, Sh_initial, T_initial);
+	InitialType initial(Pg_initial, Pc_initial, Sw_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial);
 
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
+	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::IIPG;
+	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::IIPG;
+	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::IIPG;
+	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::IIPG;
+	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::IIPG;
 	double alpha_g = 10.;
 	double alpha_w = 10.;
 	double alpha_s = 10.;
 	double alpha_T = 10000.;
+	double alpha_x = 10.;
+	double alpha_y = 10.;
 
-	typedef FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T> LOP; // spatial part
-	LOP lop(gv, &unew, gfs, &time, &dt, 6, method_g, method_w, method_T, alpha_g, alpha_w, alpha_s, alpha_T);
+	typedef FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
+	LOP lop(gv, &unew, gfs, &time, &dt, 6, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef FLOW_TimeOperator TLOP; // temporal part
 	TLOP tlop;
@@ -177,10 +200,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	//LS ls(gfs, cc, 1000, 2);
-
-	//typedef Dune::PDELab::ISTLBackend_CG_AMG_SSOR<IGO> LS; //should be checked
-	//LS ls(gfs, 100, 1, true, true);
+	//LS ls(gfs, cc, 500, 2);
 
 	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	//LS ls(gfs, 1000, 1, true, true);
@@ -248,6 +268,10 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	DGF_Sh dgf_Sh(subgfs_Sh, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
 	DGF_T dgf_T(subgfs_T, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XCH4, U> DGF_XCH4;
+	DGF_XCH4 dgf_XCH4(subgfs_XCH4, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
+	DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
 
 	// secondary variables
 	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_Pw, U_PP> DGFPP_Pw;
@@ -292,6 +316,8 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 
 	vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 	vtkSequenceWriter.clear();
@@ -351,16 +377,21 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
-		typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pg, U> DGF_Pg;
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pg, U> DGF_Pg;
 		DGF_Pg dgf_Pg(subgfs_Pg, unew);
-		typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
 		DGF_Pc dgf_Pc(subgfs_Pc, unew);
-		typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sw, U> DGF_Sw;
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sw, U> DGF_Sw;
 		DGF_Sw dgf_Sw(subgfs_Sw, unew);
-		typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
 		DGF_Sh dgf_Sh(subgfs_Sh, unew);
-		typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
 		DGF_T dgf_T(subgfs_T, unew);
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XCH4, U> DGF_XCH4;
+		DGF_XCH4 dgf_XCH4(subgfs_XCH4, unew);
+		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
+		DGF_YH2O dgf_YH2O(subgfs_YH2O, unew);
+
 
 		/*********************************************************************************************
 			 * OUTPUT
@@ -374,6 +405,8 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			vtkSequenceWriter.clear();

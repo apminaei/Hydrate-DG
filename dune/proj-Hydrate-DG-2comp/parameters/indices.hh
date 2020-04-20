@@ -23,16 +23,18 @@ public:
 
 
 	/* PRIMARY VARIABLES */
-	static const unsigned int numOfFlowPVs 	 = 5 ;
+	static const unsigned int numOfFlowPVs 	 = 7 ;
 	static const unsigned int PVId_Pg  	= 0;
 	static const unsigned int PVId_Pc  	= 1;
 	static const unsigned int PVId_Sw  	= 2;
 	static const unsigned int PVId_Sh 	= 3;
 	static const unsigned int PVId_T   	= 4;
-	static const unsigned int PVId_C   	= 5;
+	static const unsigned int PVId_XCH4	= 5 ;
+	static const unsigned int PVId_YH2O	= 6 ;
+	//static const unsigned int PVId_C   	= 5;
 
 	/* SECONDARY VARIABLES FOR POST PROCESS AND O/P */
-	static const unsigned int numOfFlowPPvars = 12 ;
+	static const unsigned int numOfFlowPPvars = 11 ;
 	static const unsigned int PP_Sg		= 0 ;
 	static const unsigned int PP_Pw		= 1 ;
 	static const unsigned int PP_XCH4	= 2 ;

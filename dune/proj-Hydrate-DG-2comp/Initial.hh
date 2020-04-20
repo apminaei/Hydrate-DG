@@ -176,5 +176,66 @@ public:
   inline const GV& getGridView () {return gv;}
 };
 
+/** \brief A function for initial values of T
+ */
+template<typename GV, typename RF>
+class XCH4_Initial
+  : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, XCH4_Initial<GV,RF> >
+{
+private:
+	  const GV& gv;
+public:
+  typedef Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> > Traits;
+
+  //! construct from grid view
+  XCH4_Initial ( const GV& gv_ )
+  : gv( gv_ ) {}
+  //! evaluate extended function on element
+  inline void evaluate (const typename Traits::ElementType& e,
+                        const typename Traits::DomainType& xlocal,
+                        typename Traits::RangeType& y) const
+  {
+    const int dim = Traits::GridViewType::Grid::dimension;
+    typedef typename Traits::GridViewType::Grid::ctype ctype;
+    Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
+
+    IncludeClasses::ProblemSpecs problemSpecs;
+    y=problemSpecs.ProblemICValues(x)[Indices::PVId_XCH4]/CharacteristicValues::x_c ; //initial temperature
+    return;
+  }
+  //! get a reference to the grid view
+  inline const GV& getGridView () {return gv;}
+};
+
+/** \brief A function for initial values of T
+ */
+template<typename GV, typename RF>
+class YH2O_Initial
+  : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, YH2O_Initial<GV,RF> >
+{
+private:
+	  const GV& gv;
+public:
+  typedef Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> > Traits;
+
+  //! construct from grid view
+  YH2O_Initial ( const GV& gv_ )
+  : gv( gv_ ) {}
+  //! evaluate extended function on element
+  inline void evaluate (const typename Traits::ElementType& e,
+                        const typename Traits::DomainType& xlocal,
+                        typename Traits::RangeType& y) const
+  {
+    const int dim = Traits::GridViewType::Grid::dimension;
+    typedef typename Traits::GridViewType::Grid::ctype ctype;
+    Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
+
+    IncludeClasses::ProblemSpecs problemSpecs;
+    y=problemSpecs.ProblemICValues(x)[Indices::PVId_YH2O]/CharacteristicValues::x_c ; //initial temperature
+    return;
+  }
+  //! get a reference to the grid view
+  inline const GV& getGridView () {return gv;}
+};
 
 #endif /* INITIAL_HH_ */
