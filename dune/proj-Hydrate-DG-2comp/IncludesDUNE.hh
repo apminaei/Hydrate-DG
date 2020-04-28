@@ -8,6 +8,7 @@
 #ifndef INCLUDESDUNE_HH_
 #define INCLUDESDUNE_HH_
 #define ALUGRID
+#define PARALLEL
 
 #include<dune/common/parallel/mpihelper.hh>
 #include<dune/common/exceptions.hh>
@@ -21,22 +22,20 @@
 #include<dune/grid/io/file/vtk/vtksequencewriterbase.hh>
 #include<dune/grid/io/file/gmshreader.hh>
 #include<dune/grid/yaspgrid.hh>
-//#include<dune/grid/utility/structuredgridfactory.hh>
 
 
-#if HAVE_ALBERTA
+#ifdef HAVE_ALBERTA
 #include<dune/grid/albertagrid.hh>
 #include<dune/grid/albertagrid/dgfparser.hh>
 #endif
-//#if HAVE_UG
+#ifdef UG
 #include<dune/grid/uggrid.hh>
-//#endif
-//#if HAVE_ALUGRID
+#endif
+#ifdef ALUGRID
 #include<dune/alugrid/grid.hh>
-//#include<dune/grid/io/file/dgfparser/dgfalu.hh>
 #include<dune/grid/io/file/dgfparser/dgfparser.hh>
 #include<dune/alugrid/common/structuredgridfactory.hh>
-//#endif
+#endif
 
 #include<dune/istl/bvector.hh>
 #include<dune/istl/operators.hh>
@@ -91,8 +90,9 @@
 
 
 #include<dune/geometry/referenceelements.hh>
+#include<dune/geometry/refinement.hh>
 #include<dune/geometry/quadraturerules.hh>
 #include<dune/geometry/type.hh>
 
-
+#include<dune/grid/utility/parmetisgridpartitioner.hh>
 #endif /* INCLUDESDUNE_HH_ */

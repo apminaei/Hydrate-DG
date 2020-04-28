@@ -101,26 +101,13 @@ public:
 			Traits::LocalBasisType::Traits::RangeType;
 		using size_type = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::SizeType;
 
-		// dimensions
-		const int dim = EG::Entity::dimension;
-		//	      const int order = std::max(lfsu.finiteElement().localBasis().order(),
-		//	          lfsv.finiteElement().localBasis().order());
-
-		// Get cell
-		const auto &cell = eg.entity();
-
 		// Get geometry
 		auto geo = eg.geometry();
-
-		// evaluate diffusion tensor at cell center, assume it is constant over elements
-		auto ref_el = referenceElement(geo);
-		auto localcenter = ref_el.position(0, 0);
 
 		// Transformation matrix
 		typename EG::Geometry::JacobianInverseTransposed jac;
 
 		// loop over quadrature points
-		//      auto intorder = intorderadd + quadrature_factor * order;
 		for (const auto &ip : quadratureRule(geo, intorder))
 		{
 			// evaluate test shape functions
@@ -213,11 +200,8 @@ public:
 
 			//  adding terms regarding components
 			auto Sg = 1. - Sw - Sh;
-			//auto XCH4 = paramclass.mixture.mole_x_CH4(T * Xc_T, Pg * Xc_P);
 			auto YCH4 = paramclass.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
 			auto XH2O = paramclass.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P);
-			//auto YH2O = paramclass.mixture.mole_y_H2O(T * Xc_T, Pg * Xc_P);
-			//std::cout << "----" << zCH4 << std::endl;
 			//  end of terms regarding components
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
@@ -239,7 +223,7 @@ public:
 				r.accumulate(lfsv_T, i, (Cv_eff * T * psi_T[i]) * factor);
 			}
 
-		} //End Quadrature Rule
-	}
+		} 	//End Quadrature Rule
+	}	// End of alpha volume
 };
 #endif /* FLOW_TIMEOPERATOR_HH_ */

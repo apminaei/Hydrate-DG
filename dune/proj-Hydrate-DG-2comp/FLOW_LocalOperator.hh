@@ -276,15 +276,8 @@ public:
     const int order = std::max(lfsu_Pg.finiteElement().localBasis().order(),
                                lfsv_Pg.finiteElement().localBasis().order());
 
-    // Get cell
-    const auto &cell = eg.entity();
-
     // Get geometry
     auto geo = eg.geometry();
-
-    // evaluate diffusion tensor at cell center, assume it is constant over elements
-    auto ref_el = referenceElement(geo);
-    auto localcenter = ref_el.position(0, 0);
 
     // Initialize vectors outside for loop
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg(lfsu_Pg.size());
@@ -449,35 +442,34 @@ public:
       auto por = paramclass.problemSpecs.SedimentPorosity(ip_global);
       auto rho_g = paramclass.methane.density(T * Xc_T, Pg * Xc_P, 1.) / Xc_rho;
       auto rho_w = paramclass.water.density(T * Xc_T, Pw * Xc_P) / Xc_rho;
-      auto rho_h = paramclass.hydrate.density() / Xc_rho;
+      //auto rho_h = paramclass.hydrate.density() / Xc_rho;
 
       //  adding terms regarding components
       auto Sg = 1. - Sw - Sh;
       auto tau = paramclass.soil.tortuosity(por);
       auto DH2O_g = tau * por * paramclass.mixture.binaryDiffCoeffInGas(T * Xc_T, Pg * Xc_P);
       auto DCH4_w = tau * por * paramclass.mixture.binaryDiffCoeffInLiquid(T * Xc_T, Pw * Xc_P);
-      //auto XCH4 = paramclass.mixture.mole_x_CH4(T * Xc_T, Pg * Xc_P);
+      
       auto YCH4 = paramclass.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
       auto XH2O = paramclass.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P);
-      //auto YH2O = paramclass.mixture.mole_y_H2O(T * Xc_T, Pg * Xc_P);
+      
       auto H_M_w = paramclass.methane.henrysConstant(T * Xc_T);
       auto P_H_sat = paramclass.water.saturatedVaporPressure(T * Xc_T);
       auto zCH4 = paramclass.eos.evaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
-      //std::cout << "----" << zCH4 << std::endl;
       //  end of terms regarding components
 
-      //  std::cout<< "densities: (g,w,h) " << rho_g <<", "<< rho_w<<", "<<rho_h<<std::endl;
+      
       auto krW = paramclass.hydraulicProperty.krW(Sw, Sh) / (paramclass.water.dynamicViscosity(T * Xc_T, Pw * Xc_P) / Xc_mu);
       auto krN = paramclass.hydraulicProperty.krNW(Sw, Sh) / (paramclass.methane.dynamicViscosity(T * Xc_T, Pg * Xc_P) / Xc_mu);
-      //          std::cout<<"lambdas: (w,n) " <<krW<<", "<<krN<<std::endl;
+      
       auto suctionPressure = paramclass.hydraulicProperty.suctionPressure(Sw, Sh) / Xc_P;
       auto PcSF1 = paramclass.hydraulicProperty.PcSF1(Sh);
-      //          std::cout<<"suction pressure: " << suctionPressure*PcSF1<<std::endl;
+      
       auto q_g = Xc_source_m * paramclass.reactionKinetics.gasGenerationRate(paramclass.problemSpecs.T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
       auto q_w = Xc_source_m * paramclass.reactionKinetics.waterGenerationRate(paramclass.problemSpecs.T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
       auto q_h = Xc_source_m * paramclass.reactionKinetics.hydrateDissociationRate(paramclass.problemSpecs.T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
       auto Q = Xc_source_h * paramclass.reactionKinetics.heatOfDissociation(paramclass.problemSpecs.T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
-      //          std::cout<< "source terms: (g,w,h) " << g_g <<", "<<g_w<<", "<<g_h<<std::endl;
+      
       auto Cp_g = paramclass.methane.Cp(T * Xc_T, Pg * Xc_P, 1.) / Xc_C;
       auto Cp_w = paramclass.water.Cp(T * Xc_T, Pw * Xc_P) / Xc_C;
       auto kth_g = paramclass.methane.thermalConductivity(T * Xc_T, Pg * Xc_P) / Xc_kth;
@@ -507,7 +499,6 @@ public:
       //auto Diffcoeff_w = -Diffcoeff_m;
 
       // integrate (A grad u - bu)*grad phi_i + a*u*phi_i
-      // rho_g * krN * (Kgradu_Pg * gradpsi_Pg[i])
       RF factor = ip.weight() * geo.integrationElement(ip.position());
       for (size_type i = 0; i < lfsv_Pg.size(); i++)
       {
@@ -516,7 +507,7 @@ public:
                                                   - Diffcoeff_m_g_x * (gradu_XCH4 * gradpsi_Pg[i]) 
                                                   - Diffcoeff_m_w * (gradu_XCH4 * gradpsi_Pg[i])- q_g * psi_Pg[i]) * factor);
       }
-      // rho_w * krW * (Kgradu_Pg * gradpsi_Pc[i] - Kgradu_Pc * gradpsi_Pc[i])
+     
       for (size_type i = 0; i < lfsv_Pc.size(); i++)
       {
         r.accumulate(lfsv_Pc, i, ((Concoeff_w_g * (Kgradu_Pg * gradpsi_Pc[i]) + Concoeff_w_w * (Kgradu_Pg * gradpsi_Pc[i] 
@@ -531,17 +522,17 @@ public:
       }
       //Integrals regarding the NCP
 			RF max1 = std::max(0., (Sg -1. + YCH4 + YH2O));
-			for (size_type i=0; i<lfsv_XCH4.size(); i++){
-				r.accumulate(lfsv_XCH4,i,( (Sg - max1) * psi_XCH4[i]  *factor));
+			for (size_type i=0; i<lfsv_YH2O.size(); i++){
+				r.accumulate(lfsv_YH2O,i,( (Sg - max1) * psi_YH2O[i]  *factor));
 			}
 
 			// Integrals regarding the NCP
-			RF max2 = std::max(0., (-Sg + XCH4 + XH2O ));
-			for (size_type i=0; i<lfsv_YH2O.size(); i++){
-				r.accumulate(lfsv_YH2O,i,((Sw - max2) * psi_YH2O[i]  *factor));
+			RF max2 = std::max(0., (Sw -1. + XCH4 + XH2O ));
+			for (size_type i=0; i<lfsv_XCH4.size(); i++){
+				r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
 			}
 
-      // // NCP -> water phase
+      // NCP -> water phase
 			// double tmp = 0.;
 			// //auto XH2O_alg = param.mixture.XH2O(YH2O,T*Xc_T,Pg*Xc_P,S);
 			// if( ( Sw - ( 1. - XCH4 - XH2O - Xc_X ) ) > eps_ap ){//active set.
@@ -638,7 +629,7 @@ public:
 
     // dimensions
     const int dim = IG::Entity::dimension;
-    //std::cout << dim << std::endl;
+    
     const int order = std::max(
         std::max(lfsu_Pg_s.finiteElement().localBasis().order(),
                  lfsu_Pg_n.finiteElement().localBasis().order()),
@@ -657,12 +648,6 @@ public:
     // Get geometry of intersection in local coordinates of cell_inside and cell_outside
     auto geo_in_inside = ig.geometryInInside();
     auto geo_in_outside = ig.geometryInOutside();
-
-    // evaluate permeability tensors
-    auto ref_el_inside = referenceElement(geo_inside);
-    auto ref_el_outside = referenceElement(geo_outside);
-    auto local_inside = ref_el_inside.position(0, 0);
-    auto local_outside = ref_el_outside.position(0, 0);
 
     // face diameter; this should be revised for anisotropic meshes?
     auto h_F = std::min(geo_inside.volume(), geo_outside.volume()) / geo.volume(); // Houston!
@@ -747,7 +732,7 @@ public:
     typename IG::Entity::Geometry::JacobianInverseTransposed jac;
 
     // loop over quadrature points
-    //      auto intorder = intorderadd+quadrature_factor*order;
+    // auto intorder = intorderadd+quadrature_factor*order;
     for (const auto &ip : quadratureRule(geo, intorder))
     {
       // exact normal
@@ -791,9 +776,7 @@ public:
 
       auto ip_global_s = geo_inside.global(iplocal_s);
       auto ip_global_n = geo_outside.global(iplocal_n);
-      //          std::cout<<"  ip_global_s = "<<ip_global_s<<"  iplocal_s = "<<iplocal_s
-      //        		  <<"  ip_global_n = "<<ip_global_n<<"  iplocal_n = "<<iplocal_n<<std::endl;
-
+      
       // evaluate Pg
       RF Pg_s = 0.0;
       for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
@@ -880,7 +863,6 @@ public:
       auto &js_v_YH2O_n = cache_YH2O[order].evaluateJacobian(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
-
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
       for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
         jac.mv(js_Pg_s[i][0], gradphi_Pg_s[i]);
@@ -1024,22 +1006,19 @@ public:
       auto rho_w_s = paramclass.water.density(T_s * Xc_T, Pw_s * Xc_P) / Xc_rho;
       auto krW_s = paramclass.hydraulicProperty.krW(Sw_s, Sh_s) / (paramclass.water.dynamicViscosity(T_s * Xc_T, Pw_s * Xc_P) / Xc_mu);
       auto krN_s = paramclass.hydraulicProperty.krNW(Sw_s, Sh_s) / (paramclass.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
-      //          std::cout<< "densities: (g,w)_s " << rho_g_s <<", "<< rho_w_s<<std::endl;
-      //          std::cout<<"lambdas: (w,n)_s " <<krW_s<<", "<<krN_s<<std::endl;
-
+      
       //  adding terms regarding components
       auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = paramclass.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
       auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pw_s * Xc_P);
-      //auto XCH4_s = paramclass.mixture.mole_x_CH4(T_s * Xc_T, Pw_s * Xc_P);
+      
       auto YCH4_s = paramclass.mixture.mole_y_CH4(T_s * Xc_T, Pw_s * Xc_P);
       auto XH2O_s = paramclass.mixture.mole_x_H2O(T_s * Xc_T, Pw_s * Xc_P);
-      //auto YH2O_s = paramclass.mixture.mole_y_H2O(T_s * Xc_T, Pw_s * Xc_P);
+      
       auto H_M_w_s = paramclass.methane.henrysConstant(T_s * Xc_T);
       auto P_H_sat_s = paramclass.water.saturatedVaporPressure(T_s * Xc_T);
       auto zCH4_s = paramclass.eos.evaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P);
-      //std::cout << "----" << zCH4 << std::endl;
       //  end of terms regarding components
 
       auto Cp_g_s = paramclass.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_C;
@@ -1056,21 +1035,19 @@ public:
       auto rho_w_n = paramclass.water.density(T_n * Xc_T, Pw_n * Xc_P) / Xc_rho;
       auto krW_n = paramclass.hydraulicProperty.krW(Sw_n, Sh_n) / (paramclass.water.dynamicViscosity(T_n * Xc_T, Pw_n * Xc_P) / Xc_mu);
       auto krN_n = paramclass.hydraulicProperty.krNW(Sw_n, Sh_n) / (paramclass.methane.dynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) / Xc_mu);
-      //          std::cout<< "densities: (g,w)_n " << rho_g_n <<", "<< rho_w_n<<std::endl;
-      //          std::cout<<"lambdas: (w,n)_n " <<krW_n<<", "<<krN_n<<std::endl;
+      
       //  adding terms regarding components
       auto Sg_n = 1. - Sw_n - Sh_n;
       auto tau_n = paramclass.soil.tortuosity(por_n);
       auto DH2O_g_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInGas(T_n * Xc_T, Pg_n * Xc_P);
       auto DCH4_w_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
-      //auto XCH4_n = paramclass.mixture.mole_x_CH4(T_n * Xc_T, Pg_n * Xc_P);
+      
       auto YCH4_n = paramclass.mixture.mole_y_CH4(T_n * Xc_T, Pg_n * Xc_P);
       auto XH2O_n = paramclass.mixture.mole_x_H2O(T_n * Xc_T, Pg_n * Xc_P);
-      //auto YH2O_n = paramclass.mixture.mole_y_H2O(T_n * Xc_T, Pg_n * Xc_P);
+      
       auto H_M_w_n = paramclass.methane.henrysConstant(T_n * Xc_T);
       auto P_H_sat_n = paramclass.water.saturatedVaporPressure(T_n * Xc_T);
       auto zCH4_n = paramclass.eos.evaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P);
-      //std::cout << "----" << zCH4 << std::endl;
       //  end of terms regarding components
 
       auto Cp_g_n = paramclass.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_C;
@@ -1082,10 +1059,10 @@ public:
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ((1. - Sw_n - Sh_n) * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       kth_eff_n *= Xc_diff_h;
 
-      auto krN = omegaup_g_s * krN_s + omegaup_g_n * krN_n;
-      auto krW = omegaup_w_s * krW_s + omegaup_w_n * krW_n;
-      auto h_g = omegaup_g_s * Cp_g_s * T_s + omegaup_g_n * Cp_g_n * T_n;
-      auto h_w = omegaup_w_s * Cp_w_s * T_s + omegaup_w_n * Cp_w_n * T_n;
+      auto krN = omega_s * krN_s + omega_n * krN_n;
+      auto krW = omega_s * krW_s + omega_n * krW_n;
+      auto h_g = omega_s * Cp_g_s * T_s + omega_n * Cp_g_n * T_n;
+      auto h_w = omega_s * Cp_w_s * T_s + omega_n * Cp_w_n * T_n;
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
 
       // integration factor
@@ -1101,13 +1078,7 @@ public:
       auto DCH4_w = omega_s * DCH4_w_s + omega_n * DCH4_w_n; // = DH2O_w
       auto Diffcoeff_m_w_s = rho_w_s * Sw_s ;
       auto Diffcoeff_m_w_n = rho_w_n * Sw_n ;
-      //auto Diffcoeff_m_g_s = rho_g_s * Sg_s * (-YCH4_s + H_M_w_s / (H_M_w_s - zCH4_s * P_H_sat_s)) / Pg_s;
-      //auto Diffcoeff_m_g_n = rho_g_n * Sg_n * (-YCH4_n + H_M_w_n / (H_M_w_n - zCH4_n * P_H_sat_n)) / Pg_n;
-
       
-      //auto Diffcoeff_m_w_s = rho_w_s * Sw_s * (zCH4_s / (H_M_w_s - zCH4_s * P_H_sat_s));
-      //auto Diffcoeff_m_w_n = rho_w_n * Sw_n * (zCH4_n / (H_M_w_n - zCH4_n * P_H_sat_n));
-
       double term_conv_m_g = -krN * (omega_s * rho_g_s * YCH4_s * (Kgradu_Pg_s * n_F_local) 
                                     + omega_n * rho_g_n * YCH4_n * (Kgradu_Pg_n * n_F_local));
       double term_conv_m_w = -krW * (omega_s * rho_w_s * XCH4_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) 
@@ -1162,13 +1133,13 @@ public:
       }
       //Water
       
-      //auto DH2O_g = omega_s * DH2O_g_s + omega_n * DH2O_g_n; // = DCH4_g
+      //auto DH2O_g = DCH4_g
       auto Diffcoeff_w_w_p_s = rho_w_s * Sw_s * YH2O_s / P_H_sat_s;
       auto Diffcoeff_w_w_y_s = rho_w_s * Sw_s * Pg_s / P_H_sat_s;
       auto Diffcoeff_w_w_p_n = rho_w_n * Sw_n * YH2O_n  / P_H_sat_n;
       auto Diffcoeff_w_w_y_n = rho_w_n * Sw_n * Pg_n / P_H_sat_n;
       
-      //auto DCH4_w = omega_s * DCH4_w_s + omega_n * DCH4_w_n; // = DH2O_w
+      //auto DCH4_w = DH2O_w
       auto Diffcoeff_w_g_s = rho_g_s * Sg_s ;
       auto Diffcoeff_w_g_n = rho_g_n * Sg_n ;
 
@@ -1363,10 +1334,6 @@ public:
     // Get geometry of intersection in local coordinates of cell_inside and cell_outside
     auto geo_in_inside = ig.geometryInInside();
 
-    // evaluate permeability tensors
-    auto ref_el_inside = referenceElement(geo_inside);
-    auto local_inside = ref_el_inside.position(0, 0);
-
     // face diameter; this should be revised for anisotropic meshes?
     auto h_F = geo_inside.volume() / geo.volume(); // Houston!
 
@@ -1391,7 +1358,6 @@ public:
     //        }
 
     // get polynomial degree
-    auto order_s = lfsv_Pg_s.finiteElement().localBasis().order();
     auto degree = lfsv_Pg_s.finiteElement().localBasis().order();
 
     // penalty factor
@@ -1429,7 +1395,7 @@ public:
     typename IG::Entity::Geometry::JacobianInverseTransposed jac;
 
     // loop over quadrature points
-    //      auto intorder = intorderadd+quadrature_factor*order;
+    // auto intorder = intorderadd+quadrature_factor*order;
     for (const auto &ip : quadratureRule(geo, intorder))
     {
       // integration factor
@@ -1617,7 +1583,6 @@ public:
       
 
       // transform gradients of shape functions to real element
-
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
       for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
         jac.mv(js_Pg_s[i][0], gradphi_Pg_s[i]);
@@ -1716,21 +1681,19 @@ public:
       auto por_s = paramclass.problemSpecs.SedimentPorosity(iplocal_s);
       auto krW_s = paramclass.hydraulicProperty.krW(Sw_s, Sh_s) / (paramclass.water.dynamicViscosity(T_s * Xc_T, Pw_s * Xc_P) / Xc_mu);
       auto krN_s = paramclass.hydraulicProperty.krNW(Sw_s, Sh_s) / (paramclass.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
-      //          std::cout<< "densities: (g,w)_s " << rho_g_s <<", "<< rho_w_s<<std::endl;
-      //          std::cout<<"lambdas: (w,n)_s " <<krW_s<<", "<<krN_s<<std::endl;
+      
       //  adding terms regarding components
       auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = paramclass.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
       auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pw_s * Xc_P);
-      //auto XCH4_s = paramclass.mixture.mole_x_CH4(T_s * Xc_T, Pw_s * Xc_P);
+      
       auto YCH4_s = paramclass.mixture.mole_y_CH4(T_s * Xc_T, Pw_s * Xc_P);
       auto XH2O_s = paramclass.mixture.mole_x_H2O(T_s * Xc_T, Pw_s * Xc_P);
-      //auto YH2O_s = paramclass.mixture.mole_y_H2O(T_s * Xc_T, Pw_s * Xc_P);
+      
       auto H_M_w_s = paramclass.methane.henrysConstant(T_s * Xc_T);
       auto P_H_sat_s = paramclass.water.saturatedVaporPressure(T_s * Xc_T);
       auto zCH4_s = paramclass.eos.evaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P);
-      //std::cout << "----" << zCH4 << std::endl;
       //  end of terms regarding components
 
       auto Cp_g_s = paramclass.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_C;
@@ -1741,26 +1704,14 @@ public:
       auto kth_s_s = paramclass.soil.thermalConductivity(T_s * Xc_T, Peff_s * Xc_P) / Xc_kth;
       auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ((1. - Sw_s - Sh_s) * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
 
-      auto rho_g_n = paramclass.methane.density(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_rho;
-      auto rho_w_n = paramclass.water.density(T_n * Xc_T, Pw_n * Xc_P) / Xc_rho;
       auto por_n = paramclass.problemSpecs.SedimentPorosity(iplocal_s);
       auto krW_n = paramclass.hydraulicProperty.krW(Sw_n, Sh_n) / (paramclass.water.dynamicViscosity(T_n * Xc_T, Pw_n * Xc_P) / Xc_mu);
       auto krN_n = paramclass.hydraulicProperty.krNW(Sw_n, Sh_n) / (paramclass.methane.dynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) / Xc_mu);
-      //          std::cout<< "densities: (g,w)_n " << rho_g_n <<", "<< rho_w_n<<std::endl;
-      //          std::cout<<"lambdas: (w,n)_n " <<krW_n<<", "<<krN_n<<std::endl;
+      
       //  adding terms regarding components
-      auto Sg_n = 1. - Sw_n - Sh_n;
       auto tau_n = paramclass.soil.tortuosity(por_n);
       auto DH2O_g_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInGas(T_n * Xc_T, Pg_n * Xc_P);
       auto DCH4_w_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
-      //auto XCH4_n = paramclass.mixture.mole_x_CH4(T_n * Xc_T, Pg_n * Xc_P);
-      auto YCH4_n = paramclass.mixture.mole_y_CH4(T_n * Xc_T, Pg_n * Xc_P);
-      auto XH2O_n = paramclass.mixture.mole_x_H2O(T_n * Xc_T, Pg_n * Xc_P);
-      //auto YH2O_n = paramclass.mixture.mole_y_H2O(T_n * Xc_T, Pg_n * Xc_P);
-      auto H_M_w_n = paramclass.methane.henrysConstant(T_n * Xc_T);
-      auto P_H_sat_n = paramclass.water.saturatedVaporPressure(T_n * Xc_T);
-      auto zCH4_n = paramclass.eos.evaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P);
-      //std::cout << "----" << zCH4 << std::endl;
       //  end of terms regarding components
       auto Cp_g_n = paramclass.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_C;
       auto Cp_w_n = paramclass.water.Cp(T_n * Xc_T, Pw_n * Xc_P) / Xc_C;
@@ -1770,10 +1721,10 @@ public:
       auto kth_s_n = paramclass.soil.thermalConductivity(T_n * Xc_T, Peff_n * Xc_P) / Xc_kth;
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ((1. - Sw_n - Sh_n) * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
 
-      auto krN = omegaup_g_s * krN_s + omegaup_g_n * krN_n;
-      auto krW = omegaup_w_s * krW_s + omegaup_w_n * krW_n;
-      auto h_g = omegaup_g_s * Cp_g_s * T_s + omegaup_g_n * Cp_g_n * T_n;
-      auto h_w = omegaup_w_s * Cp_w_s * T_s + omegaup_w_n * Cp_w_n * T_n;
+      auto krN = omega_s * krN_s ;//+ omega_n * krN_n;
+      auto krW = omega_s * krW_s ;//+ omega_n * krW_n;
+      auto h_g = omega_s * Cp_g_s * T_s ;//+ omega_n * Cp_g_n * T_n;
+      auto h_w = omega_s * Cp_w_s * T_s ;//+ omega_n * Cp_w_n * T_n;
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       kth_eff *= Xc_diff_h;
 
@@ -1784,11 +1735,9 @@ public:
       if (bctype[Indices::PVId_Pg] == Indices::BCId_dirichlet)
       {
         //Methane
-        //auto DH2O_g = omega_s * DH2O_g_s + omega_n * DH2O_g_n; // = DCH4_g
         auto Diffcoeff_m_g_p_s = rho_g_s * Sg_s * -YCH4_s / Pg_s;
         auto Diffcoeff_m_g_x_s = rho_g_s * Sg_s * H_M_w_s / ( zCH4_s * Pg_s);
       
-        //auto DCH4_w = omega_s * DCH4_w_s + omega_n * DCH4_w_n; // = DH2O_w
         auto Diffcoeff_m_w_s = rho_w_s * Sw_s ;
 
         double term_conv_m_g = -krN * omega_s * rho_g_s * YCH4_s * (Kgradu_Pg_s * n_F_local); 
@@ -1827,14 +1776,12 @@ public:
 
       if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
       {
-        //auto DH2O_g = omega_s * DH2O_g_s + omega_n * DH2O_g_n; // = DCH4_g
+        
         auto Diffcoeff_w_w_p_s = rho_w_s * Sw_s * YH2O_s / P_H_sat_s;
         auto Diffcoeff_w_w_y_s = rho_w_s * Sw_s * Pg_s / P_H_sat_s;
       
-        //auto DCH4_w = omega_s * DCH4_w_s + omega_n * DCH4_w_n; // = DH2O_w
         auto Diffcoeff_w_g_s = rho_g_s * Sg_s ;
      
-
         double term_conv_w_g = -krN *  omega_s * rho_g_s * YH2O_s * (Kgradu_Pg_s * n_F_local);
 
         double term_conv_w_w = -krW * omega_s * rho_w_s * XH2O_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local));
@@ -1907,9 +1854,8 @@ public:
       if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
 
-        //        	  double term_diffusion_T_1 = - h_g * krN * ( omega_s*(Kgradu_Pg_s*n_F_local) );
+        
         double term_diffusion_T_1 = -h_g * krN * (omega_s * rho_g_s * (Kgradu_Pg_s * n_F_local));
-        //              double term_diffusion_T_2 = - h_w * krW * ( omega_s*( (Kgradu_Pg_s*n_F_local) - (Kgradu_Pc_s*n_F_local) ) );
         double term_diffusion_T_2 = -h_w * krW * (omega_s * rho_w_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)));
         if (bctype[Indices::PVId_Pg] == Indices::BCId_neumann)
         {
@@ -1942,7 +1888,7 @@ public:
       }
 
     } //End Quadrature Rule
-  }
+  } //End of alpha_boundary
 
   //  template<typename IG, typename LFSU, typename X, typename LFSV, typename M>
   //  void jacobian_boundary (const IG& ig,

@@ -18,12 +18,12 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 
 	//	INCLUDE EXTERNAL CLASSES
 	IncludeClasses paramclass;
-	//	PostProcess postprocess;
 
 	//	CHOOSE DOMAIN AND RANGE FIELD TYPE
 	typedef typename GV::Grid::ctype Coord;
 	typedef double Real;
 	const int dim = GV::dimension;
+
 	/*Non-dimensionalize time prams*/
 	dt *= 1. / paramclass.characteristicValue.t_c;
 	t_END *= 1. / paramclass.characteristicValue.t_c;
@@ -91,26 +91,32 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	// GFS gfs(gfs_P);
 	typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
 	CC cc;
-	//cc.clear();
+	
 	gfs.update(); // initializing the gfs
 	std::cout << "degrees of freedom: " << gfs.globalSize() << std::endl;
 
 	//	SUB-SPACES FOR ACCESSING PRIMARY VARIABLES
-	//	primary variables: Pg, Pc, Sw, Sh, T
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pg>> SUBGFS_Pg; //
-	SUBGFS_Pg subgfs_Pg(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pc>> SUBGFS_Pc; //
-	SUBGFS_Pc subgfs_Pc(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sw>> SUBGFS_Sw; //
-	SUBGFS_Sw subgfs_Sw(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sh>> SUBGFS_Sh; //
-	SUBGFS_Sh subgfs_Sh(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_T>> SUBGFS_T; //
-	SUBGFS_T subgfs_T(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_XCH4>> SUBGFS_XCH4; //
-	SUBGFS_XCH4 subgfs_XCH4(gfs);
-	typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_YH2O>> SUBGFS_YH2O; //
-	SUBGFS_YH2O subgfs_YH2O(gfs);
+	using PathPg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pg>>;
+    using SUBGFS_Pg = Dune::PDELab::GridFunctionSubSpace<GFS,PathPg>;
+    SUBGFS_Pg    subgfs_Pg(gfs);
+	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+    using SUBGFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+    SUBGFS_Pc    subgfs_Pc(gfs);
+	using PathSw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sw>>;
+    using SUBGFS_Sw = Dune::PDELab::GridFunctionSubSpace<GFS,PathSw>;
+    SUBGFS_Sw    subgfs_Sw(gfs);
+	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
+    using SUBGFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
+    SUBGFS_Sh    subgfs_Sh(gfs);
+	using PathT = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_T>>;
+    using SUBGFS_T = Dune::PDELab::GridFunctionSubSpace<GFS,PathT>;
+    SUBGFS_T    subgfs_T(gfs);
+	using PathXCH4 = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_XCH4>>;
+    using SUBGFS_XCH4 = Dune::PDELab::GridFunctionSubSpace<GFS,PathXCH4>;
+    SUBGFS_XCH4    subgfs_XCH4(gfs);
+	using PathYH2O = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_YH2O>>;
+    using SUBGFS_YH2O = Dune::PDELab::GridFunctionSubSpace<GFS,PathYH2O>;
+    SUBGFS_YH2O    subgfs_YH2O(gfs);
 
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
@@ -175,18 +181,13 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	// How well did we estimate the number of entries per matrix row?
 	// => print Jacobian pattern statistics
 	typename GOLOP::Traits::Jacobian jac(goLOP);
-	//std::cout << jac.patternStatistics() << std::endl;
-	//if (helper.rank() == 1)
 	std::cout << " LOP DONE ! " << std::endl;
 
 	typedef Dune::PDELab::GridOperator<GFS, GFS, TLOP, MBE, Real, Real, Real, CC, CC> GOTLOP;
 	GOTLOP goTLOP(gfs, cc, gfs, cc, tlop, mbe);
 
-	//std::cout << " TLOP DONE ! " << std::endl;
-
 	typedef Dune::PDELab::OneStepGridOperator<GOLOP, GOTLOP> IGO;
 	IGO igo(goLOP, goTLOP);
-	//if (helper.rank() == 1)
 	std::cout << " IGO DONE ! " << std::endl;
 
 	// SELECT A LINEAR SOLVER BACKEND
@@ -236,7 +237,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	pdesolver.setReduction(1e-6);
 	pdesolver.setMinLinearReduction(1e-6);
 	pdesolver.setAbsoluteLimit(1e-6);
-	//if (helper.rank() == 1)
+	
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 
 	// SELECT TIME-STEPPER
@@ -253,7 +254,6 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 
 	Dune::PDELab::OneStepMethod<Real, IGO, PDESOLVER, U, U> osm(*pmethod, igo, pdesolver);
 	osm.setVerbosityLevel(2);
-	//if (helper.rank() == 1)
 	std::cout << " OSM DONE ! " << std::endl;
 
 	//	GRAPHICS FOR INITIAL GUESS
@@ -273,29 +273,6 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
 	DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
 
-	// secondary variables
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_Pw, U_PP> DGFPP_Pw;
-	// DGFPP_Pw dgfpp_Pw(subgfspp_Pw, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_Sg, U_PP> DGFPP_Sg;
-	// DGFPP_Sg dgfpp_Sg(subgfspp_Sg, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_Pc, U_PP> DGFPP_Pc;
-	// DGFPP_Pc dgfpp_Pc(subgfspp_Pc, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_K, U_PP> DGFPP_K;
-	// DGFPP_K dgfpp_K(subgfspp_K, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_krw, U_PP> DGFPP_krw;
-	// DGFPP_krw dgfpp_krw(subgfspp_krw, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_krg, U_PP> DGFPP_krg;
-	// DGFPP_krg dgfpp_krg(subgfspp_krg, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_zCH4, U_PP> DGFPP_zCH4;
-	// DGFPP_zCH4 dgfpp_zCH4(subgfspp_zCH4, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_XCH4, U_PP> DGFPP_XCH4;
-	// DGFPP_XCH4 dgfpp_XCH4(subgfspp_XCH4, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_XH2O, U_PP> DGFPP_XH2O;
-	// DGFPP_XH2O dgfpp_XH2O(subgfspp_XH2O, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_YCH4, U_PP> DGFPP_YCH4;
-	// DGFPP_YCH4 dgfpp_YCH4(subgfspp_YCH4, upp);
-	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFSPP_YH2O, U_PP> DGFPP_YH2O;
-	// DGFPP_YH2O dgfpp_YH2O(subgfspp_YH2O, upp);
 
 	//	VTK
 	auto pathName = paramclass.problemSpecs.getPathName();
@@ -303,10 +280,12 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	const std::string str = "";
 	Dune::PDELab::FilenameHelper fn(pathName + fileName);
 
-	int subsampling = 0;
-	typedef Dune::SubsamplingVTKWriter<GV> VTKWRITER;
-	VTKWRITER vtkwriter(gv, subsampling, (int)0);
-	typedef Dune::VTKSequenceWriter<GV> VTKSEQUENCEWRITER;
+	int subsampling = 1;
+	Dune::RefinementIntervals RefInt(subsampling);
+
+	using VTKWRITER = Dune::SubsamplingVTKWriter<GV> ;
+	VTKWRITER vtkwriter(gv, RefInt, false, Dune::VTK::Precision::float32);
+	using VTKSEQUENCEWRITER = Dune::VTKSequenceWriter<GV> ;
 	VTKSEQUENCEWRITER vtkSequenceWriter(std::make_shared<VTKWRITER>(vtkwriter), fileName, pathName, "");
 
 	// add data field for all components of the space to the VTK writer
@@ -337,8 +316,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	while (time < t_END - 1e-8)
 	{
 		std::cout << "_____________________________________________________" << std::endl;
-		//std::cout<< " current opcount = " << opcount - 1 << std::endl;
-
+		
 		try
 		{
 			std::cout << "****************************" << std::endl;
@@ -349,8 +327,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 			std::cout << "****************************" << std::endl;
 			std::cout << " osm.apply() DONE !" << std::endl;
 			std::cout << "****************************" << std::endl;
-			//slp_proj.apply(uproj);
-
+			
 			exceptionCaught = false;
 		}
 		catch (Dune::Exception &e)
@@ -377,19 +354,12 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pg, U> DGF_Pg;
 		DGF_Pg dgf_Pg(subgfs_Pg, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
 		DGF_Pc dgf_Pc(subgfs_Pc, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sw, U> DGF_Sw;
 		DGF_Sw dgf_Sw(subgfs_Sw, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
 		DGF_Sh dgf_Sh(subgfs_Sh, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
 		DGF_T dgf_T(subgfs_T, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XCH4, U> DGF_XCH4;
 		DGF_XCH4 dgf_XCH4(subgfs_XCH4, unew);
-		//typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
 		DGF_YH2O dgf_YH2O(subgfs_YH2O, unew);
 
 
@@ -411,7 +381,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			vtkSequenceWriter.clear();
 			std::cout << " ******************************************************************* " << std::endl;
-			std::cout << " OUTPUT WRITTEN " << opcount << " ----processor: " << std::endl;
+			std::cout << " OUTPUT WRITTEN " << opcount << " ----processor: " << helper.rank() << std::endl;
 			std::cout << " ******************************************************************* " << std::endl;
 
 			timecount = time;

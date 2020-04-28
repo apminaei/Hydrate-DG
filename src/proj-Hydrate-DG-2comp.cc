@@ -18,7 +18,7 @@
 
 
 //#define ALUGRID		already defined in IncludeDUNE.hh
-//#define PARALLEL		already defined in IncludeProblem.hh
+//#define PARALLEL		already defined in IncludeDUNE.hh
 
 int main(int argc, char **argv)
 {
@@ -103,8 +103,7 @@ int main(int argc, char **argv)
 
 		typedef Grid::LeafGridView GV;
 		const GV &gv = grid->leafGridView();
-
-
+		
 #elif UG
 
 		typedef Dune::UGGrid<dim> Grid;
@@ -124,7 +123,6 @@ int main(int argc, char **argv)
 
 #else ALUGRID
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
-		//Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
 		std::array<unsigned int, dim> elements;
@@ -132,11 +130,15 @@ int main(int argc, char **argv)
 		elements[1] = N[1];
 
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+		
+		
 		typedef Grid::LeafGridView GV;
-
 		GV gv = grid->leafGridView();
+
+  		// Transfer partitioning from ParMETIS to our grid
+  		grid->loadBalance();
+
 		
 #endif
 		proj_Hydrate_SimplexDG(gv, dt, t_END, t_OP);

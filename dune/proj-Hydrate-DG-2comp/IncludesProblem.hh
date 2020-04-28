@@ -13,7 +13,7 @@
 
 #ifndef INCLUDESPROBLEM_HH_
 #define INCLUDESPROBLEM_HH_
-#define PARALLEL
+
 
 #include"./parameters/indices.hh"
 #include"./parameters/characteristicValues.hh"
