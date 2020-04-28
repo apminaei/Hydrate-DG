@@ -164,11 +164,11 @@ public:
                      double *time_,
                      double *dt_,
                      unsigned int intorder_ = 6,
-                     ConvectionDiffusionDGMethod::Type method_g_ = ConvectionDiffusionDGMethod::NIPG,
-                     ConvectionDiffusionDGMethod::Type method_w_ = ConvectionDiffusionDGMethod::NIPG,
-                     ConvectionDiffusionDGMethod::Type method_T_ = ConvectionDiffusionDGMethod::NIPG,
-                     ConvectionDiffusionDGMethod::Type method_x_ = ConvectionDiffusionDGMethod::NIPG,
-                     ConvectionDiffusionDGMethod::Type method_y_ = ConvectionDiffusionDGMethod::NIPG,
+                     ConvectionDiffusionDGMethod::Type method_g_ = ConvectionDiffusionDGMethod::IIPG,
+                     ConvectionDiffusionDGMethod::Type method_w_ = ConvectionDiffusionDGMethod::IIPG,
+                     ConvectionDiffusionDGMethod::Type method_T_ = ConvectionDiffusionDGMethod::IIPG,
+                     ConvectionDiffusionDGMethod::Type method_x_ = ConvectionDiffusionDGMethod::IIPG,
+                     ConvectionDiffusionDGMethod::Type method_y_ = ConvectionDiffusionDGMethod::IIPG,
                      double alpha_g_ = 1., double alpha_w_ = 1., double alpha_s_ = 1., double alpha_T_ = 1., double alpha_x_ = 1., double alpha_y_ = 1.)
       : gv(gv_),
         unew(unew_),
@@ -180,35 +180,35 @@ public:
         alpha_g(alpha_g_), alpha_w(alpha_w_), alpha_s(alpha_s_), alpha_T(alpha_T_), alpha_x(alpha_x_), alpha_y(alpha_y_),
         cache_Pg(20), cache_Pc(20), cache_Sw(20), cache_Sh(20), cache_T(20), cache_XCH4(20), cache_YH2O(20)
   {
-    theta_g = 1.0;
+    theta_g = 0.0;
     if (method_g == ConvectionDiffusionDGMethod::SIPG)
       theta_g = -1.0;
-    if (method_g == ConvectionDiffusionDGMethod::IIPG)
-      theta_g = 0.0;
+    if (method_g == ConvectionDiffusionDGMethod::NIPG)
+      theta_g = 1.0;
 
-    theta_w = 1.0;
+    theta_w = 0.0;
     if (method_w == ConvectionDiffusionDGMethod::SIPG)
       theta_w = -1.0;
-    if (method_w == ConvectionDiffusionDGMethod::IIPG)
-      theta_w = 0.0;
+    if (method_w == ConvectionDiffusionDGMethod::NIPG)
+      theta_w = 1.0;
 
-    theta_T = 1.0;
+    theta_T = 0.0;
     if (method_T == ConvectionDiffusionDGMethod::SIPG)
       theta_T = -1.0;
-    if (method_T == ConvectionDiffusionDGMethod::IIPG)
-      theta_T = 0.0;
+    if (method_T == ConvectionDiffusionDGMethod::NIPG)
+      theta_T = 1.0;
 
-    theta_x = 1.0;
+    theta_x = 0.0;
     if (method_x == ConvectionDiffusionDGMethod::SIPG)
       theta_x = -1.0;
-    if (method_w == ConvectionDiffusionDGMethod::IIPG)
-      theta_x = 0.0;
+    if (method_w == ConvectionDiffusionDGMethod::NIPG)
+      theta_x = 1.0;
 
-    theta_y = 1.0;
+    theta_y = 0.0;
     if (method_y == ConvectionDiffusionDGMethod::SIPG)
       theta_y = -1.0;
-    if (method_y == ConvectionDiffusionDGMethod::IIPG)
-      theta_y = 0.0;
+    if (method_y == ConvectionDiffusionDGMethod::NIPG)
+      theta_y = 1.0;
 
     Xc_conv_m = paramclass.characteristicValue.X_convective_mass;
     Xc_conv_h = paramclass.characteristicValue.X_convective_heat;
