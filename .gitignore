@@ -1,3 +1,3 @@
-/outputs
-/build
-/.vscode
+/outputs/*
+/build/*
+/.vscode/*
