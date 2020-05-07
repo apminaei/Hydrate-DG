@@ -47,11 +47,11 @@ public:
 	const static int dimension 		= 2  	;
 	constexpr static double origin 		= 0.0	;
 	constexpr static double X_length 	= 1	;
-	constexpr static double Z_length  	= 0.5	;
+	constexpr static double Z_length  	= 1.0	;
 	constexpr static double Y_length	= 1.	;		//only if dim=3
 
-	const static int X_cells	= 8 ;
-	const static int Z_cells	= 4 ;
+	const static int X_cells	= 10 ;
+	const static int Z_cells	= 10 ;
 	const static int Y_cells	= 1	 ;
 	/**********************************************************************/
 
@@ -207,6 +207,7 @@ public:
 		double T = 273.15+10.; /*K*/
 		double XCH4 = 0.1;
 		double YH2O = 0.1;
+		double XC = 5.5e-3;
 		HydraulicProperties hydraulicProperty;
 		double Pc = hydraulicProperty.suctionPressure(Sw,Sh) * hydraulicProperty.PcSF1(Sh);
 
@@ -217,6 +218,7 @@ public:
 		icvalue[Indices::PVId_T ] = T  ;
 		icvalue[Indices::PVId_XCH4] = XCH4 ;
 		icvalue[Indices::PVId_YH2O ] = YH2O  ;
+		icvalue[Indices::PVId_C] = XC ;
 
 		return icvalue;
 	}
@@ -238,6 +240,7 @@ public:
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
 			bctype[indices.PVId_XCH4] = indices.BCId_neumann ;
 			bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
+			bctype[indices.PVId_C] = indices.BCId_neumann ;
 		}
 		else if( isBottomBoundary(globalPos) ){
 
@@ -261,6 +264,7 @@ public:
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
 			bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
 			bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_C] = indices.BCId_neumann ;
 		}
 		else if( isRightBoundary(globalPos) ){
 			bctype[indices.PVId_Pg] = indices.BCId_neumann ;
@@ -269,6 +273,7 @@ public:
 			bctype[indices.PVId_T ] = indices.BCId_neumann ;
 			bctype[indices.PVId_XCH4] = indices.BCId_neumann ;
 			bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
+			bctype[indices.PVId_C] = indices.BCId_neumann ;
 		}
 
 		return bctype;
@@ -290,6 +295,7 @@ public:
 			bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
 			bcvalue[indices.PVId_XCH4] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_YH2O ] = 0.;
+			bcvalue[indices.PVId_C] = 0.;
 		}
 		else if( isBottomBoundary(globalPos) ){
 			bcvalue[indices.PVId_Pg] = 0.;//indices.BCId_neumann ;
@@ -313,6 +319,7 @@ public:
 			bcvalue[indices.PVId_T ] = 0.1;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_XCH4] = 0.1;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_YH2O ] = 0.1;
+			bcvalue[indices.PVId_C] = 0.;
 		}
 		else if( isRightBoundary(globalPos) ){
 			bcvalue[indices.PVId_Pg] = 0.;//ProblemICValues(globalPos)[indices.PVId_Pg];//indices.BCId_dirichlet ;
@@ -321,6 +328,7 @@ public:
 			bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
 			bcvalue[indices.PVId_XCH4] = 0.;//indices.BCId_neumann ;
 			bcvalue[indices.PVId_YH2O ] = 0.;
+			bcvalue[indices.PVId_C] = 0.;
 		}
 
 		return bcvalue;

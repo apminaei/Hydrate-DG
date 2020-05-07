@@ -105,6 +105,21 @@ public:
 
 	}
 
+	double DiffCoeffSaltInLiquid( double T/*K*/, double Pg/*Pa*/ ) const {
+
+		double D;
+		/* m^2/s */
+
+		double a0 = 0. ;
+		double a1 = 2.26e-9;
+		double a2 = 0.002554;
+
+		D = 1.0e-9 ;
+
+		return D; /* m^2/s */
+
+	}
+
 
 	/* AVERAGE MIXTURE PROPERTIES FOR EACH PHASE */
 

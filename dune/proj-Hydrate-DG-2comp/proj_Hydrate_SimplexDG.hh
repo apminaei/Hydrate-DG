@@ -39,7 +39,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	int minAllowableIterations = 3;
 
 	const int degree_S = 1;
-	const int degree_P = 1;
+	const int degree_P = 2;
 	const int degree_T = 1;
 	const int degree_X = 1;
 	const int degree_Y = 1;
@@ -81,9 +81,9 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 													 GFS_P,
 													 GFS_S,
 													 GFS_S,
-													 GFS_T,GFS_X,GFS_Y>
+													 GFS_T,GFS_X,GFS_Y,GFS_X>
 		GFS;
-	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T, gfs_x, gfs_y);
+	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
 	//PowerGridFunctionSpace< GFS_P,
 	// 											  Indices::numOfFlowPVs,
 	// 											  VBE,
@@ -117,6 +117,9 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	using PathYH2O = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_YH2O>>;
     using SUBGFS_YH2O = Dune::PDELab::GridFunctionSubSpace<GFS,PathYH2O>;
     SUBGFS_YH2O    subgfs_YH2O(gfs);
+	using Pathc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_C>>;
+    using SUBGFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
+    SUBGFS_XC    subgfs_XC(gfs);
 
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
@@ -141,15 +144,17 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	XCH4_InitialType XCH4_initial(gv);
 	typedef YH2O_Initial<GV, Real> YH2O_InitialType;
 	YH2O_InitialType YH2O_initial(gv);
+	typedef XC_Initial<GV, Real> XC_InitialType;
+	XC_InitialType XC_initial(gv);
 	typedef Dune::PDELab::CompositeGridFunction<Pg_InitialType,
 												Pc_InitialType,
 												Sw_InitialType,
 												Sh_InitialType,
 												T_InitialType,
 												XCH4_InitialType,
-												YH2O_InitialType>
+												YH2O_InitialType, XC_InitialType>
 		InitialType;
-	InitialType initial(Pg_initial, Pc_initial, Sw_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial);
+	InitialType initial(Pg_initial, Pc_initial, Sw_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
 
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
@@ -272,6 +277,8 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	DGF_XCH4 dgf_XCH4(subgfs_XCH4, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
 	DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XC, U> DGF_XC;
+	DGF_XC dgf_XC(subgfs_XC, uold);
 
 
 	//	VTK
@@ -297,6 +304,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
 
 	vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 	vtkSequenceWriter.clear();
@@ -325,15 +333,12 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 			osm.apply(time, dt, uold, unew);
 			newton_iterations = osm.getPDESolver().result().iterations;
 			std::cout << "****************************" << std::endl;
-			std::cout << " osm.apply() DONE !" << std::endl;
-			std::cout << "****************************" << std::endl;
-			
-			exceptionCaught = false;
-		}
-		catch (Dune::Exception &e)
-		{
+		
 			exceptionCaught = true;
-			if (dt > 1e-6)
+		}
+		catch(Dune::Exception &e)
+		{
+				if (dt > 1e-6)
 			{
 				std::cout << "Catched Error, Dune reported error: " << e << std::endl;
 
@@ -361,6 +366,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 		DGF_T dgf_T(subgfs_T, unew);
 		DGF_XCH4 dgf_XCH4(subgfs_XCH4, unew);
 		DGF_YH2O dgf_YH2O(subgfs_YH2O, unew);
+		DGF_XC dgf_XC(subgfs_XC, unew);
 
 
 		/*********************************************************************************************
@@ -377,6 +383,7 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
 
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			vtkSequenceWriter.clear();

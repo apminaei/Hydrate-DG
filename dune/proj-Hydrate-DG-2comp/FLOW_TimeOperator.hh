@@ -86,13 +86,17 @@ public:
 		const auto &lfsv_T = lfsv.template child<Indices::PVId_T>();
 		const auto &lfsu_T = lfsu.template child<Indices::PVId_T>();
 
-		//Hydrate mole fraction
+		//Methane mole fraction
     	const auto &lfsv_XCH4 = lfsv.template child<Indices::PVId_XCH4>();
     	const auto &lfsu_XCH4 = lfsu.template child<Indices::PVId_XCH4>();
 
     	//Water mole fraction
     	const auto &lfsv_YH2O = lfsv.template child<Indices::PVId_YH2O>();
     	const auto &lfsu_YH2O = lfsu.template child<Indices::PVId_YH2O>();
+		
+		//Salt mole fraction
+    	const auto &lfsv_XC = lfsv.template child<Indices::PVId_C>();
+    	const auto &lfsu_XC = lfsu.template child<Indices::PVId_C>();
 
 		// define types
 		using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
@@ -146,6 +150,11 @@ public:
 			std::vector<RangeType> psi_YH2O(lfsv_YH2O.size());
 			lfsv_YH2O.finiteElement().localBasis().evaluateFunction(ip.position(), psi_YH2O);
 
+			std::vector<RangeType> phi_XC(lfsu_XC.size());
+			lfsu_XC.finiteElement().localBasis().evaluateFunction(ip.position(), phi_XC);
+			std::vector<RangeType> psi_XC(lfsv_XC.size());
+			lfsv_XC.finiteElement().localBasis().evaluateFunction(ip.position(), psi_XC);
+
 			auto ip_global = geo.global(ip.position());
 
 			// evaluate Pg
@@ -183,6 +192,11 @@ public:
       		for (size_type i = 0; i < lfsu_YH2O.size(); i++)
         		YH2O += x(lfsu_YH2O, i) * phi_YH2O[i];
 
+			// evaluate XC
+      		RF XC = 0.0;
+      		for (size_type i = 0; i < lfsu_XC.size(); i++)
+        		XC += x(lfsu_XC, i) * phi_XC[i];
+
 			// evaluate Pw
 			RF Pw = Pg - Pc;
 			RF Peff = (Pg * (1. - Sw - Sh) + Pw * Sw) / (1. - Sh);
@@ -209,6 +223,10 @@ public:
 			for (size_type i = 0; i < lfsv_Pg.size(); i++)
 			{
 				r.accumulate(lfsv_Pg, i, ((rho_g * por * YCH4 * Sg + rho_w * por * XCH4 * Sw) * psi_Pg[i]) * factor);
+			}
+			for (size_type i = 0; i < lfsv_XC.size(); i++)
+			{
+				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pc.size(); i++)
 			{

@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 
 		typedef Grid::LeafGridView GV;
 		const GV &gv = grid->leafGridView();
-		
+		grid->loadBalance();
 #elif UG
 
 		typedef Dune::UGGrid<dim> Grid;
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 		typedef Grid::LeafGridView GV;
 
 		GV gv = grid->leafGridView();
-
+		grid->loadBalance();
 #else ALUGRID
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};

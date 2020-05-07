@@ -114,14 +114,41 @@ public:
   typedef typename LFS::template Child<Indices::PVId_T>::Type LFS_T;
   typedef typename LFS::template Child<Indices::PVId_XCH4>::Type LFS_X;
   typedef typename LFS::template Child<Indices::PVId_YH2O>::Type LFS_Y;
+  typedef typename LFS::template Child<Indices::PVId_C>::Type LFS_XC;
 
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pg>> GFS_Pg; //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pc>> GFS_Pc; //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sw>> GFS_Sw; //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sh>> GFS_Sh; //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_T>> GFS_T;   //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_XCH4>> GFS_X; //
-  typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_YH2O>> GFS_Y;   //
+
+  using PathPg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pg>>;
+  using GFS_Pg = Dune::PDELab::GridFunctionSubSpace<GFS,PathPg>;
+  //SUBGFS_Pg    subgfs_Pg(gfs);
+	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+  using GFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+  //SUBGFS_Pc    subgfs_Pc(gfs);
+	using PathSw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sw>>;
+  using GFS_Sw = Dune::PDELab::GridFunctionSubSpace<GFS,PathSw>;
+  //SUBGFS_Sw    subgfs_Sw(gfs);
+	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
+  using GFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
+  //SUBGFS_Sh    subgfs_Sh(gfs);
+	using PathT = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_T>>;
+  using GFS_T = Dune::PDELab::GridFunctionSubSpace<GFS,PathT>;
+  //SUBGFS_T    subgfs_T(gfs);
+	using PathXCH4 = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_XCH4>>;
+  using GFS_XCH4 = Dune::PDELab::GridFunctionSubSpace<GFS,PathXCH4>;
+  //SUBGFS_XCH4    subgfs_XCH4(gfs);
+	using PathYH2O = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_YH2O>>;
+  using GFS_YH2O = Dune::PDELab::GridFunctionSubSpace<GFS,PathYH2O>;
+  //SUBGFS_YH2O    subgfs_YH2O(gfs);
+	using Pathc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_C>>;
+  using GFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
+  //SUBGFS_XC    subgfs_XC(gfs);
+
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pg>> GFS_Pg; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pc>> GFS_Pc; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sw>> GFS_Sw; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sh>> GFS_Sh; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_T>> GFS_T;   //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_XCH4>> GFS_X; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_YH2O>> GFS_Y;   //
 
   using LocalBasisType_Pg = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_Pg = Dune::PDELab::LocalBasisCache<LocalBasisType_Pg>;
@@ -137,8 +164,9 @@ public:
   using Cache_XCH4 = Dune::PDELab::LocalBasisCache<LocalBasisType_XCH4>;
   using LocalBasisType_YH2O = typename FEM_Y::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_YH2O = Dune::PDELab::LocalBasisCache<LocalBasisType_YH2O>;
-
-  //    using LocalBasisType = typename FiniteElementMap::Traits::FiniteElementType::Traits::LocalBasisType;
+  using LocalBasisType_XC = typename FEM_X::Traits::FiniteElementType::Traits::LocalBasisType;
+  using Cache_XC = Dune::PDELab::LocalBasisCache<LocalBasisType_XC>;
+  
 
   // In theory it is possible that one and the same local operator is
   // called first with a finite element of one type and later with a
@@ -156,6 +184,7 @@ public:
   std::vector<Cache_T> cache_T;
   std::vector<Cache_XCH4> cache_XCH4;
   std::vector<Cache_YH2O> cache_YH2O;
+  std::vector<Cache_XC> cache_XC;
 
   // constructor stores parameters
   FLOW_LocalOperator(const GV &gv_,
@@ -178,7 +207,7 @@ public:
         intorder(intorder_),
         method_g(method_g_), method_w(method_w_), method_T(method_T_), method_x(method_x_), method_y(method_y_),
         alpha_g(alpha_g_), alpha_w(alpha_w_), alpha_s(alpha_s_), alpha_T(alpha_T_), alpha_x(alpha_x_), alpha_y(alpha_y_),
-        cache_Pg(20), cache_Pc(20), cache_Sw(20), cache_Sh(20), cache_T(20), cache_XCH4(20), cache_YH2O(20)
+        cache_Pg(20), cache_Pc(20), cache_Sw(20), cache_Sh(20), cache_T(20), cache_XCH4(20), cache_YH2O(20), cache_XC(20)
   {
     theta_g = 0.0;
     if (method_g == ConvectionDiffusionDGMethod::SIPG)
@@ -255,13 +284,17 @@ public:
     const auto &lfsv_T = lfsv.template child<Indices::PVId_T>();
     const auto &lfsu_T = lfsu.template child<Indices::PVId_T>();
 
-    //Hydrate Saturation
+    //Methane mole fraction
     const auto &lfsv_XCH4 = lfsv.template child<Indices::PVId_XCH4>();
     const auto &lfsu_XCH4 = lfsu.template child<Indices::PVId_XCH4>();
 
-    //Temperature
+    //H2O mole fraction
     const auto &lfsv_YH2O = lfsv.template child<Indices::PVId_YH2O>();
     const auto &lfsu_YH2O = lfsu.template child<Indices::PVId_YH2O>();
+
+    //Salt mole fraction
+    const auto &lfsv_XC = lfsv.template child<Indices::PVId_C>();
+    const auto &lfsu_XC = lfsu.template child<Indices::PVId_C>();
     
 
     // define types
@@ -290,6 +323,8 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XCH4(lfsv_XCH4.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_YH2O(lfsu_YH2O.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_YH2O(lfsv_YH2O.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_XC(lfsu_XC.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC(lfsv_XC.size());
 
     Dune::FieldVector<RF, dim> gradu_Pg(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Pg(0.0);
@@ -299,6 +334,7 @@ public:
     Dune::FieldVector<RF, dim> Ktgradu_T(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O(0.0);
+    Dune::FieldVector<RF, dim> gradu_XC(0.0);
 
     // Transformation matrix
     typename EG::Geometry::JacobianInverseTransposed jac;
@@ -322,6 +358,8 @@ public:
       auto &psi_XCH4 = cache_XCH4[order].evaluateFunction(ip.position(), lfsv_XCH4.finiteElement().localBasis());
       auto &phi_YH2O = cache_YH2O[order].evaluateFunction(ip.position(), lfsu_YH2O.finiteElement().localBasis());
       auto &psi_YH2O = cache_YH2O[order].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &phi_XC = cache_XC[order].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &psi_XC = cache_XC[order].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       auto ip_global = geo.global(ip.position());
 
@@ -360,6 +398,11 @@ public:
       for (size_type i = 0; i < lfsu_YH2O.size(); i++)
         YH2O += x(lfsu_YH2O, i) * phi_YH2O[i];
 
+      // evaluate XC
+      RF XC = 0.0;
+      for (size_type i = 0; i < lfsu_XC.size(); i++)
+        XC += x(lfsu_XC, i) * phi_XC[i];
+
       // evaluate Pw
       RF Pw = Pg - Pc;
       RF Peff = (Pg * (1. - Sw - Sh) + Pw * Sw) / (1. - Sh);
@@ -375,6 +418,8 @@ public:
       auto &js_v_XCH4 = cache_XCH4[order].evaluateJacobian(ip.position(), lfsv_XCH4.finiteElement().localBasis());
       auto &js_YH2O = cache_YH2O[order].evaluateJacobian(ip.position(), lfsu_YH2O.finiteElement().localBasis());
       auto &js_v_YH2O = cache_YH2O[order].evaluateJacobian(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &js_XC = cache_XC[order].evaluateJacobian(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &js_v_XC = cache_XC[order].evaluateJacobian(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
       jac = geo.jacobianInverseTransposed(ip.position());
@@ -404,6 +449,12 @@ public:
       for (size_type i = 0; i < lfsv_T.size(); i++)
         jac.mv(js_v_YH2O[i][0], gradpsi_YH2O[i]);
 
+
+      for (size_type i = 0; i < lfsu_XC.size(); i++)
+        jac.mv(js_XC[i][0], gradphi_XC[i]);
+      for (size_type i = 0; i < lfsv_XC.size(); i++)
+        jac.mv(js_v_XC[i][0], gradpsi_XC[i]);
+
       // compute gradient of Pg
       gradu_Pg = 0.0;
       for (size_type i = 0; i < lfsu_Pg.size(); i++)
@@ -429,6 +480,12 @@ public:
       for (size_type i = 0; i < lfsu_YH2O.size(); i++)
         gradu_YH2O.axpy(x(lfsu_YH2O, i), gradphi_YH2O[i]);
 
+      // compute gradient of XCH4
+      gradu_XC = 0.0;
+      for (size_type i = 0; i < lfsu_XC.size(); i++)
+        gradu_XC.axpy(x(lfsu_XC, i), gradphi_XC[i]);
+
+
       auto K = paramclass.problemSpecs.SedimentPermeabilityTensor(ip_global);
       K *= 1. / Xc_K; /*ndim K*/
       K *= Xc_conv_m;
@@ -448,7 +505,8 @@ public:
       auto Sg = 1. - Sw - Sh;
       auto tau = paramclass.soil.tortuosity(por);
       auto DH2O_g = tau * por * paramclass.mixture.binaryDiffCoeffInGas(T * Xc_T, Pg * Xc_P);
-      auto DCH4_w = tau * por * paramclass.mixture.binaryDiffCoeffInLiquid(T * Xc_T, Pw * Xc_P);
+      auto DCH4_w = tau * por * paramclass.mixture.binaryDiffCoeffInLiquid(T * Xc_T, Pg * Xc_P);
+      auto DC_w = tau * por * paramclass.mixture.DiffCoeffSaltInLiquid(T * Xc_T, Pg * Xc_P);
       
       auto YCH4 = paramclass.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
       auto XH2O = paramclass.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P);
@@ -482,10 +540,12 @@ public:
       //Methane
       auto Concoeff_m_g = rho_g * krN * YCH4;
       auto Concoeff_m_w = rho_w * krW * XCH4;
+      auto Concoeff_c_w = rho_w * krW * XC;
 
       auto Diffcoeff_m_g_p = DH2O_g * rho_g * Sg * -YCH4  / Pg;
       auto Diffcoeff_m_g_x = DH2O_g * rho_g * Sg * H_M_w / ( zCH4 * Pg);
       auto Diffcoeff_m_w = DCH4_w * rho_w * Sw ;
+      auto Diffcoeff_c_w = DC_w * rho_w * Sw ;
 
       
       
@@ -508,6 +568,13 @@ public:
                                                   - Diffcoeff_m_w * (gradu_XCH4 * gradpsi_Pg[i])- q_g * psi_Pg[i]) * factor);
       }
      
+      for (size_type i = 0; i < lfsv_XC.size(); i++)
+      {
+        r.accumulate(lfsv_XC, i, (Concoeff_c_w * (Kgradu_Pg * gradpsi_XC[i] 
+                                                  - Kgradu_Pc * gradpsi_XC[i])
+                                                  - Diffcoeff_c_w * (gradu_XC * gradpsi_XC[i])) * factor);
+      }
+
       for (size_type i = 0; i < lfsv_Pc.size(); i++)
       {
         r.accumulate(lfsv_Pc, i, ((Concoeff_w_g * (Kgradu_Pg * gradpsi_Pc[i]) + Concoeff_w_w * (Kgradu_Pg * gradpsi_Pc[i] 
@@ -527,7 +594,7 @@ public:
 			}
 
 			// Integrals regarding the NCP
-			RF max2 = std::max(0., (Sw -1. + XCH4 + XH2O ));
+			RF max2 = std::max(0., (Sw -1. + XC + XCH4 + XH2O ));
 			for (size_type i=0; i<lfsv_XCH4.size(); i++){
 				r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
 			}
@@ -611,16 +678,23 @@ public:
     const auto &lfsv_T_n = lfsv_n.template child<Indices::PVId_T>();
     const auto &lfsu_T_n = lfsu_n.template child<Indices::PVId_T>();
 
-    //Hydrate mole fraction
+    //Methane mole fraction
     const auto &lfsv_XCH4_s = lfsv_s.template child<Indices::PVId_XCH4>();
     const auto &lfsu_XCH4_s = lfsu_s.template child<Indices::PVId_XCH4>();
     const auto &lfsv_XCH4_n = lfsv_n.template child<Indices::PVId_XCH4>();
     const auto &lfsu_XCH4_n = lfsu_n.template child<Indices::PVId_XCH4>();
+
     //Water mole fraction
     const auto &lfsv_YH2O_s = lfsv_s.template child<Indices::PVId_YH2O>();
     const auto &lfsu_YH2O_s = lfsu_s.template child<Indices::PVId_YH2O>();
     const auto &lfsv_YH2O_n = lfsv_n.template child<Indices::PVId_YH2O>();
     const auto &lfsu_YH2O_n = lfsu_n.template child<Indices::PVId_YH2O>();
+
+    //Salt mole fraction
+    const auto &lfsv_XC_s = lfsv_s.template child<Indices::PVId_C>();
+    const auto &lfsu_XC_s = lfsu_s.template child<Indices::PVId_C>();
+    const auto &lfsv_XC_n = lfsv_n.template child<Indices::PVId_C>();
+    const auto &lfsu_XC_n = lfsu_n.template child<Indices::PVId_C>();
 
     // define types
     using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
@@ -697,6 +771,8 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XCH4_s(lfsv_XCH4_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_YH2O_s(lfsu_YH2O_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_YH2O_s(lfsv_YH2O_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_s(lfsu_XC_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_s(lfsv_XC_s.size());
 
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg_n(lfsu_Pg_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pg_n(lfsv_Pg_n.size());
@@ -708,6 +784,8 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XCH4_n(lfsv_XCH4_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_YH2O_n(lfsu_YH2O_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_YH2O_n(lfsv_YH2O_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_n(lfsu_XC_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_n(lfsv_XC_n.size());
 
     Dune::FieldVector<RF, dim> gradu_Pg_s(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Pg_s(0.0);
@@ -716,6 +794,7 @@ public:
     Dune::FieldVector<RF, dim> gradu_T_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_s(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_XC_s(0.0);
 
     Dune::FieldVector<RF, dim> gradu_Pg_n(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Pg_n(0.0);
@@ -724,6 +803,7 @@ public:
     Dune::FieldVector<RF, dim> gradu_T_n(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_n(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_XC_n(0.0);
 
     Dune::FieldVector<RF, dim> v_g(0.0);
     Dune::FieldVector<RF, dim> v_w(0.0);
@@ -758,6 +838,8 @@ public:
       auto &psi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &phi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
       auto &psi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
       auto &phi_Pg_n = cache_Pg[order].evaluateFunction(iplocal_n, lfsu_Pg_n.finiteElement().localBasis());
       auto &psi_Pg_n = cache_Pg[order].evaluateFunction(iplocal_n, lfsv_Pg_n.finiteElement().localBasis());
@@ -773,6 +855,8 @@ public:
       auto &psi_XCH4_n = cache_XCH4[order].evaluateFunction(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
       auto &phi_YH2O_n = cache_YH2O[order].evaluateFunction(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
       auto &psi_YH2O_n = cache_YH2O[order].evaluateFunction(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
+      auto &phi_XC_n = cache_XC[order].evaluateFunction(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
+      auto &psi_XC_n = cache_XC[order].evaluateFunction(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
 
       auto ip_global_s = geo_inside.global(iplocal_s);
       auto ip_global_n = geo_outside.global(iplocal_n);
@@ -833,6 +917,14 @@ public:
       for (size_type i = 0; i < lfsu_YH2O_n.size(); i++)
         YH2O_n += x_n(lfsu_YH2O_n, i) * phi_YH2O_n[i];
 
+      // evaluate XC
+      RF XC_s = 0.0;
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        XC_s += x_s(lfsu_XC_s, i) * phi_XC_s[i];
+      RF XC_n = 0.0;
+      for (size_type i = 0; i < lfsu_XC_n.size(); i++)
+        XC_n += x_n(lfsu_XC_n, i) * phi_XC_n[i];
+
       // evaluate Pw
       RF Pw_s = Pg_s - Pc_s;
       RF Pw_n = Pg_n - Pc_n;
@@ -850,6 +942,8 @@ public:
       auto &js_v_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &js_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
       auto &js_v_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &js_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &js_v_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
       auto &js_Pg_n = cache_Pg[order].evaluateJacobian(iplocal_n, lfsu_Pg_n.finiteElement().localBasis());
       auto &js_v_Pg_n = cache_Pg[order].evaluateJacobian(iplocal_n, lfsv_Pg_n.finiteElement().localBasis());
@@ -861,6 +955,8 @@ public:
       auto &js_v_XCH4_n = cache_XCH4[order].evaluateJacobian(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
       auto &js_YH2O_n = cache_YH2O[order].evaluateJacobian(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
       auto &js_v_YH2O_n = cache_YH2O[order].evaluateJacobian(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
+      auto &js_XC_n = cache_XC[order].evaluateJacobian(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
+      auto &js_v_XC_n = cache_XC[order].evaluateJacobian(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
@@ -884,6 +980,10 @@ public:
         jac.mv(js_YH2O_s[i][0], gradphi_YH2O_s[i]);
       for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
         jac.mv(js_v_YH2O_s[i][0], gradpsi_YH2O_s[i]);
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        jac.mv(js_XC_s[i][0], gradphi_XCH4_s[i]);
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        jac.mv(js_v_XC_s[i][0], gradpsi_XC_s[i]);
 
       jac = geo_outside.jacobianInverseTransposed(iplocal_n);
       for (size_type i = 0; i < lfsu_Pg_n.size(); i++)
@@ -906,6 +1006,10 @@ public:
         jac.mv(js_YH2O_n[i][0], gradphi_YH2O_n[i]);
       for (size_type i = 0; i < lfsv_YH2O_n.size(); i++)
         jac.mv(js_v_YH2O_n[i][0], gradpsi_YH2O_n[i]);
+      for (size_type i = 0; i < lfsu_XC_n.size(); i++)
+        jac.mv(js_XC_n[i][0], gradphi_XC_n[i]);
+      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
+        jac.mv(js_v_XC_n[i][0], gradpsi_XC_n[i]);
 
       // compute gradient of Pg
       gradu_Pg_s = 0.0;
@@ -946,6 +1050,14 @@ public:
       gradu_YH2O_n = 0.0;
       for (size_type i = 0; i < lfsu_YH2O_n.size(); i++)
         gradu_YH2O_n.axpy(x_n(lfsu_YH2O_n, i), gradphi_YH2O_n[i]);
+
+      // compute gradient of XC
+      gradu_XC_s = 0.0;
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        gradu_XC_s.axpy(x_s(lfsu_XC_s, i), gradphi_XC_s[i]);
+      gradu_XC_n = 0.0;
+      for (size_type i = 0; i < lfsu_XC_n.size(); i++)
+        gradu_XC_n.axpy(x_n(lfsu_XC_n, i), gradphi_XC_n[i]);
 
       auto K_s = paramclass.problemSpecs.SedimentPermeabilityTensor(ip_global_s);
       K_s *= 1. / Xc_K;
@@ -1011,8 +1123,9 @@ public:
       auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = paramclass.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
-      auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pw_s * Xc_P);
-      
+      auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pg_s * Xc_P);
+      auto DC_w_s = tau_s * por_s * paramclass.mixture.DiffCoeffSaltInLiquid(T_s * Xc_T, Pg_s * Xc_P);
+
       auto YCH4_s = paramclass.mixture.mole_y_CH4(T_s * Xc_T, Pw_s * Xc_P);
       auto XH2O_s = paramclass.mixture.mole_x_H2O(T_s * Xc_T, Pw_s * Xc_P);
       
@@ -1041,7 +1154,8 @@ public:
       auto tau_n = paramclass.soil.tortuosity(por_n);
       auto DH2O_g_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInGas(T_n * Xc_T, Pg_n * Xc_P);
       auto DCH4_w_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
-      
+      auto DC_w_n = tau_n * por_n * paramclass.mixture.DiffCoeffSaltInLiquid(T_n * Xc_T, Pg_n * Xc_P);
+
       auto YCH4_n = paramclass.mixture.mole_y_CH4(T_n * Xc_T, Pg_n * Xc_P);
       auto XH2O_n = paramclass.mixture.mole_x_H2O(T_n * Xc_T, Pg_n * Xc_P);
       
@@ -1131,8 +1245,57 @@ public:
       {
         r_n.accumulate(lfsv_Pg_n, i, term_penalty_g * -psi_Pg_n[i] * factor);
       }
-      //Water
       
+      // Salt
+      
+      
+      auto DC_w = omega_s * DC_w_s + omega_n * DC_w_n; 
+      auto Diffcoeff_c_w_s = rho_w_s * Sw_s ;
+      auto Diffcoeff_c_w_n = rho_w_n * Sw_n ;
+      
+      
+      double term_conv_c_w = -krW * (omega_s * rho_w_s * XC_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) 
+                                    + omega_n * rho_w_n * XC_n * ((Kgradu_Pg_n * n_F_local) - (Kgradu_Pc_n * n_F_local)));
+
+      double term_diffusion_c = term_conv_c_w + DC_w * (omega_s * Diffcoeff_c_w_s * (gradu_XC_s * n_F_local)
+                                              + omega_n * Diffcoeff_c_w_n * (gradu_XC_n * n_F_local)) ;
+
+      
+      double term_nipg_c_x = theta_x * (XC_s - XC_n);
+
+      double term_penalty_c = penalty_factor_x * (XC_s - XC_n);
+      // diffusion term
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r_s.accumulate(lfsv_XC_s, i, term_diffusion_c * psi_XC_s[i] * factor);
+      }
+      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
+      {
+        r_n.accumulate(lfsv_XC_n, i, term_diffusion_c * -psi_XC_n[i] * factor);
+      }
+      // (non-)symmetric IP term
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r_s.accumulate(lfsv_XC_s, i, ( term_nipg_w * krW * omega_s * rho_w_s * XC_s  * (Kn_F_s * gradpsi_XC_s[i])
+                                      + omega_s * ( term_nipg_c_x * DC_w * Diffcoeff_c_w_s) * (n_F_local* gradpsi_XC_s[i])) * factor);
+      }
+      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
+      {
+        r_n.accumulate(lfsv_Pg_n, i, (term_nipg_w * krW * omega_n * rho_w_n * XC_n  * (Kn_F_n * gradpsi_XC_n[i])
+                                      + omega_n * ( term_nipg_c_x * DC_w * Diffcoeff_c_w_n) * (n_F_local* gradpsi_XC_n[i])) * factor);
+      }
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r_s.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      }
+      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
+      {
+        r_n.accumulate(lfsv_XC_n, i, term_penalty_c * -psi_XC_n[i] * factor);
+      }
+     
+      
+      //Water
       //auto DH2O_g = DCH4_g
       auto Diffcoeff_w_w_p_s = rho_w_s * Sw_s * YH2O_s / P_H_sat_s;
       auto Diffcoeff_w_w_y_s = rho_w_s * Sw_s * Pg_s / P_H_sat_s;
@@ -1278,6 +1441,8 @@ public:
     } //End Quadrature Rule
   }//End of alpha_skeleton
 
+
+
   template <typename IG, typename LFSU, typename X, typename LFSV, typename R>
   void alpha_boundary(const IG &ig,
                       const LFSU &lfsu,
@@ -1313,6 +1478,10 @@ public:
     //Water mole fraction
     const auto &lfsv_YH2O_s = lfsv.template child<Indices::PVId_YH2O>();
     const auto &lfsu_YH2O_s = lfsu.template child<Indices::PVId_YH2O>();
+
+        //Hydrate mole fraction
+    const auto &lfsv_XC_s = lfsv.template child<Indices::PVId_C>();
+    const auto &lfsu_XC_s = lfsu.template child<Indices::PVId_C>();
 
     // define types
     using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
@@ -1379,6 +1548,8 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XCH4_s(lfsv_XCH4_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_YH2O_s(lfsu_YH2O_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_YH2O_s(lfsv_YH2O_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_s(lfsu_XC_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_s(lfsv_XC_s.size());
 
     Dune::FieldVector<RF, dim> gradu_Pg_s(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Pg_s(0.0);
@@ -1387,6 +1558,7 @@ public:
     Dune::FieldVector<RF, dim> gradu_T_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_s(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_XC_s(0.0);
 
     Dune::FieldVector<RF, dim> v_g(0.0);
     Dune::FieldVector<RF, dim> v_w(0.0);
@@ -1420,6 +1592,7 @@ public:
       auto &psi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
       auto &psi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &psi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
       if (bctype[Indices::PVId_Pg] == Indices::BCId_neumann)
       {
@@ -1455,6 +1628,7 @@ public:
           bctype[Indices::PVId_Pc] == Indices::BCId_neumann and
           bctype[Indices::PVId_Pg] == Indices::BCId_neumann and
           bctype[Indices::PVId_XCH4] == Indices::BCId_neumann and
+          bctype[Indices::PVId_C] == Indices::BCId_neumann and
           bctype[Indices::PVId_YH2O] == Indices::BCId_neumann)
       {
         continue;
@@ -1467,6 +1641,7 @@ public:
       auto &phi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
       auto &phi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
       auto &phi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
+      auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       
 
       // evaluate Pg
@@ -1562,6 +1737,19 @@ public:
         YH2O_n = bcvalue[Indices::PVId_YH2O] / Xc_Y;
       }
 
+      // evaluate XC
+      RF XC_s = 0.0;
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        XC_s += x(lfsu_XC_s, i) * phi_XC_s[i];
+      RF XC_n = 0.0;
+      if (bctype[Indices::PVId_C] == Indices::BCId_neumann)
+      {
+        XC_n = XC_s;
+      }
+      else if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
+      {
+        XC_n = bcvalue[Indices::PVId_C] / Xc_X;
+      }
 
       // evaluate Pw
       RF Pw_s = Pg_s - Pc_s;
@@ -1580,6 +1768,9 @@ public:
       auto &js_v_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &js_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
       auto &js_v_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &js_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &js_v_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
+
       
 
       // transform gradients of shape functions to real element
@@ -1604,6 +1795,10 @@ public:
         jac.mv(js_YH2O_s[i][0], gradphi_YH2O_s[i]);
       for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
         jac.mv(js_v_YH2O_s[i][0], gradpsi_YH2O_s[i]);
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        jac.mv(js_XC_s[i][0], gradphi_XC_s[i]);
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        jac.mv(js_v_XC_s[i][0], gradpsi_XC_s[i]);
 
       // compute gradient of Pg
       gradu_Pg_s = 0.0;
@@ -1629,6 +1824,12 @@ public:
       gradu_YH2O_s = 0.0;
       for (size_type i = 0; i < lfsu_YH2O_s.size(); i++)
         gradu_YH2O_s.axpy(x(lfsu_YH2O_s, i), gradphi_YH2O_s[i]);
+
+      // compute gradient of XC
+      gradu_XC_s = 0.0;
+      for (size_type i = 0; i < lfsu_XC_s.size(); i++)
+        gradu_XC_s.axpy(x(lfsu_XC_s, i), gradphi_XC_s[i]);
+
 
       auto K_s = paramclass.problemSpecs.SedimentPermeabilityTensor(ip_global_s);
       K_s *= 1. / Xc_K;
@@ -1686,7 +1887,8 @@ public:
       auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = paramclass.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
-      auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pw_s * Xc_P);
+      auto DCH4_w_s = tau_s * por_s * paramclass.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pg_s * Xc_P);
+      auto DC_w_s = tau_s * por_s * paramclass.mixture.DiffCoeffSaltInLiquid(T_s * Xc_T, Pg_s * Xc_P);
       
       auto YCH4_s = paramclass.mixture.mole_y_CH4(T_s * Xc_T, Pw_s * Xc_P);
       auto XH2O_s = paramclass.mixture.mole_x_H2O(T_s * Xc_T, Pw_s * Xc_P);
@@ -1712,6 +1914,7 @@ public:
       auto tau_n = paramclass.soil.tortuosity(por_n);
       auto DH2O_g_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInGas(T_n * Xc_T, Pg_n * Xc_P);
       auto DCH4_w_n = tau_n * por_n * paramclass.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
+      auto DC_w_n = tau_n * por_n * paramclass.mixture.DiffCoeffSaltInLiquid(T_n * Xc_T, Pg_n * Xc_P);
       //  end of terms regarding components
       auto Cp_g_n = paramclass.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_C;
       auto Cp_w_n = paramclass.water.Cp(T_n * Xc_T, Pw_n * Xc_P) / Xc_C;
@@ -1730,7 +1933,7 @@ public:
 
       auto DH2O_g = omega_s * DH2O_g_s + omega_s * DH2O_g_n; // = DCH4_g
       auto DCH4_w = omega_s * DCH4_w_s + omega_s * DCH4_w_n; // = DH2O_w
-
+      auto DC_w = omega_s * DC_w_s + omega_s * DC_w_n; // = DH2O_w
 
       if (bctype[Indices::PVId_Pg] == Indices::BCId_dirichlet)
       {
@@ -1773,6 +1976,39 @@ public:
           r.accumulate(lfsv_Pg_s, i, term_penalty_g * psi_Pg_s[i] * factor);
         }
       }
+
+
+      if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
+      {
+        // Salt
+        auto Diffcoeff_c_w_s = rho_w_s * Sw_s ;      
+        
+        double term_conv_c_w = -krW * omega_s * rho_w_s * XC_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local));
+
+        double term_diffusion_c = term_conv_c_w + DC_w * omega_s * Diffcoeff_c_w_s * (gradu_XC_s * n_F_local) ;
+
+        
+        double term_nipg_c_x = theta_x * (XC_s - XC_n);
+        double term_nipg_w = theta_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+        double term_penalty_c = penalty_factor_x * (XC_s - XC_n);
+        // diffusion term
+        for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        {
+          r.accumulate(lfsv_XC_s, i, term_diffusion_c * psi_XC_s[i] * factor);
+        }
+        // (non-)symmetric IP term
+        for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        {
+          r.accumulate(lfsv_XC_s, i, ( term_nipg_w * krW * omega_s * rho_w_s * XC_s  * (Kn_F_s * gradpsi_XC_s[i])
+                                        + omega_s * ( term_nipg_c_x * DC_w * Diffcoeff_c_w_s) * (n_F_local* gradpsi_XC_s[i])) * factor);
+        }
+        // standard IP term integral
+        for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        {
+          r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+        }
+      }
+     
 
       if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
       {
