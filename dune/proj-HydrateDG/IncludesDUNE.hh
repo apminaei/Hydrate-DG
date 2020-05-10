@@ -10,7 +10,9 @@
 #define ALUGRID
 #define PARALLEL
 
+#include<dune/common/parametertreeparser.hh>
 #include<dune/common/parallel/mpihelper.hh>
+#include<dune/common/parallel/mpiguard.hh>
 #include<dune/common/exceptions.hh>
 #include<dune/common/fvector.hh>
 #include<dune/common/timer.hh>
@@ -96,3 +98,6 @@
 
 #include<dune/grid/utility/parmetisgridpartitioner.hh>
 #endif /* INCLUDESDUNE_HH_ */
+
+
+

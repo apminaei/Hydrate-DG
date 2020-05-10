@@ -8,7 +8,7 @@ DEPENDENCIES=@REQUIRES@
 
 Name: @PACKAGE_NAME@
 Version: @VERSION@
-Description: proj-Hydrate-DG-2comp module
+Description: proj-HydrateDG module
 URL: http://dune-project.org/
 Requires: dune-common dune-geometry dune-uggrid dune-grid dune-istl dune-localfunctions dune-matrix-vector dune-alugrid dune-solvers dune-typetree dune-functions dune-pdelab
 Libs: -L${libdir}

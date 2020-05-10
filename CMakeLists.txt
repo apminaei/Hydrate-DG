@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(proj-Hydrate-DG-2comp CXX)
+project(proj-HydrateDG CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
       "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))
@@ -22,7 +22,6 @@ add_subdirectory("src")
 add_subdirectory("dune")
 add_subdirectory("doc")
 add_subdirectory("cmake/modules")
-add_subdirectory("outputs")
 
 # finalize the dune project, e.g. generating config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)

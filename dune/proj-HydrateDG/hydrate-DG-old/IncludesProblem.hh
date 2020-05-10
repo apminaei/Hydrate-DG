@@ -17,7 +17,7 @@
 
 #include"./parameters/indices.hh"
 #include"./parameters/characteristicValues.hh"
-
+#include"./grids/grid.hh"
 /*PROBLEM FILES*/
 #include"./problemSpecs/problem_20160922_test1.hh"
 
@@ -36,9 +36,9 @@
 #include"IncludeClasses.hh"
 
 /*MAIN*/
-#include"Initial.hh"
-#include"FLOW_LocalOperator.hh"
-#include"FLOW_TimeOperator.hh"
+#include"../operators/Initial.hh"
+#include"../operators/FLOW_LocalOperator.hh"
+#include"../operators/FLOW_TimeOperator.hh"
 #include"proj_Hydrate_SimplexDG.hh"
 
 

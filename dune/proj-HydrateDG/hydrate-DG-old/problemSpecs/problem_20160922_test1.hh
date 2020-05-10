@@ -29,7 +29,7 @@ public:
 
 	std::string getPathName(){
 
-		std::string pathName = "/home/amir/dune-master/proj-Hydrate-DG-2comp/outputs/";
+		std::string pathName = "/home/amir/dune-master/proj-HydrateDG/dune/proj-HydrateDG/hydrate-DG-old/outputs/";
 	    return pathName ;
 	}
 
@@ -50,8 +50,8 @@ public:
 	constexpr static double Z_length  	= 1.0	;
 	constexpr static double Y_length	= 1.	;		//only if dim=3
 
-	const static int X_cells	= 10 ;
-	const static int Z_cells	= 10 ;
+	const static int X_cells	= 8 ;
+	const static int Z_cells	= 8 ;
 	const static int Y_cells	= 1	 ;
 	/**********************************************************************/
 

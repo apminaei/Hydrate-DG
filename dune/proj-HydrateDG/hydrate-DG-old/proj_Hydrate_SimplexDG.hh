@@ -8,12 +8,9 @@
 #ifndef PROJ_HYDRATE_SIMPLEXDG_HH_
 #define PROJ_HYDRATE_SIMPLEXDG_HH_
 
-template <class GV>
+template <class GV, class PTree>
 void proj_Hydrate_SimplexDG(const GV &gv, // GridView
-							double dt,	  // (sec) Time-step size
-							double t_END, // (sec) End time
-							double t_OP	  // (sec) Interval at which output must be plotted,
-)
+							const PTree& ptree, Dune::MPIHelper& helper)
 {
 
 	//	INCLUDE EXTERNAL CLASSES
@@ -25,21 +22,22 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	const int dim = GV::dimension;
 
 	/*Non-dimensionalize time prams*/
-	dt *= 1. / paramclass.characteristicValue.t_c;
-	t_END *= 1. / paramclass.characteristicValue.t_c;
-	t_OP *= 1. / paramclass.characteristicValue.t_c;
-	Real dt_min = paramclass.timeStepControl.mindt / paramclass.characteristicValue.t_c;
-	Real dt_max = paramclass.timeStepControl.maxdt / paramclass.characteristicValue.t_c;
+	/*Non-dimensionalize time prams*/
+	Real dt = ptree.get("time.dt_initial",(double)0.001)/ paramclass.characteristicValue.t_c;
+	Real t_END = ptree.get("time.time_end",(double)86400.) / paramclass.characteristicValue.t_c;
+	Real t_OP = ptree.get("output.time_interval",(double)1.) / paramclass.characteristicValue.t_c;
+	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) / paramclass.characteristicValue.t_c;
+	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) / paramclass.characteristicValue.t_c;
 
 	Real time = 0.0;
 	Real dtstart = dt;
 	Real time_op = time;
 
-	int maxAllowableIterations = 6;
-	int minAllowableIterations = 3;
+	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)4);
+	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)2);
 
 	const int degree_S = 1;
-	const int degree_P = 2;
+	const int degree_P = 1;
 	const int degree_T = 1;
 	const int degree_X = 1;
 	const int degree_Y = 1;
@@ -199,8 +197,8 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 #ifdef PARALLEL
 
 	//make vector consistent NEW IN PARALLEL
-	Dune::PDELab::ISTL::ParallelHelper<GFS> helper(gfs);
-	helper.maskForeignDOFs(uold);
+	Dune::PDELab::ISTL::ParallelHelper<GFS> phelper(gfs);
+	phelper.maskForeignDOFs(uold);
 	Dune::PDELab::AddDataHandle<GFS, U> adddh(gfs, uold);
 	if (gfs.gridView().comm().size() > 1)
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);

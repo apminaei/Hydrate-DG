@@ -3,7 +3,7 @@
 ################################
 
 #Name of the module
-Module: proj-Hydrate-DG-2comp
+Module: proj-HydrateDG
 Version: 0.1
 Maintainer: apminaei@gmail.com
 #depending on
