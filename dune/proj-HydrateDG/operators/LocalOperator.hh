@@ -1,5 +1,5 @@
 /*
- * FLOW_LocalOperator.hh
+ * LocalOperator.hh
  *
  *  Created on: Sep 22, 2016
  *      Author: shubhangi
@@ -21,12 +21,12 @@ struct ConvectionDiffusionDGMethod
 };
 
 template <class GV, typename U, class GFS, class FEM_P, class FEM_S, class FEM_T, class FEM_X, class FEM_Y>
-class FLOW_LocalOperator : public Dune::PDELab::NumericalJacobianApplyVolume<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
-                           public Dune::PDELab::NumericalJacobianVolume<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
-                           public Dune::PDELab::NumericalJacobianApplySkeleton<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
-                           public Dune::PDELab::NumericalJacobianSkeleton<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
-                           public Dune::PDELab::NumericalJacobianApplyBoundary<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
-                           public Dune::PDELab::NumericalJacobianBoundary<FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+class LocalOperator : public Dune::PDELab::NumericalJacobianApplyVolume<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+                           public Dune::PDELab::NumericalJacobianVolume<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+                           public Dune::PDELab::NumericalJacobianApplySkeleton<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+                           public Dune::PDELab::NumericalJacobianSkeleton<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+                           public Dune::PDELab::NumericalJacobianApplyBoundary<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
+                           public Dune::PDELab::NumericalJacobianBoundary<LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y>>,
                            public Dune::PDELab::FullSkeletonPattern, // matrix entries skeleton
                            public Dune::PDELab::FullVolumePattern,
                            public Dune::PDELab::LocalOperatorDefaultFlags,
@@ -187,7 +187,7 @@ public:
   std::vector<Cache_XC> cache_XC;
 
   // constructor stores parameters
-  FLOW_LocalOperator(const GV &gv_,
+  LocalOperator(const GV &gv_,
                      U *unew_,
                      GFS gfs_,
                      double *time_,

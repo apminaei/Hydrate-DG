@@ -37,9 +37,9 @@
 
 /*MAIN*/
 #include"../operators/Initial.hh"
-#include"../operators/FLOW_LocalOperator.hh"
-#include"../operators/FLOW_TimeOperator.hh"
-#include"proj_Hydrate_SimplexDG.hh"
+#include"../operators/LocalOperator.hh"
+#include"../operators/TimeOperator.hh"
+#include"driver.hh"
 
 
 #endif /* INCLUDESPROBLEM_HH_ */

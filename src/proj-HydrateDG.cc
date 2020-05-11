@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 
 		
 #endif
-		proj_Hydrate_SimplexDG(gv, ptree, helper);
+		driver(gv, ptree, helper);
 	}
 	catch (Dune::Exception &e)
 	{

@@ -9,7 +9,7 @@
 #define PROJ_HYDRATE_SIMPLEXDG_HH_
 
 template <class GV, class PTree>
-void proj_Hydrate_SimplexDG(const GV &gv, // GridView
+void driver(const GV &gv, // GridView
 							const PTree& ptree, Dune::MPIHelper& helper)
 {
 
@@ -169,10 +169,10 @@ void proj_Hydrate_SimplexDG(const GV &gv, // GridView
 	double alpha_x = 10.;
 	double alpha_y = 10.;
 
-	typedef FLOW_LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
+	typedef LocalOperator<GV, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	LOP lop(gv, &unew, gfs, &time, &dt, 6, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
-	typedef FLOW_TimeOperator TLOP; // temporal part
+	typedef TimeOperator TLOP; // temporal part
 	TLOP tlop;
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;

@@ -44,10 +44,10 @@ public:
 	 * 2D -> X and Z
 	 * 3D -> X, Y and Z
 	 */
-	const static int dimension 		= 2  	;
+	const static int dimension 			= 2  	;
 	constexpr static double origin 		= 0.0	;
-	constexpr static double X_length 	= 1	;
-	constexpr static double Z_length  	= 1.0	;
+	constexpr static double X_length 	= 1.	;
+	constexpr static double Z_length  	= 1.	;
 	constexpr static double Y_length	= 1.	;		//only if dim=3
 
 	const static int X_cells	= 8 ;

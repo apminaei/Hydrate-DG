@@ -1,5 +1,5 @@
 #install headers
-install(FILES proj-Hydrate-SimplexDG.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-old)
+install(FILES driver.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-old)
 install(FILES IncludeClasses.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-old)
 install(FILES IncludesProblem.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-old)
 add_subdirectory("Geo")

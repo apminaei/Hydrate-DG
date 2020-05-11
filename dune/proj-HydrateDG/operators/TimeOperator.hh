@@ -1,5 +1,5 @@
 /*
- * FLOW_TimeOperator.hh
+ * TimeOperator.hh
  *
  *  Created on: Sep 22, 2016
  *      Author: shubhangi
@@ -10,9 +10,9 @@
 
 using namespace Dune::PDELab;
 
-class FLOW_TimeOperator
-	: public Dune::PDELab::NumericalJacobianApplyVolume<FLOW_TimeOperator>,
-	  public Dune::PDELab::NumericalJacobianVolume<FLOW_TimeOperator>,
+class TimeOperator
+	: public Dune::PDELab::NumericalJacobianApplyVolume<TimeOperator>,
+	  public Dune::PDELab::NumericalJacobianVolume<TimeOperator>,
 	  public Dune::PDELab::FullVolumePattern,
 	  public Dune::PDELab::LocalOperatorDefaultFlags,
 	  public Dune::PDELab::InstationaryLocalOperatorDefaultMethods<double>
@@ -46,7 +46,7 @@ public:
 	};
 
 	// constructor remembers parameters
-	FLOW_TimeOperator(unsigned int intorder_ = 4)
+	TimeOperator(unsigned int intorder_ = 4)
 		: intorder(intorder_)
 	{
 		Xc_K = paramclass.characteristicValue.permeability_c;
