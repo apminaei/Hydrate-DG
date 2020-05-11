@@ -15,8 +15,8 @@
 #include<exception>
 #include<chrono>
 
-#include "dune/proj-HydrateDG/IncludesDUNE.hh"
-#include "dune/proj-HydrateDG/hydrate-DG-old/IncludesProblem.hh"
+#include "dune/proj-HydrateDG-Ex1/IncludesDUNE.hh"
+#include "dune/proj-HydrateDG-Ex1/hydrate-DG-old/IncludesProblem.hh"
 
 
 //#define ALUGRID		already defined in IncludeDUNE.hh
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 		{
 			if (helper.rank() == 0)
 			{
-				std::cout << "usage: ./proj-HydrateDG <input_file.ini> " << std::endl;
+				std::cout << "usage: ./proj-HydrateDG-Ex1 <input_file.ini> " << std::endl;
 			}
 			return 1;
 		}
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-master/proj-HydrateDG/dune/proj-HydrateDG/hydrate-DG-old/inputs/";
+	    std::string input_file = "/home/amir/dune-master/proj-HydrateDG-Ex1/dune/proj-HydrateDG-Ex1/hydrate-DG-old/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 

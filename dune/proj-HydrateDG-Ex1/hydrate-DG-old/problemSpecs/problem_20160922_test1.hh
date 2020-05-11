@@ -29,7 +29,7 @@ public:
 
 	std::string getPathName(){
 
-		std::string pathName = "/home/amir/dune-master/proj-HydrateDG/dune/proj-HydrateDG/hydrate-DG-old/outputs/";
+		std::string pathName = "/home/amir/dune-master/proj-HydrateDG-Ex1/dune/proj-HydrateDG-Ex1/hydrate-DG-old/outputs/";
 	    return pathName ;
 	}
 

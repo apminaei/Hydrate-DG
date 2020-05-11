@@ -1,1 +1,1 @@
-add_subdirectory(proj-HydrateDG)
+add_subdirectory(proj-HydrateDG-Ex1)
