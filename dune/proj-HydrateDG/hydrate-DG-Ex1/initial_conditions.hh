@@ -32,7 +32,7 @@ public:
 
 			/******************************************************************************/
 			// PRESSURES
-			double porosity = property.soil.SedimentPorosity(xglobal);
+			//double porosity = property.soil.SedimentPorosity(xglobal);
 			//double Pc = property.hydraulicProperty.CapillaryPressure(element,xlocal,Sw,porosity)
 			//			* property.characteristicValue.P_c; /*Pa*/
 			double Pw = property.parameter.InitialPw(xglobal);  /*Pa*/
@@ -49,15 +49,15 @@ public:
 			// auto yh2o = Xf[Indices::compId_YH2O];
 
 			/******************************************************************************/
-			// 	double Pw = 2.*1.e6; /*Pa*/
+			//double Pw = 2.*1.e6; /*Pa*/
 			
-			double T = 273.15+4.; /*K*/
-			double XCH4 = 0.0;
-			double YH2O = 0.1;
-			double XC = 5.5e-3;
+			double T = property.parameter.InitialT(xglobal);; /*K*/
+			double XCH4 = property.parameter.InitialXCH4(xglobal);;
+			double YH2O = property.parameter.InitialYH2O(xglobal);;
+			double XC = property.parameter.InitialXC(xglobal);;
 			HydraulicProperties hydraulicProperty;
 			double Pc = hydraulicProperty.suctionPressure(Sw,Sh) * hydraulicProperty.PcSF1(Sh);
-			double Pg = 2.0848*1.e6; /*Pa*/
+			double Pg = Pw + Pc; /*Pa*/
 
 			icvalue[Indices::PVId_Pg] = Pg ; //P_w + P_c ;
 			icvalue[Indices::PVId_Sw] = Sw ;

@@ -159,6 +159,8 @@ int main(int argc, char **argv)
 
 		
 #endif
+		Dune::VTKWriter<GV> vtkWriter(gv);
+  		vtkWriter.write(std::string("gridviews"));
 		driver(gv, ptree, helper);
 	}
 	catch (Dune::Exception &e)

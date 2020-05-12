@@ -18,12 +18,14 @@ private:
 	const double pi = 3.14159265358979323846;
 	const static int dim = MeshParameters<PTree>::dimension;
 
+	double T_t0;
 	double Sg_t0;
 	double Pw_t0;
 	double Pg_t0;
 	double Sh_t0;
 	double XCH4_t0;
 	double YH2O_t0;
+	double XC_t0;
 	double Sg_x0;
 	double Pw_x0;
 	double Sgin_x0;
@@ -47,15 +49,15 @@ public:
    mesh(ptree_)
   {
 		Sg_t0 = ptree.get("initial.Sg",(double)0.001);
-		Pw_t0 = ptree.get("initial.Pw",(double)1.e6);
-		Pg_t0 = ptree.get("initial.Pg",(double)0.001);
-		//Sw_t0 = ptree.get("initial.Sw",(double)1.e6);
-		Sh_t0 = ptree.get("initial.Sh",(double)0.001);
-		//Pc_t0 = ptree.get("initial.Pc",(double)1.e6);
+		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
+		Pg_t0 = ptree.get("initial.Pg",(double)2.e6);
+		T_t0 = ptree.get("initial.T",(double)4.) + 273.05; // in Kelvin
+		Sh_t0 = ptree.get("initial.Sh",(double)0.3);
 		YH2O_t0 = ptree.get("initial.YH2O",(double)0.001);
-		XCH4_t0 = ptree.get("initial.XCH4",(double)1.e6);
+		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
+		XC_t0 = ptree.get("initial.XC",(double)5.5e-3);
 
-		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)1.e6);
+		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)2.e6);
 		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.001);
 		
 		numMaterials = ptree.get("sediment.number_of_materials",(int)1);
@@ -111,10 +113,10 @@ public:
 		return Pg;
 	}
 
-	// double InitialSw(Dune::FieldVector< double,dim > xglobal) const {
-	// 	double Sw = Sw_t0;
-	// 	return Sw;
-	// }
+	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
+		double T = T_t0;
+		return T;
+	}
 	double InitialSh(Dune::FieldVector< double,dim > xglobal) const {
 		double Sh = Sh_t0;
 		return Sh;
@@ -129,8 +131,12 @@ public:
 		return YH2O;
 	}
 
-	//3. Boundary values
+	double InitialXC(Dune::FieldVector< double,dim > xglobal) const {
+		double XC = XC_t0;
+		return XC;
+	}
 
+	//3. Boundary values
 	double InletSg(Dune::FieldVector< double,dim > xglobal) const {
 		double Sg = Sgin_x0;
 		return Sg;
@@ -141,8 +147,8 @@ public:
 		return Pw;
 	}
 
-	//4. Material properties
 
+	//4. Material properties
 	std::vector< std::vector<double> > layer_properties() const {
 		return prop;
 	}
