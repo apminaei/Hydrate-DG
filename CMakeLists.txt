@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(proj-HydrateDG-Ex1 CXX)
+project(proj-HydrateDG CXX)
 
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
       "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))

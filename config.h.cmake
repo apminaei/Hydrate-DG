@@ -1,4 +1,4 @@
-/* begin proj-HydrateDG-Ex1
+/* begin proj-HydrateDG
    put the definitions for config.h specific to
    your project here. Everything above will be
    overwritten
@@ -28,18 +28,18 @@
 
 /* end private */
 
-/* Define to the version of proj-HydrateDG-Ex1 */
+/* Define to the version of proj-HydrateDG */
 #define PROJ_HYDRATEDG_VERSION "@PROJ_HYDRATEDG_VERSION@"
 
-/* Define to the major version of proj-HydrateDG-Ex1 */
+/* Define to the major version of proj-HydrateDG */
 #define PROJ_HYDRATEDG_VERSION_MAJOR @PROJ_HYDRATEDG_VERSION_MAJOR@
 
-/* Define to the minor version of proj-HydrateDG-Ex1 */
+/* Define to the minor version of proj-HydrateDG */
 #define PROJ_HYDRATEDG_VERSION_MINOR @PROJ_HYDRATEDG_VERSION_MINOR@
 
-/* Define to the revision of proj-HydrateDG-Ex1 */
+/* Define to the revision of proj-HydrateDG */
 #define PROJ_HYDRATEDG_VERSION_REVISION @PROJ_HYDRATEDG_VERSION_REVISION@
 
-/* end proj-HydrateDG-Ex1
+/* end proj-HydrateDG
    Everything below here will be overwritten
 */
