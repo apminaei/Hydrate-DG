@@ -83,8 +83,7 @@ int main(int argc, char **argv)
 
 		/*____________________________________________*/
 
-		//IncludeProblemSpecifications::ProblemSpecifications parameters;
-		//const int dim = mesh.dimension;
+		
 		const double X = mesh.X_length;
 		//const double Y = mesh.Y_length;
 		const double Z = mesh.Z_length;

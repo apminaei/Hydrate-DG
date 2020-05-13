@@ -59,10 +59,10 @@ public:
 			double Pc = hydraulicProperty.suctionPressure(Sw,Sh) * hydraulicProperty.PcSF1(Sh);
 			double Pg = Pw + Pc; /*Pa*/
 
-			icvalue[Indices::PVId_Pg] = Pg ; //P_w + P_c ;
-			icvalue[Indices::PVId_Sw] = Sw ;
+			icvalue[Indices::PVId_Pw] = Pg ; //P_w + P_c ;
+			icvalue[Indices::PVId_Sg] = Sw ;
 			icvalue[Indices::PVId_Sh] = Sh ;
-			icvalue[Indices::PVId_Pc] = Pc ;
+			//icvalue[Indices::PVId_Pc] = Pc ;
 			icvalue[Indices::PVId_T ] = T  ;
 			icvalue[Indices::PVId_XCH4] = XCH4 ;
 			icvalue[Indices::PVId_YH2O ] = YH2O  ;

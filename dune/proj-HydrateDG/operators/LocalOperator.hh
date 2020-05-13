@@ -112,9 +112,9 @@ public:
   typedef Dune::PDELab::LFSIndexCache<LFS> LFSCache;
   typedef typename U::template LocalView<LFSCache> VectorView;
 
-  typedef typename LFS::template Child<Indices::PVId_Pg>::Type LFS_Pg;
-  typedef typename LFS::template Child<Indices::PVId_Pc>::Type LFS_Pc;
-  typedef typename LFS::template Child<Indices::PVId_Sw>::Type LFS_Sw;
+  typedef typename LFS::template Child<Indices::PVId_Pw>::Type LFS_Pw;
+  //typedef typename LFS::template Child<Indices::PVId_Pc>::Type LFS_Pc;
+  typedef typename LFS::template Child<Indices::PVId_Sg>::Type LFS_Sg;
   typedef typename LFS::template Child<Indices::PVId_Sh>::Type LFS_Sh;
   typedef typename LFS::template Child<Indices::PVId_T>::Type LFS_T;
   typedef typename LFS::template Child<Indices::PVId_XCH4>::Type LFS_X;
@@ -122,15 +122,15 @@ public:
   typedef typename LFS::template Child<Indices::PVId_C>::Type LFS_XC;
 
 
-  using PathPg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pg>>;
-  using GFS_Pg = Dune::PDELab::GridFunctionSubSpace<GFS,PathPg>;
-  //SUBGFS_Pg    subgfs_Pg(gfs);
-	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
-  using GFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+  using PathPw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>>;
+  using GFS_Pw = Dune::PDELab::GridFunctionSubSpace<GFS,PathPw>;
+  //SUBGFS_Pw    subgfs_Pw(gfs);
+	// using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+  // using GFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
   //SUBGFS_Pc    subgfs_Pc(gfs);
-	using PathSw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sw>>;
-  using GFS_Sw = Dune::PDELab::GridFunctionSubSpace<GFS,PathSw>;
-  //SUBGFS_Sw    subgfs_Sw(gfs);
+	using PathSg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sg>>;
+  using GFS_Sg = Dune::PDELab::GridFunctionSubSpace<GFS,PathSg>;
+  //SUBGFS_Sg    subgfs_Sg(gfs);
 	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
   using GFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
   //SUBGFS_Sh    subgfs_Sh(gfs);
@@ -147,20 +147,20 @@ public:
   using GFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
   //SUBGFS_XC    subgfs_XC(gfs);
 
-  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pg>> GFS_Pg; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pw>> GFS_Pw; //
   // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Pc>> GFS_Pc; //
-  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sw>> GFS_Sw; //
+  // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sg>> GFS_Sg; //
   // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_Sh>> GFS_Sh; //
   // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_T>> GFS_T;   //
   // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_XCH4>> GFS_X; //
   // typedef typename Dune::PDELab::GridFunctionSubSpace<GFS, Dune::TypeTree::TreePath<Indices::PVId_YH2O>> GFS_Y;   //
 
-  using LocalBasisType_Pg = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
-  using Cache_Pg = Dune::PDELab::LocalBasisCache<LocalBasisType_Pg>;
-  using LocalBasisType_Pc = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
-  using Cache_Pc = Dune::PDELab::LocalBasisCache<LocalBasisType_Pc>;
-  using LocalBasisType_Sw = typename FEM_S::Traits::FiniteElementType::Traits::LocalBasisType;
-  using Cache_Sw = Dune::PDELab::LocalBasisCache<LocalBasisType_Sw>;
+  using LocalBasisType_Pw = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
+  using Cache_Pw = Dune::PDELab::LocalBasisCache<LocalBasisType_Pw>;
+  // using LocalBasisType_Pc = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
+  // using Cache_Pc = Dune::PDELab::LocalBasisCache<LocalBasisType_Pc>;
+  using LocalBasisType_Sg = typename FEM_S::Traits::FiniteElementType::Traits::LocalBasisType;
+  using Cache_Sg = Dune::PDELab::LocalBasisCache<LocalBasisType_Sg>;
   using LocalBasisType_Sh = typename FEM_S::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_Sh = Dune::PDELab::LocalBasisCache<LocalBasisType_Sh>;
   using LocalBasisType_T = typename FEM_T::Traits::FiniteElementType::Traits::LocalBasisType;
@@ -182,9 +182,9 @@ public:
   // enough to support p-adaptivity.  (Another likely candidate would be
   // differing geometry types, i.e. hybrid meshes.)
 
-  std::vector<Cache_Pg> cache_Pg;
-  std::vector<Cache_Pc> cache_Pc;
-  std::vector<Cache_Sw> cache_Sw;
+  std::vector<Cache_Pw> cache_Pw;
+  //std::vector<Cache_Pc> cache_Pc;
+  std::vector<Cache_Sg> cache_Sg;
   std::vector<Cache_Sh> cache_Sh;
   std::vector<Cache_T> cache_T;
   std::vector<Cache_XCH4> cache_XCH4;
@@ -212,7 +212,7 @@ public:
         intorder(intorder_),
         method_g(method_g_), method_w(method_w_), method_T(method_T_), method_x(method_x_), method_y(method_y_),
         alpha_g(alpha_g_), alpha_w(alpha_w_), alpha_s(alpha_s_),  alpha_T(alpha_T_), alpha_x(alpha_x_), alpha_y(alpha_y_),
-        cache_Pg(20), cache_Pc(20), cache_T(20), cache_Sw(20), cache_Sh(20), cache_XCH4(20), cache_YH2O(20), cache_XC(20)
+        cache_Pw(20), cache_T(20), cache_Sg(20), cache_Sh(20), cache_XCH4(20), cache_YH2O(20), cache_XC(20)
   {
     theta_g = 0.0;
     if (method_g == ConvectionDiffusionDGMethod::SIPG)
@@ -271,16 +271,16 @@ public:
 
     // subspaces
     //Gas pressure
-    const auto &lfsv_Pg = lfsv.template child<Indices::PVId_Pg>();
-    const auto &lfsu_Pg = lfsu.template child<Indices::PVId_Pg>();
+    const auto &lfsv_Pw = lfsv.template child<Indices::PVId_Pw>();
+    const auto &lfsu_Pw = lfsu.template child<Indices::PVId_Pw>();
 
     //Capillary Pressure
-    const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
-    const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
+    // const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
+    // const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
 
     //Water Saturation
-    const auto &lfsv_Sw = lfsv.template child<Indices::PVId_Sw>();
-    const auto &lfsu_Sw = lfsu.template child<Indices::PVId_Sw>();
+    const auto &lfsv_Sg = lfsv.template child<Indices::PVId_Sg>();
+    const auto &lfsu_Sg = lfsu.template child<Indices::PVId_Sg>();
 
     //Hydrate Saturation
     const auto &lfsv_Sh = lfsv.template child<Indices::PVId_Sh>();
@@ -304,25 +304,27 @@ public:
     
 
     // define types
-    using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
+    using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
         Traits::LocalBasisType::Traits::RangeFieldType;
-    typedef typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
+    typedef typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
         Traits::LocalBasisType::Traits::JacobianType JacobianType;
-    using size_type = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::SizeType;
+    using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
     const int dim = EG::Entity::dimension;
-    const int order = std::max(lfsu_Pg.finiteElement().localBasis().order(),
-                               lfsv_Pg.finiteElement().localBasis().order());
+    const int order = std::max(lfsu_Pw.finiteElement().localBasis().order(),
+                               lfsv_Pw.finiteElement().localBasis().order());
 
     // Get geometry
     auto geo = eg.geometry();
 
     // Initialize vectors outside for loop
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg(lfsu_Pg.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pg(lfsv_Pg.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pc(lfsu_Pc.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pc(lfsv_Pc.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw(lfsu_Pw.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw(lfsv_Pw.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sg(lfsu_Sg.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sg(lfsv_Sg.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh(lfsu_Sh.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh(lfsv_Sh.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_T(lfsu_T.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_T(lfsv_T.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XCH4(lfsu_XCH4.size());
@@ -332,10 +334,13 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XC(lfsu_XC.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC(lfsv_XC.size());
 
-    Dune::FieldVector<RF, dim> gradu_Pg(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pg(0.0);
-    Dune::FieldVector<RF, dim> gradu_Pc(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pc(0.0);
+    Dune::FieldVector<RF, dim> gradu_Pw(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Pw(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sg(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sg(0.0);
+
+    Dune::FieldVector<RF, dim> gradu_Sh(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sh(0.0);
     Dune::FieldVector<RF, dim> gradu_T(0.0);
     Dune::FieldVector<RF, dim> Ktgradu_T(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4(0.0);
@@ -350,14 +355,14 @@ public:
     for (const auto &ip : quadratureRule(geo, intorder))
     {
       // evaluate basis functions
-      auto &phi_Pg = cache_Pg[order].evaluateFunction(ip.position(), lfsu_Pg.finiteElement().localBasis());
-      auto &psi_Pg = cache_Pg[order].evaluateFunction(ip.position(), lfsv_Pg.finiteElement().localBasis());
-      auto &phi_Sw = cache_Sw[order].evaluateFunction(ip.position(), lfsu_Sw.finiteElement().localBasis());
-      auto &psi_Sw = cache_Sw[order].evaluateFunction(ip.position(), lfsv_Sw.finiteElement().localBasis());
+      auto &phi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &psi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &phi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &psi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
       auto &phi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
       auto &psi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
-      auto &phi_Pc = cache_Pc[order].evaluateFunction(ip.position(), lfsu_Pc.finiteElement().localBasis());
-      auto &psi_Pc = cache_Pc[order].evaluateFunction(ip.position(), lfsv_Pc.finiteElement().localBasis());
+      // auto &phi_Pc = cache_Pc[order].evaluateFunction(ip.position(), lfsu_Pc.finiteElement().localBasis());
+      // auto &psi_Pc = cache_Pc[order].evaluateFunction(ip.position(), lfsv_Pc.finiteElement().localBasis());
       auto &phi_T = cache_T[order].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
       auto &psi_T = cache_T[order].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
       auto &phi_XCH4 = cache_XCH4[order].evaluateFunction(ip.position(), lfsu_XCH4.finiteElement().localBasis());
@@ -369,15 +374,15 @@ public:
 
       auto ip_global = geo.global(ip.position());
 
-      // evaluate Pg
-      RF Pg = 0.0;
-      for (size_type i = 0; i < lfsu_Pg.size(); i++)
-        Pg += x(lfsu_Pg, i) * phi_Pg[i];
+      // evaluate Pw
+      RF Pw = 0.0;
+      for (size_type i = 0; i < lfsu_Pw.size(); i++)
+        Pw += x(lfsu_Pw, i) * phi_Pw[i];
 
-      // evaluate Sw
-      RF Sw = 0.0;
-      for (size_type i = 0; i < lfsu_Sw.size(); i++)
-        Sw += x(lfsu_Sw, i) * phi_Sw[i];
+      // evaluate Sg
+      RF Sg = 0.0;
+      for (size_type i = 0; i < lfsu_Sg.size(); i++)
+        Sg += x(lfsu_Sg, i) * phi_Sg[i];
 
       // evaluate Sh
       RF Sh = 0.0;
@@ -385,9 +390,9 @@ public:
         Sh += x(lfsu_Sh, i) * phi_Sh[i];
 
       // evaluate Pc
-      RF Pc = 0.0;
-      for (size_type i = 0; i < lfsu_Pc.size(); i++)
-        Pc += x(lfsu_Pc, i) * phi_Pc[i];
+      // RF Pc = 0.0;
+      // for (size_type i = 0; i < lfsu_Pc.size(); i++)
+      //   Pc += x(lfsu_Pc, i) * phi_Pc[i];
 
       // evaluate T
       RF T = 0.0;
@@ -409,15 +414,19 @@ public:
       for (size_type i = 0; i < lfsu_XC.size(); i++)
         XC += x(lfsu_XC, i) * phi_XC[i];
 
-      // evaluate Pw
-      RF Pw = Pg - Pc;
-      RF Peff = (Pg * (1. - Sw - Sh) + Pw * Sw) / (1. - Sh);
+      RF Sw = 1. - Sg - Sh;
+      // evaluate Pg
+      RF Pc = property.hydraulicProperty.suctionPressure(Sw, Sh) / Xc_P * property.hydraulicProperty.PcSF1(Sh);
+      RF Pg = Pw + Pc;
+      RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
       // evaluate gradient of basis functions
-      auto &js_Pg = cache_Pg[order].evaluateJacobian(ip.position(), lfsu_Pg.finiteElement().localBasis());
-      auto &js_v_Pg = cache_Pg[order].evaluateJacobian(ip.position(), lfsv_Pg.finiteElement().localBasis());
-      auto &js_Pc = cache_Pc[order].evaluateJacobian(ip.position(), lfsu_Pc.finiteElement().localBasis());
-      auto &js_v_Pc = cache_Pc[order].evaluateJacobian(ip.position(), lfsv_Pc.finiteElement().localBasis());
+      auto &js_Pw = cache_Pw[order].evaluateJacobian(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &js_v_Pw = cache_Pw[order].evaluateJacobian(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &js_Sg = cache_Sg[order].evaluateJacobian(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &js_v_Sg = cache_Sg[order].evaluateJacobian(ip.position(), lfsv_Sg.finiteElement().localBasis());
+      auto &js_Sh = cache_Sh[order].evaluateJacobian(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &js_v_Sh = cache_Sh[order].evaluateJacobian(ip.position(), lfsv_Sh.finiteElement().localBasis());
       auto &js_T = cache_T[order].evaluateJacobian(ip.position(), lfsu_T.finiteElement().localBasis());
       auto &js_v_T = cache_T[order].evaluateJacobian(ip.position(), lfsv_T.finiteElement().localBasis());
       auto &js_XCH4 = cache_XCH4[order].evaluateJacobian(ip.position(), lfsu_XCH4.finiteElement().localBasis());
@@ -430,15 +439,20 @@ public:
       // transform gradients of shape functions to real element
       jac = geo.jacobianInverseTransposed(ip.position());
 
-      for (size_type i = 0; i < lfsu_Pg.size(); i++)
-        jac.mv(js_Pg[i][0], gradphi_Pg[i]);
-      for (size_type i = 0; i < lfsv_Pg.size(); i++)
-        jac.mv(js_v_Pg[i][0], gradpsi_Pg[i]);
+      for (size_type i = 0; i < lfsu_Pw.size(); i++)
+        jac.mv(js_Pw[i][0], gradphi_Pw[i]);
+      for (size_type i = 0; i < lfsv_Pw.size(); i++)
+        jac.mv(js_v_Pw[i][0], gradpsi_Pw[i]);
 
-      for (size_type i = 0; i < lfsu_Pc.size(); i++)
-        jac.mv(js_Pc[i][0], gradphi_Pc[i]);
-      for (size_type i = 0; i < lfsv_Pc.size(); i++)
-        jac.mv(js_v_Pc[i][0], gradpsi_Pc[i]);
+      for (size_type i = 0; i < lfsu_Sg.size(); i++)
+        jac.mv(js_Sg[i][0], gradphi_Sg[i]);
+      for (size_type i = 0; i < lfsv_Sg.size(); i++)
+        jac.mv(js_v_Sg[i][0], gradpsi_Sg[i]);
+
+      for (size_type i = 0; i < lfsu_Sh.size(); i++)
+        jac.mv(js_Sh[i][0], gradphi_Sh[i]);
+      for (size_type i = 0; i < lfsv_Sh.size(); i++)
+        jac.mv(js_v_Sh[i][0], gradpsi_Sh[i]);
 
       for (size_type i = 0; i < lfsu_T.size(); i++)
         jac.mv(js_T[i][0], gradphi_T[i]);
@@ -461,15 +475,20 @@ public:
       for (size_type i = 0; i < lfsv_XC.size(); i++)
         jac.mv(js_v_XC[i][0], gradpsi_XC[i]);
 
-      // compute gradient of Pg
-      gradu_Pg = 0.0;
-      for (size_type i = 0; i < lfsu_Pg.size(); i++)
-        gradu_Pg.axpy(x(lfsu_Pg, i), gradphi_Pg[i]);
+      // compute gradient of Pw
+      gradu_Pw = 0.0;
+      for (size_type i = 0; i < lfsu_Pw.size(); i++)
+        gradu_Pw.axpy(x(lfsu_Pw, i), gradphi_Pw[i]);
 
-      // compute gradient of Pc
-      gradu_Pc = 0.0;
-      for (size_type i = 0; i < lfsu_Pc.size(); i++)
-        gradu_Pc.axpy(x(lfsu_Pc, i), gradphi_Pc[i]);
+      //compute gradient of Sg
+      gradu_Sg = 0.0;
+      for (size_type i = 0; i < lfsu_Sg.size(); i++)
+        gradu_Sg.axpy(x(lfsu_Sg, i), gradphi_Sg[i]);
+
+      //compute gradient of Sh
+      gradu_Sh = 0.0;
+      for (size_type i = 0; i < lfsu_Sh.size(); i++)
+        gradu_Sh.axpy(x(lfsu_Sh, i), gradphi_Sh[i]);
 
       // compute gradient of T
       gradu_T = 0.0;
@@ -496,11 +515,14 @@ public:
       K *= 1. / Xc_K; /*ndim K*/
       K *= Xc_conv_m;
 
-      // compute K * gradient of Pg
-      K.mv(gradu_Pg, Kgradu_Pg);
+      // compute K * gradient of Pw
+      K.mv(gradu_Pw, Kgradu_Pw);
 
-      // compute K * gradient of Pc
-      K.mv(gradu_Pc, Kgradu_Pc);
+      // compute K * gradient of Sg
+      K.mv(gradu_Sg, Kgradu_Sg);
+
+      // compute K * gradient of Sg
+      K.mv(gradu_Sh, Kgradu_Sh);
 
       auto por = property.soil.SedimentPorosity(ip_global);
       auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, 1.) / Xc_rho;
@@ -508,7 +530,7 @@ public:
       //auto rho_h = property.hydrate.density() / Xc_rho;
 
       //  adding terms regarding components
-      auto Sg = 1. - Sw - Sh;
+      
       auto tau = property.soil.tortuosity(por);
       auto DH2O_g = tau * por * property.mixture.binaryDiffCoeffInGas(T * Xc_T, Pg * Xc_P);
       auto DCH4_w = tau * por * property.mixture.binaryDiffCoeffInLiquid(T * Xc_T, Pg * Xc_P);
@@ -526,8 +548,7 @@ public:
       auto krW = property.hydraulicProperty.krW(Sw, Sh) / (property.water.dynamicViscosity(T * Xc_T, Pw * Xc_P) / Xc_mu);
       auto krN = property.hydraulicProperty.krNW(Sw, Sh) / (property.methane.dynamicViscosity(T * Xc_T, Pg * Xc_P) / Xc_mu);
       
-      auto suctionPressure = property.hydraulicProperty.suctionPressure(Sw, Sh) / Xc_P;
-      auto PcSF1 = property.hydraulicProperty.PcSF1(Sh);
+     
       
       auto q_g = Xc_source_m * property.reactionKinetics.gasGenerationRate( T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global); // property.parameter.ReferenceTemperature()
       auto q_w = Xc_source_m * property.reactionKinetics.waterGenerationRate(T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
@@ -540,7 +561,7 @@ public:
       auto kth_w = property.water.thermalConductivity(T * Xc_T, Pw * Xc_P) / Xc_kth;
       auto kth_h = property.hydrate.thermalConductivity(T * Xc_T, Peff * Xc_P) / Xc_kth;
       auto kth_s = property.soil.thermalConductivity(T * Xc_T, Peff * Xc_P) / Xc_kth;
-      auto kth_eff = (1. - por) * kth_s + por * ((1. - Sw - Sh) * kth_g + Sw * kth_w + Sh * kth_h);
+      auto kth_eff = (1. - por) * kth_s + por * (Sg * kth_g + Sw * kth_w + Sh * kth_h);
       kth_eff *= Xc_diff_h;
 
       //Methane
@@ -562,31 +583,31 @@ public:
       auto Diffcoeff_w_w_p = DCH4_w * rho_w * Sw * YH2O / P_H_sat ;
       auto Diffcoeff_w_w_x = DCH4_w * rho_w * Sw * Pg /  P_H_sat;
       auto Diffcoeff_w_g = DH2O_g * rho_g * Sg ;
+      auto coeff1 = -property.hydraulicProperty.Pentry()*Pc/1.2;
 
       // integrate (A grad u - bu)*grad phi_i + a*u*phi_i
       RF factor = ip.weight() * geo.integrationElement(ip.position());
-      for (size_type i = 0; i < lfsv_Pg.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw.size(); i++)
       {
-        r.accumulate(lfsv_Pg, i, ((Concoeff_m_g * (Kgradu_Pg * gradpsi_Pg[i]) + Concoeff_m_w * (Kgradu_Pg * gradpsi_Pg[i] 
-                                                  - Kgradu_Pc * gradpsi_Pg[i])) - Diffcoeff_m_g_p * (gradu_Pg * gradpsi_Pg[i]) 
-                                                  - Diffcoeff_m_g_x * (gradu_XCH4 * gradpsi_Pg[i]) 
-                                                  - Diffcoeff_m_w * (gradu_XCH4 * gradpsi_Pg[i])- q_g * psi_Pg[i]) * factor);
+        r.accumulate(lfsv_Pw, i, ((Concoeff_m_g * (Kgradu_Pw + (coeff1*(-Kgradu_Sg/Sw + (-1./Sw+1.2/(1.-Sh))*Kgradu_Sh))) * gradpsi_Pw[i] + Concoeff_m_w * (Kgradu_Pw * gradpsi_Pw[i] )
+                                                  - Diffcoeff_m_g_p * (gradu_Pw +  (coeff1*(-gradu_Sg/Sw + (-1./Sw+1./(1.-Sh))*gradu_Sh))) * gradpsi_Pw[i]) 
+                                                  - Diffcoeff_m_g_x * (gradu_XCH4 * gradpsi_Pw[i]) 
+                                                  - Diffcoeff_m_w * (gradu_XCH4 * gradpsi_Pw[i])- q_g * psi_Pw[i]) * factor);
       }
      
       for (size_type i = 0; i < lfsv_XC.size(); i++)
       {
-        r.accumulate(lfsv_XC, i, (Concoeff_c_w * (Kgradu_Pg * gradpsi_XC[i] 
-                                                  - Kgradu_Pc * gradpsi_XC[i])
+        r.accumulate(lfsv_XC, i, (Concoeff_c_w * (Kgradu_Pw  * gradpsi_XC[i])
                                                   - Diffcoeff_c_w * (gradu_XC * gradpsi_XC[i])) * factor);
       }
 
-      for (size_type i = 0; i < lfsv_Pc.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg.size(); i++)
       {
-        r.accumulate(lfsv_Pc, i, ((Concoeff_w_g * (Kgradu_Pg * gradpsi_Pc[i]) + Concoeff_w_w * (Kgradu_Pg * gradpsi_Pc[i] 
-                                                  - Kgradu_Pc * gradpsi_Pc[i])) - Diffcoeff_w_w_p * (gradu_Pg * gradpsi_Pc[i])
-                                                  - Diffcoeff_w_w_x * (gradu_YH2O * gradpsi_Pc[i])
-                                                  - Diffcoeff_w_g * (gradu_YH2O * gradpsi_Pc[i]) 
-                                                  - q_w * psi_Pc[i]) * factor);
+        r.accumulate(lfsv_Sg, i, (Concoeff_w_g * (Kgradu_Pw + (coeff1*(-Kgradu_Sg/Sw + (-1./Sw+1.2/(1.-Sh))*Kgradu_Sh))) * gradpsi_Sg[i] + Concoeff_w_w * (Kgradu_Pw * gradpsi_Sg[i]) 
+                                                  - Diffcoeff_w_w_p * (gradu_Pw + (coeff1*(-gradu_Sg/Sw + (-1./Sw+1./(1.-Sh))*gradu_Sh))) * gradpsi_Sg[i]
+                                                  - Diffcoeff_w_w_x * (gradu_YH2O * gradpsi_Sg[i])
+                                                  - Diffcoeff_w_g * (gradu_YH2O * gradpsi_Sg[i]) 
+                                                  - q_w * psi_Sg[i]) * factor);
       }
       for (size_type i = 0; i < lfsv_Sh.size(); i++)
       {
@@ -631,14 +652,13 @@ public:
 			// r.accumulate(lfsv_YH2O , i, +tmp * psi_YH2O[i]  *factor);
       // }
 
-      for (size_type i = 0; i < lfsv_Sw.size(); i++)
-      {
-        r.accumulate(lfsv_Sw, i, (Pc - suctionPressure * PcSF1) * psi_Sw[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_Sg.size(); i++)
+      // {
+      //   r.accumulate(lfsv_Sg, i, (Pc - suctionPressure * PcSF1) * psi_Sg[i] * factor);
+      // }
       for (size_type i = 0; i < lfsv_T.size(); i++)
       {
-        r.accumulate(lfsv_T, i, (rho_g * krN * (Kgradu_Pg * gradpsi_T[i]) * Cp_g * T + rho_w * krW * (Kgradu_Pg * gradpsi_T[i] 
-                                              - Kgradu_Pc * gradpsi_T[i]) * Cp_w * T + kth_eff * (gradu_T * gradpsi_T[i]) 
+        r.accumulate(lfsv_T, i, (rho_g * krN * ((Kgradu_Pw + (coeff1*(-Kgradu_Sg/Sw + (-1./Sw+1.2/(1.-Sh))*Kgradu_Sh))) * gradpsi_T[i]) * Cp_g * T + rho_w * krW * (Kgradu_Pw * gradpsi_T[i]) * Cp_w * T + kth_eff * (gradu_T * gradpsi_T[i]) 
                                               - Q * psi_T[i]) * factor);
       }
     } //End Quadrature Rule
@@ -654,22 +674,22 @@ public:
   {
     // subspaces
     //Gas pressure
-    const auto &lfsv_Pg_s = lfsv_s.template child<Indices::PVId_Pg>();
-    const auto &lfsu_Pg_s = lfsu_s.template child<Indices::PVId_Pg>();
-    const auto &lfsv_Pg_n = lfsv_n.template child<Indices::PVId_Pg>();
-    const auto &lfsu_Pg_n = lfsu_n.template child<Indices::PVId_Pg>();
+    const auto &lfsv_Pw_s = lfsv_s.template child<Indices::PVId_Pw>();
+    const auto &lfsu_Pw_s = lfsu_s.template child<Indices::PVId_Pw>();
+    const auto &lfsv_Pw_n = lfsv_n.template child<Indices::PVId_Pw>();
+    const auto &lfsu_Pw_n = lfsu_n.template child<Indices::PVId_Pw>();
 
     //Capillary Pressure
-    const auto &lfsv_Pc_s = lfsv_s.template child<Indices::PVId_Pc>();
-    const auto &lfsu_Pc_s = lfsu_s.template child<Indices::PVId_Pc>();
-    const auto &lfsv_Pc_n = lfsv_n.template child<Indices::PVId_Pc>();
-    const auto &lfsu_Pc_n = lfsu_n.template child<Indices::PVId_Pc>();
+    // const auto &lfsv_Pc_s = lfsv_s.template child<Indices::PVId_Pc>();
+    // const auto &lfsu_Pc_s = lfsu_s.template child<Indices::PVId_Pc>();
+    // const auto &lfsv_Pc_n = lfsv_n.template child<Indices::PVId_Pc>();
+    // const auto &lfsu_Pc_n = lfsu_n.template child<Indices::PVId_Pc>();
 
     //Water Saturation
-    const auto &lfsv_Sw_s = lfsv_s.template child<Indices::PVId_Sw>();
-    const auto &lfsu_Sw_s = lfsu_s.template child<Indices::PVId_Sw>();
-    const auto &lfsv_Sw_n = lfsv_n.template child<Indices::PVId_Sw>();
-    const auto &lfsu_Sw_n = lfsu_n.template child<Indices::PVId_Sw>();
+    const auto &lfsv_Sg_s = lfsv_s.template child<Indices::PVId_Sg>();
+    const auto &lfsu_Sg_s = lfsu_s.template child<Indices::PVId_Sg>();
+    const auto &lfsv_Sg_n = lfsv_n.template child<Indices::PVId_Sg>();
+    const auto &lfsu_Sg_n = lfsu_n.template child<Indices::PVId_Sg>();
 
     //Hydrate Saturation
     const auto &lfsv_Sh_s = lfsv_s.template child<Indices::PVId_Sh>();
@@ -702,19 +722,19 @@ public:
     const auto &lfsu_XC_n = lfsu_n.template child<Indices::PVId_C>();
 
     // define types
-    using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
+    using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
         Traits::LocalBasisType::Traits::RangeFieldType;
-    using size_type = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::SizeType;
+    using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
     const int dim= IG::Entity::dimension;
     const int dimension = GV::dimension;
     //std::cout << "grid dimension " << dimension << "  element dim " << dim << std::endl;
     const int order = std::max(
-        std::max(lfsu_Pg_s.finiteElement().localBasis().order(),
-                 lfsu_Pg_n.finiteElement().localBasis().order()),
-        std::max(lfsv_Pg_s.finiteElement().localBasis().order(),
-                 lfsv_Pg_n.finiteElement().localBasis().order()));
+        std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
+                 lfsu_Pw_n.finiteElement().localBasis().order()),
+        std::max(lfsv_Pw_s.finiteElement().localBasis().order(),
+                 lfsv_Pw_n.finiteElement().localBasis().order()));
 
     // References to inside and outside cells
     const auto &cell_inside = ig.inside();
@@ -755,8 +775,8 @@ public:
     //        }
 
     // get polynomial degree
-    auto order_s = lfsv_Pg_s.finiteElement().localBasis().order();
-    auto order_n = lfsv_Pg_n.finiteElement().localBasis().order();
+    auto order_s = lfsv_Pw_s.finiteElement().localBasis().order();
+    auto order_n = lfsv_Pw_n.finiteElement().localBasis().order();
     auto degree = std::max(order_s, order_n);
 
     // penalty factor
@@ -768,10 +788,12 @@ public:
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
     // Initialize vectors outside for loop
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg_s(lfsu_Pg_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pg_s(lfsv_Pg_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pc_s(lfsu_Pc_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pc_s(lfsv_Pc_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_s(lfsu_Pw_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw_s(lfsv_Pw_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sg_s(lfsu_Sg_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sg_s(lfsv_Sg_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh_s(lfsu_Sh_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh_s(lfsv_Sh_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_T_s(lfsu_T_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_T_s(lfsv_T_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XCH4_s(lfsu_XCH4_s.size());
@@ -781,10 +803,12 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_s(lfsu_XC_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_s(lfsv_XC_s.size());
 
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg_n(lfsu_Pg_n.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pg_n(lfsv_Pg_n.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pc_n(lfsu_Pc_n.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pc_n(lfsv_Pc_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_n(lfsu_Pw_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw_n(lfsv_Pw_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sg_n(lfsu_Sg_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sg_n(lfsv_Sg_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh_n(lfsu_Sh_n.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh_n(lfsv_Sh_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_T_n(lfsu_T_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_T_n(lfsv_T_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XCH4_n(lfsu_XCH4_n.size());
@@ -794,19 +818,23 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_n(lfsu_XC_n.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_n(lfsv_XC_n.size());
 
-    Dune::FieldVector<RF, dim> gradu_Pg_s(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pg_s(0.0);
-    Dune::FieldVector<RF, dim> gradu_Pc_s(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pc_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Pw_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Pw_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sg_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sg_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sh_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sh_s(0.0);
     Dune::FieldVector<RF, dim> gradu_T_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_s(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XC_s(0.0);
 
-    Dune::FieldVector<RF, dim> gradu_Pg_n(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pg_n(0.0);
-    Dune::FieldVector<RF, dim> gradu_Pc_n(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pc_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_Pw_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Pw_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sg_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sg_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sh_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sh_n(0.0);
     Dune::FieldVector<RF, dim> gradu_T_n(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_n(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_n(0.0);
@@ -835,14 +863,14 @@ public:
       //std::cout << "ip_global_s " << ip_global_s << "  local " << iplocal_s <<  "  ip position "<< ip.position() <<  std::endl;
       // evaluate basis functions
 
-      auto &phi_Pg_s = cache_Pg[order].evaluateFunction(iplocal_s, lfsu_Pg_s.finiteElement().localBasis());
-      auto &psi_Pg_s = cache_Pg[order].evaluateFunction(iplocal_s, lfsv_Pg_s.finiteElement().localBasis());
-      auto &phi_Sw_s = cache_Sw[order].evaluateFunction(iplocal_s, lfsu_Sw_s.finiteElement().localBasis());
-      auto &psi_Sw_s = cache_Sw[order].evaluateFunction(iplocal_s, lfsv_Sw_s.finiteElement().localBasis());
+      auto &phi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &psi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &phi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &psi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
       auto &phi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
       auto &psi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &phi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
-      auto &psi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
+      // auto &phi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
+      // auto &psi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
       auto &phi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
       auto &psi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
       auto &phi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
@@ -852,14 +880,14 @@ public:
       auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
-      auto &phi_Pg_n = cache_Pg[order].evaluateFunction(iplocal_n, lfsu_Pg_n.finiteElement().localBasis());
-      auto &psi_Pg_n = cache_Pg[order].evaluateFunction(iplocal_n, lfsv_Pg_n.finiteElement().localBasis());
-      auto &phi_Sw_n = cache_Sw[order].evaluateFunction(iplocal_n, lfsu_Sw_n.finiteElement().localBasis());
-      auto &psi_Sw_n = cache_Sw[order].evaluateFunction(iplocal_n, lfsv_Sw_n.finiteElement().localBasis());
+      auto &phi_Pw_n = cache_Pw[order].evaluateFunction(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
+      auto &psi_Pw_n = cache_Pw[order].evaluateFunction(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
+      auto &phi_Sg_n = cache_Sg[order].evaluateFunction(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
+      auto &psi_Sg_n = cache_Sg[order].evaluateFunction(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
       auto &phi_Sh_n = cache_Sh[order].evaluateFunction(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
       auto &psi_Sh_n = cache_Sh[order].evaluateFunction(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
-      auto &phi_Pc_n = cache_Pc[order].evaluateFunction(iplocal_n, lfsu_Pc_n.finiteElement().localBasis());
-      auto &psi_Pc_n = cache_Pc[order].evaluateFunction(iplocal_n, lfsv_Pc_n.finiteElement().localBasis());
+      // auto &phi_Pc_n = cache_Pc[order].evaluateFunction(iplocal_n, lfsu_Pc_n.finiteElement().localBasis());
+      // auto &psi_Pc_n = cache_Pc[order].evaluateFunction(iplocal_n, lfsv_Pc_n.finiteElement().localBasis());
       auto &phi_T_n = cache_T[order].evaluateFunction(iplocal_n, lfsu_T_n.finiteElement().localBasis());
       auto &psi_T_n = cache_T[order].evaluateFunction(iplocal_n, lfsv_T_n.finiteElement().localBasis());
       auto &phi_XCH4_n = cache_XCH4[order].evaluateFunction(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
@@ -870,21 +898,21 @@ public:
       auto &psi_XC_n = cache_XC[order].evaluateFunction(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
 
       
-      // evaluate Pg
-      RF Pg_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        Pg_s += x_s(lfsu_Pg_s, i) * phi_Pg_s[i];
-      RF Pg_n = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_n.size(); i++)
-        Pg_n += x_n(lfsu_Pg_n, i) * phi_Pg_n[i];
+      // evaluate Pw
+      RF Pw_s = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        Pw_s += x_s(lfsu_Pw_s, i) * phi_Pw_s[i];
+      RF Pw_n = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_n.size(); i++)
+        Pw_n += x_n(lfsu_Pw_n, i) * phi_Pw_n[i];
 
-      // evaluate Sw
-      RF Sw_s = 0.0;
-      for (size_type i = 0; i < lfsu_Sw_s.size(); i++)
-        Sw_s += x_s(lfsu_Sw_s, i) * phi_Sw_s[i];
-      RF Sw_n = 0.0;
-      for (size_type i = 0; i < lfsu_Sw_n.size(); i++)
-        Sw_n += x_n(lfsu_Sw_n, i) * phi_Sw_n[i];
+      // evaluate Sg
+      RF Sg_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        Sg_s += x_s(lfsu_Sg_s, i) * phi_Sg_s[i];
+      RF Sg_n = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_n.size(); i++)
+        Sg_n += x_n(lfsu_Sg_n, i) * phi_Sg_n[i];
 
       // evaluate Sh
       RF Sh_s = 0.0;
@@ -895,12 +923,12 @@ public:
         Sh_n += x_n(lfsu_Sh_n, i) * phi_Sh_n[i];
 
       // evaluate Pc
-      RF Pc_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        Pc_s += x_s(lfsu_Pc_s, i) * phi_Pc_s[i];
-      RF Pc_n = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_n.size(); i++)
-        Pc_n += x_n(lfsu_Pc_n, i) * phi_Pc_n[i];
+      // RF Pc_s = 0.0;
+      // for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
+      //   Pc_s += x_s(lfsu_Pc_s, i) * phi_Pc_s[i];
+      // RF Pc_n = 0.0;
+      // for (size_type i = 0; i < lfsu_Pc_n.size(); i++)
+      //   Pc_n += x_n(lfsu_Pc_n, i) * phi_Pc_n[i];
 
       // evaluate T
       RF T_s = 0.0;
@@ -934,17 +962,27 @@ public:
       for (size_type i = 0; i < lfsu_XC_n.size(); i++)
         XC_n += x_n(lfsu_XC_n, i) * phi_XC_n[i];
 
+      RF Sw_s = 1. - Sg_s - Sh_s;
+      RF Sw_n = 1. - Sg_n - Sh_n;
+
+
       // evaluate Pw
-      RF Pw_s = Pg_s - Pc_s;
-      RF Pw_n = Pg_n - Pc_n;
-      RF Peff_s = (Pg_s * (1. - Sw_s - Sh_s) + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * (1. - Sw_n - Sh_n) + Pw_n * Sw_n) / (1. - Sh_n);
+      RF Pc_s = property.hydraulicProperty.suctionPressure(Sw_s, Sh_s) / Xc_P * property.hydraulicProperty.PcSF1(Sh_s);
+      RF Pg_s = Pw_s + Pc_s;
+
+      RF Pc_n = property.hydraulicProperty.suctionPressure(Sw_n, Sh_n) / Xc_P * property.hydraulicProperty.PcSF1(Sh_n);
+      RF Pg_n = Pw_n + Pc_n;
+
+      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
+      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
 
       // evaluate gradient of basis functions
-      auto &js_Pg_s = cache_Pg[order].evaluateJacobian(iplocal_s, lfsu_Pg_s.finiteElement().localBasis());
-      auto &js_v_Pg_s = cache_Pg[order].evaluateJacobian(iplocal_s, lfsv_Pg_s.finiteElement().localBasis());
-      auto &js_Pc_s = cache_Pc[order].evaluateJacobian(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
-      auto &js_v_Pc_s = cache_Pc[order].evaluateJacobian(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
+      auto &js_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &js_v_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &js_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &js_v_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &js_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &js_v_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
       auto &js_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
       auto &js_v_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
       auto &js_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
@@ -954,10 +992,12 @@ public:
       auto &js_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       auto &js_v_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
-      auto &js_Pg_n = cache_Pg[order].evaluateJacobian(iplocal_n, lfsu_Pg_n.finiteElement().localBasis());
-      auto &js_v_Pg_n = cache_Pg[order].evaluateJacobian(iplocal_n, lfsv_Pg_n.finiteElement().localBasis());
-      auto &js_Pc_n = cache_Pc[order].evaluateJacobian(iplocal_n, lfsu_Pc_n.finiteElement().localBasis());
-      auto &js_v_Pc_n = cache_Pc[order].evaluateJacobian(iplocal_n, lfsv_Pc_n.finiteElement().localBasis());
+      auto &js_Pw_n = cache_Pw[order].evaluateJacobian(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
+      auto &js_v_Pw_n = cache_Pw[order].evaluateJacobian(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
+      auto &js_Sg_n = cache_Sg[order].evaluateJacobian(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
+      auto &js_v_Sg_n = cache_Sg[order].evaluateJacobian(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
+      auto &js_Sh_n = cache_Sh[order].evaluateJacobian(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
+      auto &js_v_Sh_n = cache_Sh[order].evaluateJacobian(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
       auto &js_T_n = cache_T[order].evaluateJacobian(iplocal_n, lfsu_T_n.finiteElement().localBasis());
       auto &js_v_T_n = cache_T[order].evaluateJacobian(iplocal_n, lfsv_T_n.finiteElement().localBasis());
       auto &js_XCH4_n = cache_XCH4[order].evaluateJacobian(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
@@ -969,14 +1009,18 @@ public:
 
       // transform gradients of shape functions to real element
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        jac.mv(js_Pg_s[i][0], gradphi_Pg_s[i]);
-      for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
-        jac.mv(js_v_Pg_s[i][0], gradpsi_Pg_s[i]);
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        jac.mv(js_Pc_s[i][0], gradphi_Pc_s[i]);
-      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
-        jac.mv(js_v_Pc_s[i][0], gradpsi_Pc_s[i]);
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        jac.mv(js_Pw_s[i][0], gradphi_Pw_s[i]);
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+        jac.mv(js_v_Pw_s[i][0], gradpsi_Pw_s[i]);
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        jac.mv(js_Sg_s[i][0], gradphi_Sg_s[i]);
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+        jac.mv(js_v_Sg_s[i][0], gradpsi_Sg_s[i]);
+      for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
+        jac.mv(js_Sh_s[i][0], gradphi_Sh_s[i]);
+      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+        jac.mv(js_v_Sh_s[i][0], gradpsi_Sh_s[i]);
       for (size_type i = 0; i < lfsu_T_s.size(); i++)
         jac.mv(js_T_s[i][0], gradphi_T_s[i]);
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
@@ -995,14 +1039,18 @@ public:
         jac.mv(js_v_XC_s[i][0], gradpsi_XC_s[i]);
 
       jac = geo_outside.jacobianInverseTransposed(iplocal_n);
-      for (size_type i = 0; i < lfsu_Pg_n.size(); i++)
-        jac.mv(js_Pg_n[i][0], gradphi_Pg_n[i]);
-      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
-        jac.mv(js_v_Pg_n[i][0], gradpsi_Pg_n[i]);
-      for (size_type i = 0; i < lfsu_Pc_n.size(); i++)
-        jac.mv(js_Pc_n[i][0], gradphi_Pc_n[i]);
-      for (size_type i = 0; i < lfsv_Pc_n.size(); i++)
-        jac.mv(js_v_Pc_n[i][0], gradpsi_Pc_n[i]);
+      for (size_type i = 0; i < lfsu_Pw_n.size(); i++)
+        jac.mv(js_Pw_n[i][0], gradphi_Pw_n[i]);
+      for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
+        jac.mv(js_v_Pw_n[i][0], gradpsi_Pw_n[i]);
+      for (size_type i = 0; i < lfsu_Sg_n.size(); i++)
+        jac.mv(js_Sg_n[i][0], gradphi_Sg_n[i]);
+      for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
+        jac.mv(js_v_Sg_n[i][0], gradpsi_Sg_n[i]);
+      for (size_type i = 0; i < lfsu_Sh_n.size(); i++)
+        jac.mv(js_Sh_n[i][0], gradphi_Sh_n[i]);
+      for (size_type i = 0; i < lfsv_Sh_n.size(); i++)
+        jac.mv(js_v_Sh_n[i][0], gradpsi_Sh_n[i]);
       for (size_type i = 0; i < lfsu_T_n.size(); i++)
         jac.mv(js_T_n[i][0], gradphi_T_n[i]);
       for (size_type i = 0; i < lfsv_T_n.size(); i++)
@@ -1020,21 +1068,29 @@ public:
       for (size_type i = 0; i < lfsv_XC_n.size(); i++)
         jac.mv(js_v_XC_n[i][0], gradpsi_XC_n[i]);
 
-      // compute gradient of Pg
-      gradu_Pg_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        gradu_Pg_s.axpy(x_s(lfsu_Pg_s, i), gradphi_Pg_s[i]);
-      gradu_Pg_n = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_n.size(); i++)
-        gradu_Pg_n.axpy(x_s(lfsu_Pg_n, i), gradphi_Pg_n[i]);
+      // compute gradient of Pw
+      gradu_Pw_s = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        gradu_Pw_s.axpy(x_s(lfsu_Pw_s, i), gradphi_Pw_s[i]);
+      gradu_Pw_n = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_n.size(); i++)
+        gradu_Pw_n.axpy(x_s(lfsu_Pw_n, i), gradphi_Pw_n[i]);
 
-      // compute gradient of Pc
-      gradu_Pc_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        gradu_Pc_s.axpy(x_s(lfsu_Pc_s, i), gradphi_Pc_s[i]);
-      gradu_Pc_n = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_n.size(); i++)
-        gradu_Pc_n.axpy(x_n(lfsu_Pc_n, i), gradphi_Pc_n[i]);
+      // compute gradient of Sg
+      gradu_Sg_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        gradu_Sg_s.axpy(x_s(lfsu_Sg_s, i), gradphi_Sg_s[i]);
+      gradu_Sg_n = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_n.size(); i++)
+        gradu_Sg_n.axpy(x_n(lfsu_Sg_n, i), gradphi_Sg_n[i]);
+
+      // compute gradient of Sh
+      gradu_Sh_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
+        gradu_Sh_s.axpy(x_s(lfsu_Sh_s, i), gradphi_Sh_s[i]);
+      gradu_Sh_n = 0.0;
+      for (size_type i = 0; i < lfsu_Sh_n.size(); i++)
+        gradu_Sh_n.axpy(x_n(lfsu_Sh_n, i), gradphi_Sh_n[i]);
 
       // compute gradient of T
       gradu_T_s = 0.0;
@@ -1075,13 +1131,19 @@ public:
       K_n *= 1. / Xc_K;
       K_n *= Xc_conv_m;
 
-      // compute K * gradient of Pg
-      K_s.mv(gradu_Pg_s, Kgradu_Pg_s);
-      K_n.mv(gradu_Pg_n, Kgradu_Pg_n);
+      auto coeff1_s = -property.hydraulicProperty.Pentry()*Pc_s/1.2;
+      auto coeff1_n = -property.hydraulicProperty.Pentry()*Pc_n/1.2;
+      // compute K * gradient of Pw
+      K_s.mv(gradu_Pw_s, Kgradu_Pw_s);
+      K_n.mv(gradu_Pw_n, Kgradu_Pw_n);
 
-      // compute K * gradient of Pc
-      K_s.mv(gradu_Pc_s, Kgradu_Pc_s);
-      K_n.mv(gradu_Pc_n, Kgradu_Pc_n);
+      // compute K * gradient of Sg
+      K_s.mv(gradu_Sg_s, Kgradu_Sg_s);
+      K_n.mv(gradu_Sg_n, Kgradu_Sg_n);
+
+      // compute K * gradient of Sh
+      K_s.mv(gradu_Sh_s, Kgradu_Sh_s);
+      K_n.mv(gradu_Sh_n, Kgradu_Sh_n);
 
       auto n_F = ig.centerUnitOuterNormal();
       Dune::FieldVector<RF, dim> Kn_F_s;
@@ -1091,8 +1153,9 @@ public:
 
       for (int i = 0; i < dim; i++)
       {
-        v_g[i] = (omega_s * Kgradu_Pg_s[i] + omega_n * Kgradu_Pg_n[i]);
-        v_w[i] = (omega_s * (Kgradu_Pg_s[i] - Kgradu_Pc_s[i]) + omega_n * (Kgradu_Pg_n[i] - Kgradu_Pc_n[i]));
+        v_g[i] = (omega_s * (Kgradu_Pw_s[i] + (coeff1_s*(-Kgradu_Sg_s[i]/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s[i]))) 
+                  + omega_n * (Kgradu_Pw_n[i] + (coeff1_n*(-Kgradu_Sg_n[i]/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*Kgradu_Sh_n[i]))));
+        v_w[i] = (omega_s * (Kgradu_Pw_s[i] ) + omega_n * (Kgradu_Pw_n[i] ));
       }
 
       double normalflux_g = -1. * (v_g * n_F_local);
@@ -1129,7 +1192,6 @@ public:
       auto krN_s = property.hydraulicProperty.krNW(Sw_s, Sh_s) / (property.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
       
       //  adding terms regarding components
-      auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = property.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * property.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
       auto DCH4_w_s = tau_s * por_s * property.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pg_s * Xc_P);
@@ -1149,7 +1211,7 @@ public:
       auto kth_w_s = property.water.thermalConductivity(T_s * Xc_T, Pw_s * Xc_P) / Xc_kth;
       auto kth_h_s = property.hydrate.thermalConductivity(T_s * Xc_T, Peff_s * Xc_P) / Xc_kth;
       auto kth_s_s = property.soil.thermalConductivity(T_s * Xc_T, Peff_s * Xc_P) / Xc_kth;
-      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ((1. - Sw_s - Sh_s) * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * (Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
       kth_eff_s *= Xc_diff_h;
 
       auto por_n = property.soil.SedimentPorosity(ip_global_n);
@@ -1159,7 +1221,7 @@ public:
       auto krN_n = property.hydraulicProperty.krNW(Sw_n, Sh_n) / (property.methane.dynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) / Xc_mu);
       
       //  adding terms regarding components
-      auto Sg_n = 1. - Sw_n - Sh_n;
+      
       auto tau_n = property.soil.tortuosity(por_n);
       auto DH2O_g_n = tau_n * por_n * property.mixture.binaryDiffCoeffInGas(T_n * Xc_T, Pg_n * Xc_P);
       auto DCH4_w_n = tau_n * por_n * property.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
@@ -1179,7 +1241,7 @@ public:
       auto kth_w_n = property.water.thermalConductivity(T_n * Xc_T, Pw_n * Xc_P) / Xc_kth;
       auto kth_h_n = property.hydrate.thermalConductivity(T_n * Xc_T, Peff_n * Xc_P) / Xc_kth;
       auto kth_s_n = property.soil.thermalConductivity(T_n * Xc_T, Peff_n * Xc_P) / Xc_kth;
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ((1. - Sw_n - Sh_n) * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       kth_eff_n *= Xc_diff_h;
 
       auto krN = omega_s * krN_s + omega_n * krN_n;
@@ -1202,57 +1264,57 @@ public:
       auto Diffcoeff_m_w_s = rho_w_s * Sw_s ;
       auto Diffcoeff_m_w_n = rho_w_n * Sw_n ;
       
-      double term_conv_m_g = -krN * (omega_s * rho_g_s * YCH4_s * (Kgradu_Pg_s * n_F_local) 
-                                    + omega_n * rho_g_n * YCH4_n * (Kgradu_Pg_n * n_F_local));
-      double term_conv_m_w = -krW * (omega_s * rho_w_s * XCH4_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) 
-                                    + omega_n * rho_w_n * XCH4_n * ((Kgradu_Pg_n * n_F_local) - (Kgradu_Pc_n * n_F_local)));
+      double term_conv_m_g = -krN * (omega_s * rho_g_s * YCH4_s * ((Kgradu_Pw_s+ (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local) 
+                                    + omega_n * rho_g_n * YCH4_n * ((Kgradu_Pw_n+ (coeff1_n*(-Kgradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*Kgradu_Sh_n)) ) * n_F_local));
+      double term_conv_m_w = -krW * (omega_s * rho_w_s * XCH4_s * (Kgradu_Pw_s * n_F_local) 
+                                    + omega_n * rho_w_n * XCH4_n * (Kgradu_Pw_n * n_F_local));
 
-      double term_diffusion_m = term_conv_m_g + term_conv_m_w + DH2O_g * (omega_s * (Diffcoeff_m_g_p_s * (gradu_Pg_s * n_F_local) 
+      double term_diffusion_m = term_conv_m_g + term_conv_m_w + DH2O_g * (omega_s * (Diffcoeff_m_g_p_s * ((gradu_Pw_s + (coeff1_s*(-gradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*gradu_Sh_s))) * n_F_local) 
                                               + Diffcoeff_m_g_x_s * (gradu_XCH4_s * n_F_local))
-                                              + omega_n * (Diffcoeff_m_g_p_n * (gradu_Pg_n * n_F_local) 
+                                              + omega_n * (Diffcoeff_m_g_p_n * ((gradu_Pw_n + (coeff1_n*(-gradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*gradu_Sh_n))) * n_F_local) 
                                               + Diffcoeff_m_g_x_n * (gradu_XCH4_n * n_F_local)))
                                               + DCH4_w * (omega_s * Diffcoeff_m_w_s * (gradu_XCH4_s * n_F_local)
                                               + omega_n * Diffcoeff_m_w_n * (gradu_XCH4_n * n_F_local)) ;
 
       double term_nipg_g = theta_g * (Pg_s - Pg_n);
-      double term_nipg_w = theta_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+      double term_nipg_w = theta_w * (Pw_s - Pw_n);
       double term_nipg_m_x = theta_x * (XCH4_s - XCH4_n);
 
-      double term_penalty_g = penalty_factor_g * (Pg_s - Pg_n);
+      double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n);
       // diffusion term
-      for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pg_s, i, term_diffusion_m * psi_Pg_s[i] * factor);
+        r_s.accumulate(lfsv_Pw_s, i, term_diffusion_m * psi_Pw_s[i] * factor);
       }
-      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pg_n, i, term_diffusion_m * -psi_Pg_n[i] * factor);
+        r_n.accumulate(lfsv_Pw_n, i, term_diffusion_m * -psi_Pw_n[i] * factor);
       }
       // (non-)symmetric IP term
-      for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pg_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YCH4_s * (Kn_F_s * gradpsi_Pg_s[i]) 
-                                      + term_nipg_w * krW * omega_s * rho_w_s * XCH4_s  * (Kn_F_s * gradpsi_Pg_s[i])
+        r_s.accumulate(lfsv_Pw_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YCH4_s * (Kn_F_s * gradpsi_Pw_s[i]) 
+                                      + term_nipg_w * krW * omega_s * rho_w_s * XCH4_s  * (Kn_F_s * gradpsi_Pw_s[i])
                                       + omega_s * (term_nipg_g * DH2O_g *  Diffcoeff_m_g_p_s 
                                       + term_nipg_m_x * DH2O_g * Diffcoeff_m_g_x_s
-                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_s) * (n_F_local* gradpsi_Pg_s[i])) * factor);
+                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_s) * (n_F_local* gradpsi_Pw_s[i])) * factor);
       }
-      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pg_n, i, (term_nipg_g * krN * omega_n * rho_g_n * YCH4_n * (Kn_F_n * gradpsi_Pg_n[i]) 
-                                      + term_nipg_w * krW * omega_n * rho_w_n * XCH4_n  * (Kn_F_n * gradpsi_Pg_n[i])
+        r_n.accumulate(lfsv_Pw_n, i, (term_nipg_g * krN * omega_n * rho_g_n * YCH4_n * (Kn_F_n * gradpsi_Pw_n[i]) 
+                                      + term_nipg_w * krW * omega_n * rho_w_n * XCH4_n  * (Kn_F_n * gradpsi_Pw_n[i])
                                       + omega_n * (term_nipg_g * DH2O_g *  Diffcoeff_m_g_p_n 
                                       + term_nipg_m_x * DH2O_g * Diffcoeff_m_g_x_n
-                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_n) * (n_F_local* gradpsi_Pg_n[i])) * factor);
+                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_n) * (n_F_local* gradpsi_Pw_n[i])) * factor);
       }
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pg_s, i, term_penalty_g * psi_Pg_s[i] * factor);
+        r_s.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
-      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pg_n, i, term_penalty_g * -psi_Pg_n[i] * factor);
+        r_n.accumulate(lfsv_Pw_n, i, term_penalty_w * -psi_Pw_n[i] * factor);
       }
       
       // Salt
@@ -1263,8 +1325,8 @@ public:
       auto Diffcoeff_c_w_n = rho_w_n * Sw_n ;
       
       
-      double term_conv_c_w = -krW * (omega_s * rho_w_s * XC_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) 
-                                    + omega_n * rho_w_n * XC_n * ((Kgradu_Pg_n * n_F_local) - (Kgradu_Pc_n * n_F_local)));
+      double term_conv_c_w = -krW * (omega_s * rho_w_s * XC_s * Kgradu_Pw_s * n_F_local  
+                                    + omega_n * rho_w_n * XC_n * Kgradu_Pw_n * n_F_local);
 
       double term_diffusion_c = term_conv_c_w + DC_w * (omega_s * Diffcoeff_c_w_s * (gradu_XC_s * n_F_local)
                                               + omega_n * Diffcoeff_c_w_n * (gradu_XC_n * n_F_local)) ;
@@ -1288,9 +1350,9 @@ public:
         r_s.accumulate(lfsv_XC_s, i, ( term_nipg_w * krW * omega_s * rho_w_s * XC_s  * (Kn_F_s * gradpsi_XC_s[i])
                                       + omega_s * ( term_nipg_c_x * DC_w * Diffcoeff_c_w_s) * (n_F_local* gradpsi_XC_s[i])) * factor);
       }
-      for (size_type i = 0; i < lfsv_Pg_n.size(); i++)
+      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pg_n, i, (term_nipg_w * krW * omega_n * rho_w_n * XC_n  * (Kn_F_n * gradpsi_XC_n[i])
+        r_n.accumulate(lfsv_XC_n, i, (term_nipg_w * krW * omega_n * rho_w_n * XC_n  * (Kn_F_n * gradpsi_XC_n[i])
                                       + omega_n * ( term_nipg_c_x * DC_w * Diffcoeff_c_w_n) * (n_F_local* gradpsi_XC_n[i])) * factor);
       }
       // standard IP term integral
@@ -1315,71 +1377,71 @@ public:
       auto Diffcoeff_w_g_s = rho_g_s * Sg_s ;
       auto Diffcoeff_w_g_n = rho_g_n * Sg_n ;
 
-      double term_conv_w_g = -krN * ( omega_s * rho_g_s * YH2O_s * (Kgradu_Pg_s * n_F_local) 
-                                    + omega_n * rho_g_n * YH2O_n * (Kgradu_Pg_n * n_F_local));
+      double term_conv_w_g = -krN * ( omega_s * rho_g_s * YH2O_s * (Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local 
+                                    + omega_n * rho_g_n * YH2O_n * (Kgradu_Pw_n + (coeff1_n*(-Kgradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*Kgradu_Sh_n))) * n_F_local);
 
-      double term_conv_w_w = -krW * ( omega_s * rho_w_s * XH2O_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) 
-                                    + omega_n * rho_w_n * XH2O_n * ((Kgradu_Pg_n * n_F_local) - (Kgradu_Pc_n * n_F_local)));
+      double term_conv_w_w = -krW * ( omega_s * rho_w_s * XH2O_s * Kgradu_Pw_s * n_F_local 
+                                    + omega_n * rho_w_n * XH2O_n * Kgradu_Pw_n * n_F_local );
 
       double term_diffusion_w = term_conv_w_g + term_conv_w_w + DH2O_g * (omega_s * Diffcoeff_w_g_s * (gradu_YH2O_s * n_F_local) 
                               + omega_n * Diffcoeff_w_g_n * (gradu_YH2O_n * n_F_local)) 
-                              + DCH4_w * (omega_s * (Diffcoeff_w_w_p_s * (gradu_Pg_s * n_F_local)
+                              + DCH4_w * (omega_s * (Diffcoeff_w_w_p_s * ((gradu_Pw_s  + (coeff1_s*(-gradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*gradu_Sh_s)) ) * n_F_local)
                               + Diffcoeff_w_w_y_s * (gradu_YH2O_s * n_F_local))
-                              + omega_n * (Diffcoeff_w_w_p_n * (gradu_Pg_n * n_F_local)
+                              + omega_n * (Diffcoeff_w_w_p_n * ((gradu_Pw_n  + (coeff1_n*(-gradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*gradu_Sh_n)) ) * n_F_local)
                               + Diffcoeff_w_w_y_n * (gradu_YH2O_n * n_F_local)));
 
 
       
       double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
-      double term_penalty_w = penalty_factor_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+      double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
       // diffusion term
-      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pc_s, i, term_diffusion_w * psi_Pc_s[i] * factor);
+        r_s.accumulate(lfsv_Sg_s, i, term_diffusion_w * psi_Sg_s[i] * factor);
       }
 
-      for (size_type i = 0; i < lfsv_Pc_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pc_n, i, term_diffusion_w * -psi_Pc_n[i] * factor);
+        r_n.accumulate(lfsv_Sg_n, i, term_diffusion_w * -psi_Sg_n[i] * factor);
       }
       // (non-)symmetric IP term
                                       
-      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pc_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YH2O_s * (Kn_F_s * gradpsi_Pc_s[i]) 
-                                      + term_nipg_w * krW * omega_s * rho_w_s * XH2O_s  * (Kn_F_s * gradpsi_Pc_s[i])
+        r_s.accumulate(lfsv_Sg_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YH2O_s * (Kn_F_s * gradpsi_Sg_s[i]) 
+                                      + term_nipg_w * krW * omega_s * rho_w_s * XH2O_s  * (Kn_F_s * gradpsi_Sg_s[i])
                                       + omega_s * (term_nipg_g * DCH4_w *  Diffcoeff_w_w_p_s 
                                       + term_nipg_w_y * DCH4_w * Diffcoeff_w_w_y_s
-                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_s) * (n_F_local* gradpsi_Pc_s[i])) * factor);
+                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_s) * (n_F_local* gradpsi_Sg_s[i])) * factor);
       }
-      for (size_type i = 0; i < lfsv_Pc_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pc_n, i, (term_nipg_g * krN * omega_n * rho_g_n * YH2O_n * (Kn_F_n * gradpsi_Pc_n[i]) 
-                                      + term_nipg_w * krW * omega_n * rho_w_n * XH2O_n  * (Kn_F_n * gradpsi_Pc_n[i])
+        r_n.accumulate(lfsv_Sg_n, i, (term_nipg_g * krN * omega_n * rho_g_n * YH2O_n * (Kn_F_n * gradpsi_Sg_n[i]) 
+                                      + term_nipg_w * krW * omega_n * rho_w_n * XH2O_n  * (Kn_F_n * gradpsi_Sg_n[i])
                                       + omega_n * (term_nipg_g * DCH4_w *  Diffcoeff_w_w_p_n 
                                       + term_nipg_w_y * DCH4_w * Diffcoeff_w_w_y_n
-                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_n) * (n_F_local* gradpsi_Pc_n[i])) * factor);
+                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_n) * (n_F_local* gradpsi_Sg_n[i])) * factor);
       }
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pc_s, i, term_penalty_w * psi_Pc_s[i] * factor);
+        r_s.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
       }
-      for (size_type i = 0; i < lfsv_Pc_n.size(); i++)
+      for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pc_n, i, term_penalty_w * -psi_Pc_n[i] * factor);
+        r_n.accumulate(lfsv_Sg_n, i, term_penalty_sg * -psi_Sg_n[i] * factor);
       }
 
-      double term_penalty_sw = penalty_factor_s * (Sw_s - Sw_n);
+      //double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_Sw_s.size(); i++)
-      {
-        r_s.accumulate(lfsv_Sw_s, i, term_penalty_sw * psi_Sw_s[i] * factor);
-      }
-      for (size_type i = 0; i < lfsv_Sw_n.size(); i++)
-      {
-        r_n.accumulate(lfsv_Sw_n, i, term_penalty_sw * -psi_Sw_n[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+      // {
+      //   r_s.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
+      // }
+      // for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
+      // {
+      //   r_n.accumulate(lfsv_Sg_n, i, term_penalty_sg * -psi_Sg_n[i] * factor);
+      // }
 
       double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
       // standard IP term integral
@@ -1414,8 +1476,10 @@ public:
         r_n.accumulate(lfsv_YH2O_n, i, term_penalty_YH2O * -psi_YH2O_n[i] * factor);
       }
 
-      double term_diffusion_T_1 = -h_g * krN * (omega_s * rho_g_s * (Kgradu_Pg_s * n_F_local) + omega_n * rho_g_n * (Kgradu_Pg_n * n_F_local));
-      double term_diffusion_T_2 = -h_w * krW * (omega_s * rho_w_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)) + omega_n * rho_w_n * ((Kgradu_Pg_n * n_F_local) - (Kgradu_Pc_n * n_F_local)));
+      double term_diffusion_T_1 = -h_g * krN * (omega_s * rho_g_s * ((Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local) 
+                                  + omega_n * rho_g_n * ((Kgradu_Pw_n + (coeff1_n*(-Kgradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*Kgradu_Sh_n))) * n_F_local));
+      double term_diffusion_T_2 = -h_w * krW * (omega_s * rho_w_s * (Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local 
+                                                + omega_n * rho_w_n * (Kgradu_Pw_n + (coeff1_n*(-Kgradu_Sg_n/Sw_n + (-1./Sw_n+1.2/(1.-Sh_n))*Kgradu_Sh_n))) * n_F_local);
       double term_diffusion_T_3 = -kth_eff * (omega_s * (gradu_T_s * n_F_local) + omega_n * (gradu_T_n * n_F_local));
       double term_diffusion_T = term_diffusion_T_1 + term_diffusion_T_2 + term_diffusion_T_3;
       double term_nipg_T = theta_T * (T_s - T_n);
@@ -1461,16 +1525,16 @@ public:
   {
     // subspaces
     //Gas pressure
-    const auto &lfsv_Pg_s = lfsv.template child<Indices::PVId_Pg>();
-    const auto &lfsu_Pg_s = lfsu.template child<Indices::PVId_Pg>();
+    const auto &lfsv_Pw_s = lfsv.template child<Indices::PVId_Pw>();
+    const auto &lfsu_Pw_s = lfsu.template child<Indices::PVId_Pw>();
 
     //Capillary Pressure
-    const auto &lfsv_Pc_s = lfsv.template child<Indices::PVId_Pc>();
-    const auto &lfsu_Pc_s = lfsu.template child<Indices::PVId_Pc>();
+    // const auto &lfsv_Pc_s = lfsv.template child<Indices::PVId_Pc>();
+    // const auto &lfsu_Pc_s = lfsu.template child<Indices::PVId_Pc>();
 
     //Water Saturation
-    const auto &lfsv_Sw_s = lfsv.template child<Indices::PVId_Sw>();
-    const auto &lfsu_Sw_s = lfsu.template child<Indices::PVId_Sw>();
+    const auto &lfsv_Sg_s = lfsv.template child<Indices::PVId_Sg>();
+    const auto &lfsu_Sg_s = lfsu.template child<Indices::PVId_Sg>();
 
     //Hydrate Saturation
     const auto &lfsv_Sh_s = lfsv.template child<Indices::PVId_Sh>();
@@ -1493,15 +1557,15 @@ public:
     const auto &lfsu_XC_s = lfsu.template child<Indices::PVId_C>();
 
     // define types
-    using RF = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::FiniteElementType::
+    using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
         Traits::LocalBasisType::Traits::RangeFieldType;
-    using size_type = typename LFSU::template Child<Indices::PVId_Pg>::Type::Traits::SizeType;
+    using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
     const int dimension = GV::dimension;
     const int dim = IG::Entity::dimension;
-    const int order = std::max(lfsu_Pg_s.finiteElement().localBasis().order(),
-                               lfsv_Pg_s.finiteElement().localBasis().order());
+    const int order = std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
+                               lfsv_Pw_s.finiteElement().localBasis().order());
 
     // References to inside and outside cells
     const auto &cell_inside = ig.inside();
@@ -1538,7 +1602,7 @@ public:
     //        }
 
     // get polynomial degree
-    auto degree = lfsv_Pg_s.finiteElement().localBasis().order();
+    auto degree = lfsv_Pw_s.finiteElement().localBasis().order();
 
     // penalty factor
     auto penalty_factor_g = (alpha_g / h_F) * harmonic_average * degree * (degree + dim - 1);
@@ -1549,10 +1613,12 @@ public:
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
     // Initialize vectors outside for loop
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pg_s(lfsu_Pg_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pg_s(lfsv_Pg_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pc_s(lfsu_Pc_s.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pc_s(lfsv_Pc_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_s(lfsu_Pw_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw_s(lfsv_Pw_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sg_s(lfsu_Sg_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sg_s(lfsv_Sg_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh_s(lfsu_Sh_s.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh_s(lfsv_Sh_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_T_s(lfsu_T_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_T_s(lfsv_T_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XCH4_s(lfsu_XCH4_s.size());
@@ -1562,10 +1628,12 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XC_s(lfsu_XC_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC_s(lfsv_XC_s.size());
 
-    Dune::FieldVector<RF, dim> gradu_Pg_s(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pg_s(0.0);
-    Dune::FieldVector<RF, dim> gradu_Pc_s(0.0);
-    Dune::FieldVector<RF, dim> Kgradu_Pc_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Pw_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Pw_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sg_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sg_s(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sh_s(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sh_s(0.0);
     Dune::FieldVector<RF, dim> gradu_T_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4_s(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O_s(0.0);
@@ -1601,32 +1669,32 @@ public:
       //auto bcvalue = property.problemSpecs.ProblemBCValues(ip_global_s, *(time));
 
       // evaluate basis functions
-      auto &psi_Pg_s = cache_Pg[order].evaluateFunction(iplocal_s, lfsv_Pg_s.finiteElement().localBasis());
-      auto &psi_Sw_s = cache_Sw[order].evaluateFunction(iplocal_s, lfsv_Sw_s.finiteElement().localBasis());
+      auto &psi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &psi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
       auto &psi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &psi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
+      //auto &psi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
       auto &psi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
       auto &psi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &psi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
       auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
-      if (bctype[Indices::PVId_Pg] == Indices::BCId_neumann)
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
       {
 
-        double flux_g = bcvalue[Indices::PVId_Pg];
-        for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+        double flux_w = bcvalue[Indices::PVId_Pw];
+        for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
         {
-          r.accumulate(lfsv_Pg_s, i, flux_g * psi_Pg_s[i] * factor);
+          r.accumulate(lfsv_Pw_s, i, flux_w * psi_Pw_s[i] * factor);
         }
       }
 
-      if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
+      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
       {
 
-        double flux_w = bcvalue[Indices::PVId_Pc];
-        for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+        double flux_w = bcvalue[Indices::PVId_Sg];
+        for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, flux_w * psi_Pc_s[i] * factor);
+          r.accumulate(lfsv_Sg_s, i, flux_w * psi_Sg_s[i] * factor);
         }
       }
 
@@ -1640,8 +1708,8 @@ public:
         }
       }
 
-      if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann and
-          bctype[Indices::PVId_Pg] == Indices::BCId_neumann and
+      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann and
+          bctype[Indices::PVId_Pw] == Indices::BCId_neumann and
           bctype[Indices::PVId_XCH4] == Indices::BCId_neumann and
           bctype[Indices::PVId_C] == Indices::BCId_neumann and
           bctype[Indices::PVId_YH2O] == Indices::BCId_neumann)
@@ -1649,28 +1717,28 @@ public:
         continue;
       }
 
-      auto &phi_Pg_s = cache_Pg[order].evaluateFunction(iplocal_s, lfsu_Pg_s.finiteElement().localBasis());
-      auto &phi_Sw_s = cache_Sw[order].evaluateFunction(iplocal_s, lfsu_Sw_s.finiteElement().localBasis());
+      auto &phi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &phi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
       auto &phi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
-      auto &phi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
+      //auto &phi_Pc_s = cache_Pc[order].evaluateFunction(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
       auto &phi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
       auto &phi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
       auto &phi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
       auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       
 
-      // evaluate Pg
-      RF Pg_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        Pg_s += x(lfsu_Pg_s, i) * phi_Pg_s[i];
-      RF Pg_n = 0.0;
-      if (bctype[Indices::PVId_Pg] == Indices::BCId_neumann)
+      // evaluate Pw
+      RF Pw_s = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        Pw_s += x(lfsu_Pw_s, i) * phi_Pw_s[i];
+      RF Pw_n = 0.0;
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
       {
-        Pg_n = Pg_s;
+        Pw_n = Pw_s;
       }
-      else if (bctype[Indices::PVId_Pg] == Indices::BCId_dirichlet)
+      else if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
-        Pg_n = bcvalue[Indices::PVId_Pg] / Xc_P;
+        Pw_n = bcvalue[Indices::PVId_Pw] / Xc_P;
       }
 
       // evaluate Sh
@@ -1679,36 +1747,36 @@ public:
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i];
       RF Sh_n = Sh_s;
 
-      // evaluate Sw
-      RF Sw_s = 0.0;
-      for (size_type i = 0; i < lfsu_Sw_s.size(); i++)
-        Sw_s += x(lfsu_Sw_s, i) * phi_Sw_s[i];
-      RF Sw_n = 0.0;
-      if (bctype[Indices::PVId_Sw] == Indices::BCId_neumann)
+      // evaluate Sg
+      RF Sg_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
+      RF Sg_n = 0.0;
+      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
       {
-        Sw_n = Sw_s;
+        Sg_n = Sg_s;
       }
-      else if (bctype[Indices::PVId_Sw] == Indices::BCId_dirichlet)
+      else if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
       {
-        Sw_n=bcvalue[Indices::PVId_Sw];
-        //Sw_n = Sw_s;
+        Sg_n=bcvalue[Indices::PVId_Sg];
+        //Sg_n = Sg_s;
       }
 
       // evaluate Pc
-      RF Pc_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        Pc_s += x(lfsu_Pc_s, i) * phi_Pc_s[i];
-      RF Pc_n = 0.;
-      if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
-      {
-        Pc_n = Pc_s;
-      }
-      else if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
-      {
-        //auto PcSF1_n = paramclass.hydraulicProperty.PcSF1(Sh_n);
-        //Pc_n=paramclass.hydraulicProperty.suctionPressure(Sw_n,Sh_n)*PcSF1_n;
-        Pc_n = bcvalue[Indices::PVId_Pc] * property.hydraulicProperty.PcSF1(Sh_n) / Xc_P;
-      }
+      // RF Pc_s = 0.0;
+      // for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
+      //   Pc_s += x(lfsu_Pc_s, i) * phi_Pc_s[i];
+      // RF Pc_n = 0.;
+      // if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
+      // {
+      //   Pc_n = Pc_s;
+      // }
+      // else if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
+      // {
+      //   //auto PcSF1_n = paramclass.hydraulicProperty.PcSF1(Sh_n);
+      //   //Pc_n=paramclass.hydraulicProperty.suctionPressure(Sw_n,Sh_n)*PcSF1_n;
+      //   Pc_n = bcvalue[Indices::PVId_Pc] * property.hydraulicProperty.PcSF1(Sh_n) / Xc_P;
+      // }
 
       // evaluate T
       RF T_s = 0.0;
@@ -1766,17 +1834,25 @@ public:
         XC_n = bcvalue[Indices::PVId_C] / Xc_X;
       }
 
+      RF Sw_s = 1. - Sg_s - Sh_s;
+      RF Sw_n = 1. - Sg_n - Sh_n;
       // evaluate Pw
-      RF Pw_s = Pg_s - Pc_s;
-      RF Pw_n = Pg_n - Pc_n;
-      RF Peff_s = (Pg_s * (1. - Sw_s - Sh_s) + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * (1. - Sw_n - Sh_n) + Pw_n * Sw_n) / (1. - Sh_n);
+      RF Pc_s = property.hydraulicProperty.suctionPressure(Sw_s, Sh_s) / Xc_P * property.hydraulicProperty.PcSF1(Sh_s);
+      RF Pg_s = Pw_s + Pc_s;
+
+      RF Pc_n = property.hydraulicProperty.suctionPressure(Sw_n, Sh_n) / Xc_P * property.hydraulicProperty.PcSF1(Sh_n);
+      RF Pg_n = Pw_n + Pc_n;
+
+      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
+      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
 
       // evaluate gradient of basis functions
-      auto &js_Pg_s = cache_Pg[order].evaluateJacobian(iplocal_s, lfsu_Pg_s.finiteElement().localBasis());
-      auto &js_v_Pg_s = cache_Pg[order].evaluateJacobian(iplocal_s, lfsv_Pg_s.finiteElement().localBasis());
-      auto &js_Pc_s = cache_Pc[order].evaluateJacobian(iplocal_s, lfsu_Pc_s.finiteElement().localBasis());
-      auto &js_v_Pc_s = cache_Pc[order].evaluateJacobian(iplocal_s, lfsv_Pc_s.finiteElement().localBasis());
+      auto &js_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &js_v_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &js_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &js_v_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &js_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &js_v_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
       auto &js_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
       auto &js_v_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
       auto &js_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
@@ -1790,14 +1866,18 @@ public:
 
       // transform gradients of shape functions to real element
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        jac.mv(js_Pg_s[i][0], gradphi_Pg_s[i]);
-      for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
-        jac.mv(js_v_Pg_s[i][0], gradpsi_Pg_s[i]);
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        jac.mv(js_Pc_s[i][0], gradphi_Pc_s[i]);
-      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
-        jac.mv(js_v_Pc_s[i][0], gradpsi_Pc_s[i]);
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        jac.mv(js_Pw_s[i][0], gradphi_Pw_s[i]);
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+        jac.mv(js_v_Pw_s[i][0], gradpsi_Pw_s[i]);
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        jac.mv(js_Sg_s[i][0], gradphi_Sg_s[i]);
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+        jac.mv(js_v_Sg_s[i][0], gradpsi_Sg_s[i]);
+      for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
+        jac.mv(js_Sh_s[i][0], gradphi_Sh_s[i]);
+      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+        jac.mv(js_v_Sh_s[i][0], gradpsi_Sh_s[i]);
       for (size_type i = 0; i < lfsu_T_s.size(); i++)
         jac.mv(js_T_s[i][0], gradphi_T_s[i]);
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
@@ -1815,15 +1895,20 @@ public:
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
         jac.mv(js_v_XC_s[i][0], gradpsi_XC_s[i]);
 
-      // compute gradient of Pg
-      gradu_Pg_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pg_s.size(); i++)
-        gradu_Pg_s.axpy(x(lfsu_Pg_s, i), gradphi_Pg_s[i]);
+      // compute gradient of Pw
+      gradu_Pw_s = 0.0;
+      for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
+        gradu_Pw_s.axpy(x(lfsu_Pw_s, i), gradphi_Pw_s[i]);
 
-      // compute gradient of Pc
-      gradu_Pc_s = 0.0;
-      for (size_type i = 0; i < lfsu_Pc_s.size(); i++)
-        gradu_Pc_s.axpy(x(lfsu_Pc_s, i), gradphi_Pc_s[i]);
+      // compute gradient of Sg
+      gradu_Sg_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
+        gradu_Sg_s.axpy(x(lfsu_Sg_s, i), gradphi_Sg_s[i]);
+        
+      // compute gradient of Sh
+      gradu_Sh_s = 0.0;
+      for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
+        gradu_Sh_s.axpy(x(lfsu_Sh_s, i), gradphi_Sh_s[i]);
 
       // compute gradient of T
       gradu_T_s = 0.0;
@@ -1855,16 +1940,21 @@ public:
       Dune::FieldVector<RF, dim> Kn_F_s;
       K_s.mv(n_F, Kn_F_s);
 
-      // compute K * gradient of Pg
-      K_s.mv(gradu_Pg_s, Kgradu_Pg_s);
+      // compute K * gradient of Pw
+      K_s.mv(gradu_Pw_s, Kgradu_Pw_s);
 
-      // compute K * gradient of Pc
-      K_s.mv(gradu_Pc_s, Kgradu_Pc_s);
+      // compute K * gradient of Sg
+      K_s.mv(gradu_Sg_s, Kgradu_Sg_s);
+
+      // compute K * gradient of Sg
+      K_s.mv(gradu_Sh_s, Kgradu_Sh_s);
+
+      auto coeff1_s = -property.hydraulicProperty.Pentry()*Pc_s/1.2;
 
       for (int i = 0; i < dim; i++)
       {
-        v_g[i] = omega_s * Kgradu_Pg_s[i];
-        v_w[i] = omega_s * (Kgradu_Pg_s[i] - Kgradu_Pc_s[i]);
+        v_w[i] = omega_s * Kgradu_Pw_s[i];
+        v_g[i] = omega_s * (Kgradu_Pw_s[i] + (coeff1_s*(-Kgradu_Sg_s[i]/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s[i])));
       }
 
       double normalflux_g = -1. * (v_g * n_F_local);
@@ -1901,7 +1991,6 @@ public:
       auto krN_s = property.hydraulicProperty.krNW(Sw_s, Sh_s) / (property.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
       
       //  adding terms regarding components
-      auto Sg_s = 1. - Sw_s - Sh_s;
       auto tau_s = property.soil.tortuosity(por_s);
       auto DH2O_g_s = tau_s * por_s * property.mixture.binaryDiffCoeffInGas(T_s * Xc_T, Pg_s * Xc_P);
       auto DCH4_w_s = tau_s * por_s * property.mixture.binaryDiffCoeffInLiquid(T_s * Xc_T, Pg_s * Xc_P);
@@ -1921,7 +2010,7 @@ public:
       auto kth_w_s = property.water.thermalConductivity(T_s * Xc_T, Pw_s * Xc_P) / Xc_kth;
       auto kth_h_s = property.hydrate.thermalConductivity(T_s * Xc_T, Peff_s * Xc_P) / Xc_kth;
       auto kth_s_s = property.soil.thermalConductivity(T_s * Xc_T, Peff_s * Xc_P) / Xc_kth;
-      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ((1. - Sw_s - Sh_s) * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * (Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
 
       auto por_n = property.soil.SedimentPorosity(ip_global_s);
       auto krW_n = property.hydraulicProperty.krW(Sw_n, Sh_n) / (property.water.dynamicViscosity(T_n * Xc_T, Pw_n * Xc_P) / Xc_mu);
@@ -1939,7 +2028,7 @@ public:
       auto kth_w_n = property.water.thermalConductivity(T_n * Xc_T, Pw_n * Xc_P) / Xc_kth;
       auto kth_h_n = property.hydrate.thermalConductivity(T_n * Xc_T, Peff_n * Xc_P) / Xc_kth;
       auto kth_s_n = property.soil.thermalConductivity(T_n * Xc_T, Peff_n * Xc_P) / Xc_kth;
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ((1. - Sw_n - Sh_n) * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
 
       auto krN = omega_s * krN_s ;//+ omega_n * krN_n;
       auto krW = omega_s * krW_s ;//+ omega_n * krW_n;
@@ -1952,7 +2041,7 @@ public:
       auto DCH4_w = omega_s * DCH4_w_s + omega_s * DCH4_w_n; // = DH2O_w
       auto DC_w = omega_s * DC_w_s + omega_s * DC_w_n; // = DH2O_w
 
-      if (bctype[Indices::PVId_Pg] == Indices::BCId_dirichlet)
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
         //Methane
         auto Diffcoeff_m_g_p_s = rho_g_s * Sg_s * -YCH4_s / Pg_s;
@@ -1960,37 +2049,37 @@ public:
       
         auto Diffcoeff_m_w_s = rho_w_s * Sw_s ;
 
-        double term_conv_m_g = -krN * omega_s * rho_g_s * YCH4_s * (Kgradu_Pg_s * n_F_local); 
-        double term_conv_m_w = -krW * omega_s * rho_w_s * XCH4_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)); 
+        double term_conv_m_g = -krN * omega_s * rho_g_s * YCH4_s * (Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local; 
+        double term_conv_m_w = -krW * omega_s * rho_w_s * XCH4_s * (Kgradu_Pw_s * n_F_local) ; 
 
-        double term_diffusion_m = term_conv_m_g + term_conv_m_w + DH2O_g * (omega_s * (Diffcoeff_m_g_p_s * (gradu_Pg_s * n_F_local) 
+        double term_diffusion_m = term_conv_m_g + term_conv_m_w + DH2O_g * (omega_s * (Diffcoeff_m_g_p_s * ((gradu_Pw_s + (coeff1_s*(-gradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*gradu_Sh_s))) * n_F_local) 
                                               + Diffcoeff_m_g_x_s * (gradu_XCH4_s * n_F_local)))
                                               + DCH4_w * omega_s * Diffcoeff_m_w_s * (gradu_XCH4_s * n_F_local);
                                              
         double term_nipg_g = theta_g * (Pg_s - Pg_n);
-        double term_nipg_w = theta_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+        double term_nipg_w = theta_w * (Pw_s - Pw_n);
         double term_nipg_m_x = theta_x * (XCH4_s - XCH4_n);
 
-        double term_penalty_g = penalty_factor_g * (Pg_s - Pg_n);
+        double term_penalty_w = penalty_factor_g * (Pw_s - Pw_n);
         
         // diffusion term
-        for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
         {
-          r.accumulate(lfsv_Pg_s, i, term_diffusion_m * psi_Pg_s[i] * factor);
+          r.accumulate(lfsv_Pw_s, i, term_diffusion_m * psi_Pw_s[i] * factor);
         }
         // (non-)symmetric IP term
-        for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
         {
-          r.accumulate(lfsv_Pg_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YCH4_s * (Kn_F_s * gradpsi_Pg_s[i]) 
-                                      + term_nipg_w * krW * omega_s * rho_w_s * XCH4_s  * (Kn_F_s * gradpsi_Pg_s[i])
+          r.accumulate(lfsv_Pw_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YCH4_s * (Kn_F_s * gradpsi_Pw_s[i]) 
+                                      + term_nipg_w * krW * omega_s * rho_w_s * XCH4_s  * (Kn_F_s * gradpsi_Pw_s[i])
                                       + omega_s * (term_nipg_g * DH2O_g *  Diffcoeff_m_g_p_s 
                                       + term_nipg_m_x * DH2O_g * Diffcoeff_m_g_x_s
-                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_s) * (n_F_local* gradpsi_Pg_s[i])) * factor);
+                                      + term_nipg_m_x * DCH4_w * Diffcoeff_m_w_s) * (n_F_local* gradpsi_Pw_s[i])) * factor);
         }
         // standard IP term integral
-        for (size_type i = 0; i < lfsv_Pg_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
         {
-          r.accumulate(lfsv_Pg_s, i, term_penalty_g * psi_Pg_s[i] * factor);
+          r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
         }
       }
 
@@ -2000,13 +2089,13 @@ public:
         // Salt
         auto Diffcoeff_c_w_s = rho_w_s * Sw_s ;      
         
-        double term_conv_c_w = -krW * omega_s * rho_w_s * XC_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local));
+        double term_conv_c_w = -krW * omega_s * rho_w_s * XC_s * Kgradu_Pw_s  * n_F_local;
 
         double term_diffusion_c = term_conv_c_w + DC_w * omega_s * Diffcoeff_c_w_s * (gradu_XC_s * n_F_local) ;
 
         
         double term_nipg_c_x = theta_x * (XC_s - XC_n);
-        double term_nipg_w = theta_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+        double term_nipg_w = theta_w * (Pw_s - Pw_n);
         double term_penalty_c = penalty_factor_x * (XC_s - XC_n);
         // diffusion term
         for (size_type i = 0; i < lfsv_XC_s.size(); i++)
@@ -2027,7 +2116,7 @@ public:
       }
      
 
-      if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
+      if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
       {
         
         auto Diffcoeff_w_w_p_s = rho_w_s * Sw_s * YH2O_s / P_H_sat_s;
@@ -2035,52 +2124,52 @@ public:
       
         auto Diffcoeff_w_g_s = rho_g_s * Sg_s ;
      
-        double term_conv_w_g = -krN *  omega_s * rho_g_s * YH2O_s * (Kgradu_Pg_s * n_F_local);
+        double term_conv_w_g = -krN *  omega_s * rho_g_s * YH2O_s * ((Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local);
 
-        double term_conv_w_w = -krW * omega_s * rho_w_s * XH2O_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local));
+        double term_conv_w_w = -krW * omega_s * rho_w_s * XH2O_s * Kgradu_Pw_s * n_F_local;
 
         double term_diffusion_w = term_conv_w_g + term_conv_w_w + DH2O_g * omega_s * Diffcoeff_w_g_s * (gradu_YH2O_s * n_F_local) 
-                                + DCH4_w * (omega_s * (Diffcoeff_w_w_p_s * (gradu_Pg_s * n_F_local)
+                                + DCH4_w * (omega_s * (Diffcoeff_w_w_p_s * ((gradu_Pw_s + (coeff1_s*(-gradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*gradu_Sh_s))) * n_F_local)
                                 + Diffcoeff_w_w_y_s * (gradu_YH2O_s * n_F_local)));
 
 
         double term_nipg_g = theta_g * (Pg_s - Pg_n);
-        double term_nipg_w = theta_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+        double term_nipg_w = theta_w * (Pw_s - Pw_n);
         
         double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
-        double term_penalty_w = penalty_factor_w * ((Pg_s - Pc_s) - (Pg_n - Pc_n));
+        double term_penalty_s = penalty_factor_s * (Sg_s - Sg_n);
         
         // diffusion term
-        for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, term_diffusion_w * psi_Pc_s[i] * factor);
+          r.accumulate(lfsv_Sg_s, i, term_diffusion_w * psi_Sg_s[i] * factor);
         }
         // (non-)symmetric IP term
-        for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YH2O_s * (Kn_F_s * gradpsi_Pc_s[i]) 
-                                      + term_nipg_w * krW * omega_s * rho_w_s * XH2O_s  * (Kn_F_s * gradpsi_Pc_s[i])
+          r.accumulate(lfsv_Sg_s, i, (term_nipg_g * krN * omega_s * rho_g_s * YH2O_s * (Kn_F_s * gradpsi_Sg_s[i]) 
+                                      + term_nipg_w * krW * omega_s * rho_w_s * XH2O_s  * (Kn_F_s * gradpsi_Sg_s[i])
                                       + omega_s * (term_nipg_g * DCH4_w *  Diffcoeff_w_w_p_s 
                                       + term_nipg_w_y * DCH4_w * Diffcoeff_w_w_y_s
-                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_s)  * (n_F_local* gradpsi_Pc_s[i])) * factor);
+                                      + term_nipg_w_y * DH2O_g * Diffcoeff_w_g_s)  * (n_F_local* gradpsi_Sg_s[i])) * factor);
         }
         // standard IP term integral
-        for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+        for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, term_penalty_w * psi_Pc_s[i] * factor);
+          r.accumulate(lfsv_Sg_s, i, term_penalty_s * psi_Sg_s[i] * factor);
         }
       }
 
-      if (bctype[Indices::PVId_Sw] == Indices::BCId_dirichlet)
-      {
+      // if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
+      // {
 
-        double term_penalty_sw = penalty_factor_s * (Sw_s - Sw_n);
-        // standard IP term integral
-        for (size_type i = 0; i < lfsv_Sw_s.size(); i++)
-        {
-          r.accumulate(lfsv_Sw_s, i, term_penalty_sw * psi_Sw_s[i] * factor);
-        }
-      }
+      //   double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
+      //   // standard IP term integral
+      //   for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+      //   {
+      //     r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
+      //   }
+      // }
 
       double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
       // standard IP term integral
@@ -2108,15 +2197,15 @@ public:
       {
 
         
-        double term_diffusion_T_1 = -h_g * krN * (omega_s * rho_g_s * (Kgradu_Pg_s * n_F_local));
-        double term_diffusion_T_2 = -h_w * krW * (omega_s * rho_w_s * ((Kgradu_Pg_s * n_F_local) - (Kgradu_Pc_s * n_F_local)));
-        if (bctype[Indices::PVId_Pg] == Indices::BCId_neumann)
+        double term_diffusion_T_1 = -h_g * krN * omega_s * rho_g_s * (Kgradu_Pw_s + (coeff1_s*(-Kgradu_Sg_s/Sw_s + (-1./Sw_s+1.2/(1.-Sh_s))*Kgradu_Sh_s))) * n_F_local;
+        double term_diffusion_T_2 = -h_w * krW * omega_s * rho_w_s * (Kgradu_Pw_s * n_F_local);
+        if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
         {
-          term_diffusion_T_1 = -bcvalue[Indices::PVId_Pg] * h_g;
+          term_diffusion_T_1 = -bcvalue[Indices::PVId_Pw] * h_g;
         }
-        if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
+        if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
         {
-          term_diffusion_T_2 = -bcvalue[Indices::PVId_Pc] * h_w;
+          term_diffusion_T_2 = -bcvalue[Indices::PVId_Sg] * h_w;
         }
         double term_diffusion_T_3 = -kth_eff * (omega_s * (gradu_T_s * n_F_local));
         double term_diffusion_T = term_diffusion_T_1 + term_diffusion_T_2 + term_diffusion_T_3;

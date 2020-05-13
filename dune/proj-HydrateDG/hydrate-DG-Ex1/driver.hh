@@ -72,17 +72,16 @@ void driver(const GV &gv, // GridView
 	//	COMPOSITE GFS
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE; //  block size -> numOfPVs
 
-	// gfs for composite system Pg,Pc,Sw,Sh,T,XCH4,YH2O
+	// gfs for composite system Pw,Pc,Sg,Sh,T,XCH4,YH2O
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE,
 													 Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_P,
 													 GFS_P,
 													 GFS_T,
 													 GFS_S,
 													 GFS_S,
 													 GFS_X,GFS_Y,GFS_X>
 		GFS;
-	GFS gfs(gfs_P, gfs_P, gfs_T, gfs_S, gfs_S, gfs_x, gfs_y,gfs_x);
+	GFS gfs(gfs_P, gfs_T, gfs_S, gfs_S, gfs_x, gfs_y,gfs_x);
 	//PowerGridFunctionSpace< GFS_P,
 	// 											  Indices::numOfPVs,
 	// 											  VBE,
@@ -95,15 +94,15 @@ void driver(const GV &gv, // GridView
 	std::cout << "degrees of freedom: " << gfs.globalSize() << std::endl;
 
 	//	SUB-SPACES FOR ACCESSING PRIMARY VARIABLES
-	using PathPg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pg>>;
-    using SUBGFS_Pg = Dune::PDELab::GridFunctionSubSpace<GFS,PathPg>;
-    SUBGFS_Pg    subgfs_Pg(gfs);
-	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
-    using SUBGFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
-    SUBGFS_Pc    subgfs_Pc(gfs);
-	using PathSw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sw>>;
-    using SUBGFS_Sw = Dune::PDELab::GridFunctionSubSpace<GFS,PathSw>;
-    SUBGFS_Sw    subgfs_Sw(gfs);
+	using PathPw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>>;
+    using SUBGFS_Pw = Dune::PDELab::GridFunctionSubSpace<GFS,PathPw>;
+    SUBGFS_Pw    subgfs_Pw(gfs);
+	// using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+    // using SUBGFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+    // SUBGFS_Pc    subgfs_Pc(gfs);
+	using PathSg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sg>>;
+    using SUBGFS_Sg = Dune::PDELab::GridFunctionSubSpace<GFS,PathSg>;
+    SUBGFS_Sg    subgfs_Sg(gfs);
 	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
     using SUBGFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
     SUBGFS_Sh    subgfs_Sh(gfs);
@@ -128,13 +127,13 @@ void driver(const GV &gv, // GridView
 
 
 	//	MAKE FUNCTION FOR INITIAL VALUES
-	typedef Pg_Initial<GV,Properties,Real> Pg_InitialType;
-	Pg_InitialType Pg_initial(gv,property);
+	typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
+	Pw_InitialType Pw_initial(gv,property);
 
-	typedef Pc_Initial<GV,Properties,Real> Pc_InitialType;
-	Pc_InitialType Pc_initial(gv,property);
-	typedef Sw_Initial<GV,Properties,Real> Sw_InitialType;
-	Sw_InitialType Sw_initial(gv,property);
+	//typedef Pc_Initial<GV,Properties,Real> Pc_InitialType;
+	//Pc_InitialType Pc_initial(gv,property);
+	typedef Sg_Initial<GV,Properties,Real> Sg_InitialType;
+	Sg_InitialType Sg_initial(gv,property);
 	typedef Sh_Initial<GV,Properties,Real> Sh_InitialType;
 	Sh_InitialType Sh_initial(gv,property);
 	typedef T_Initial<GV,Properties,Real> T_InitialType;
@@ -145,15 +144,14 @@ void driver(const GV &gv, // GridView
 	YH2O_InitialType YH2O_initial(gv,property);
 	typedef XC_Initial<GV,Properties,Real> XC_InitialType;
 	XC_InitialType XC_initial(gv,property);
-	typedef Dune::PDELab::CompositeGridFunction<Pg_InitialType,
-												Pc_InitialType,
+	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
 												T_InitialType,
-												Sw_InitialType,
+												Sg_InitialType,
 												Sh_InitialType,
 												XCH4_InitialType,
 												YH2O_InitialType, XC_InitialType>
 		InitialType;
-	InitialType initial(Pg_initial, Pc_initial, T_initial, Sw_initial, Sh_initial, XCH4_initial, YH2O_initial, XC_initial);
+	InitialType initial(Pw_initial, T_initial, Sg_initial, Sh_initial, XCH4_initial, YH2O_initial, XC_initial);
 
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
@@ -267,12 +265,12 @@ void driver(const GV &gv, // GridView
 
 	//	GRAPHICS FOR INITIAL GUESS
 	// primary variables
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pg, U> DGF_Pg;
-	DGF_Pg dgf_Pg(subgfs_Pg, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
-	DGF_Pc dgf_Pc(subgfs_Pc, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sw, U> DGF_Sw;
-	DGF_Sw dgf_Sw(subgfs_Sw, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pw, U> DGF_Pw;
+	DGF_Pw dgf_Pw(subgfs_Pw, uold);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
+	// DGF_Pc dgf_Pc(subgfs_Pc, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sg, U> DGF_Sg;
+	DGF_Sg dgf_Sg(subgfs_Sg, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
 	DGF_Sh dgf_Sh(subgfs_Sh, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
@@ -301,11 +299,11 @@ void driver(const GV &gv, // GridView
 
 	// add data field for all components of the space to the VTK writer
 	// primary variables
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pg>>(dgf_Pg, "Pg"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
+	//vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
@@ -363,9 +361,9 @@ void driver(const GV &gv, // GridView
 
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
-		DGF_Pg dgf_Pg(subgfs_Pg, unew);
-		DGF_Pc dgf_Pc(subgfs_Pc, unew);
-		DGF_Sw dgf_Sw(subgfs_Sw, unew);
+		DGF_Pw dgf_Pw(subgfs_Pw, unew);
+		//DGF_Pc dgf_Pc(subgfs_Pc, unew);
+		DGF_Sg dgf_Sg(subgfs_Sg, unew);
 		DGF_Sh dgf_Sh(subgfs_Sh, unew);
 		DGF_T dgf_T(subgfs_T, unew);
 		DGF_XCH4 dgf_XCH4(subgfs_XCH4, unew);
@@ -380,11 +378,11 @@ void driver(const GV &gv, // GridView
 		{
 			//vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			// primary variables
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pg>>(dgf_Pg, "Pg"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
+			//vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sw>>(dgf_Sw, "Sw"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
