@@ -71,8 +71,8 @@ public:
 		const auto &lfsu_Pw = lfsu.template child<Indices::PVId_Pw>();
 
 		//Capillary Pressure
-		// const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
-		// const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
+		const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
+		const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
 
 		//Water Saturation
 		const auto &lfsv_Sg = lfsv.template child<Indices::PVId_Sg>();
@@ -120,10 +120,10 @@ public:
 			std::vector<RangeType> psi_Pw(lfsv_Pw.size());
 			lfsv_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pw);
 
-			// std::vector<RangeType> phi_Pc(lfsu_Pc.size());
-			// lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
-			// std::vector<RangeType> psi_Pc(lfsv_Pc.size());
-			// lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
+			std::vector<RangeType> phi_Pc(lfsu_Pc.size());
+			lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
+			std::vector<RangeType> psi_Pc(lfsv_Pc.size());
+			lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
 
 			std::vector<RangeType> phi_Sg(lfsu_Sg.size());
 			lfsu_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sg);
@@ -173,9 +173,9 @@ public:
 				Sh += x(lfsu_Sh, i) * phi_Sh[i];
 
 			// evaluate Pc
-			// RF Pc = 0.0;
-			// for (size_type i = 0; i < lfsu_Pc.size(); i++)
-			// 	Pc += x(lfsu_Pc, i) * phi_Pc[i];
+			RF Pc = 0.0;
+			for (size_type i = 0; i < lfsu_Pc.size(); i++)
+				Pc += x(lfsu_Pc, i) * phi_Pc[i];
 
 			// evaluate T
 			RF T = 0.0;
@@ -199,7 +199,6 @@ public:
 
 			RF Sw = 1. - Sg - Sh;
 			// evaluate Pw
-			RF Pc = property.hydraulicProperty.suctionPressure(Sw, Sh) / Xc_P * property.hydraulicProperty.PcSF1(Sh);
 			RF Pg = Pw + Pc;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
@@ -212,7 +211,7 @@ public:
 			auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P) / Xc_C;
 			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;
 			auto Cv_s = property.soil.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;
-			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			//  adding terms regarding components
 			auto YCH4 = property.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
@@ -229,9 +228,9 @@ public:
 			{
 				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
 			}
-			for (size_type i = 0; i < lfsv_Sg.size(); i++)
+			for (size_type i = 0; i < lfsv_Pc.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * YH2O * Sg + rho_w * por * XH2O * Sw) * psi_Sg[i]) * factor);
+				r.accumulate(lfsv_Pc, i, ((rho_g * por * YH2O * Sg + rho_w * por * XH2O * Sw) * psi_Pc[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{

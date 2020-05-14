@@ -31,7 +31,7 @@ private:
 	Parameters<PTree> parameter;
 	MeshParameters<PTree> mesh;
 
-	HydraulicProperties hydraulicProperties;
+	HydraulicProperties<GV, PTree> hydraulicProperties;
 	CharacteristicValues characteristicValue;
 	const static int dim = GV::dimension;
 
@@ -39,7 +39,8 @@ public:
 
   //! construct from grid view
   Soil (const GV& gv_, const PTree& ptree_)
-  : gv( gv_ ), ptree(ptree_), parameter(ptree_), mesh(ptree_)
+  : gv( gv_ ), ptree(ptree_), parameter(ptree_), mesh(ptree_),
+		  hydraulicProperties(gv_, ptree_)
   {}
 
 

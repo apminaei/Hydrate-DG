@@ -7,8 +7,8 @@
 
 #ifndef INCLUDESDUNE_HH_
 #define INCLUDESDUNE_HH_
-#define ALUGRID
-#define PARALLEL
+#define YASP
+//#define PARALLEL
 
 #include<dune/common/parametertreeparser.hh>
 #include<dune/common/parallel/mpihelper.hh>
@@ -45,7 +45,7 @@
 #include<dune/istl/preconditioners.hh>
 #include<dune/istl/io.hh>
 #include<dune/istl/superlu.hh>
-
+#include<dune/pdelab/function/callableadapter.hh>
 
 #include<dune/pdelab/newton/newton.hh>
 #include<dune/pdelab/common/function.hh>

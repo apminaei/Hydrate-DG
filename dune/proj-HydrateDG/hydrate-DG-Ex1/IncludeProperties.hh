@@ -29,11 +29,12 @@ class Properties{
 		//typedef IncludeProblemSpecifications::ProblemSpecifications ProblemSpecs;
 		//ProblemSpecs problemSpecs;
 		/*************************************************************************/
+		
 		Soil<GV, PTree> soil;
 		Methane methane;
 		Water water;
 		Hydrate hydrate;
-		HydraulicProperties hydraulicProperty;
+		HydraulicProperties< GV, PTree> hydraulicProperty;
 		Mixture mixture;
 		ReactionKinetics< GV, PTree> reactionKinetics;
 		PengRobinson eos;
@@ -45,7 +46,8 @@ class Properties{
 		  mesh(ptree_),
 		  parameter(ptree_),
 		  soil(gv_,ptree_),
-		  reactionKinetics(gv_, ptree_)
+		  reactionKinetics(gv_, ptree_),
+		  hydraulicProperty(gv_, ptree_)
 	  	{}
 
 };

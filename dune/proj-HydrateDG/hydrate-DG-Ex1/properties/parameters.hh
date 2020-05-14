@@ -48,7 +48,7 @@ public:
   :ptree(ptree_),
    mesh(ptree_)
   {
-		Sg_t0 = ptree.get("initial.Sg",(double)0.001);
+		Sg_t0 = ptree.get("initial.Sg",(double)0.0);
 		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
 		Pg_t0 = ptree.get("initial.Pg",(double)2.e6);
 		T_t0 = ptree.get("initial.T",(double)4.) + 273.05; // in Kelvin
@@ -66,9 +66,9 @@ public:
 		prop = std::vector<std::vector<double> > (numMaterials,std::vector<double>(numProps, 0.));
 		for(int n_mat=0; n_mat<numMaterials; n_mat++ ){
 			std::string name = "sediment.material"+std::to_string(n_mat);
-			prop[n_mat][0] = ptree.get(name+".por",	(double)0.5);
+			prop[n_mat][0] = ptree.get(name+".por",	(double)0.3);
 			prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-12);
-			prop[n_mat][2] = ptree.get(name+".pentry",(double)1.e4);
+			prop[n_mat][2] = ptree.get(name+".pentry",(double)5.e4);
 			prop[n_mat][3] = ptree.get(name+".lambda",(double)1.2);
 			prop[n_mat][4] = ptree.get(name+".swr",	(double)0.);
 			prop[n_mat][5] = ptree.get(name+".sgr",	(double)0.);

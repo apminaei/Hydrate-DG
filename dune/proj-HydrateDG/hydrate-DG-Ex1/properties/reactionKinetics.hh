@@ -16,8 +16,9 @@ private:
 	Hydrate hydrate;
 	Methane methane;
 	Water water;
+	HydraulicProperties<GV, PTree> hydraulicProperties;
 	Soil<GV, PTree> soil;
-	HydraulicProperties hydraulicProperties;
+	
 	Indices index;
 	const static int dim = GV::dimension;
 public:
@@ -25,7 +26,8 @@ public:
 	//------------------------------------
 	 //! construct from grid view
   	ReactionKinetics (const GV& gv_, const PTree& ptree_)
-  	: gv( gv_ ), ptree(ptree_), soil(gv_, ptree_)
+  	: gv( gv_ ), ptree(ptree_), soil(gv_, ptree_),
+		  hydraulicProperties(gv_, ptree_)
   	{}
 
 

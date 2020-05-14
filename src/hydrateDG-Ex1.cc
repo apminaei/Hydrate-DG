@@ -158,6 +158,11 @@ int main(int argc, char **argv)
 
 		
 #endif
+	// auto bxlambda = [&](const auto& x){ // Dirichlet for x-component of velocity
+	// 	if (x[0]>X-1.e-6 || x[1]>Z-1.e-6 || x[0]<1.e-6 || x[1]<1.e-6) return true;
+	// 	return false;
+    // };
+    // auto bx = Dune::PDELab::makeBoundaryConditionFromCallable(gv,bxlambda);
 		Dune::VTKWriter<GV> vtkWriter(gv);
   		vtkWriter.write(std::string("gridviews"));
 		driver(gv, ptree, helper);

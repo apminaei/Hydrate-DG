@@ -35,9 +35,10 @@
 
 #include"initial_conditions.hh"
 #include"../operators/Initial.hh"
+#include"boundary_conditions.hh"
 #include"../operators/LocalOperator.hh"
 #include"../operators/TimeOperator.hh"
-#include"boundary_conditions.hh"
+
 #include"driver.hh"
 
 
