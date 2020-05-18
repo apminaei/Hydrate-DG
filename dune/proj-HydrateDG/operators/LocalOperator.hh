@@ -98,8 +98,40 @@ public:
   typedef Dune::PDELab::LocalFunctionSpace<GFS> LFS;
   typedef Dune::PDELab::LFSIndexCache<LFS> LFSCache;
   typedef typename U::template LocalView<LFSCache> VectorView;
-
   
+  typedef typename LFS::template Child<Indices::PVId_Pw>::Type LFS_Pw;
+  typedef typename LFS::template Child<Indices::PVId_Pc>::Type LFS_Pc;
+  typedef typename LFS::template Child<Indices::PVId_Sg>::Type LFS_Sg;
+  typedef typename LFS::template Child<Indices::PVId_Sh>::Type LFS_Sh;
+  typedef typename LFS::template Child<Indices::PVId_T>::Type LFS_T;
+  typedef typename LFS::template Child<Indices::PVId_XCH4>::Type LFS_X;
+  typedef typename LFS::template Child<Indices::PVId_YH2O>::Type LFS_Y;
+  typedef typename LFS::template Child<Indices::PVId_C>::Type LFS_XC;
+  
+  using PathPw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>>;
+  using GFS_Pw = Dune::PDELab::GridFunctionSubSpace<GFS,PathPw>;
+  //SUBGFS_Pg    subgfs_Pg(gfs);
+	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+  using GFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+  //SUBGFS_Pc    subgfs_Pc(gfs);
+	using PathSg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sg>>;
+  using GFS_Sg = Dune::PDELab::GridFunctionSubSpace<GFS,PathSg>;
+  //SUBGFS_Sw    subgfs_Sw(gfs);
+	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
+  using GFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
+  //SUBGFS_Sh    subgfs_Sh(gfs);
+	using PathT = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_T>>;
+  using GFS_T = Dune::PDELab::GridFunctionSubSpace<GFS,PathT>;
+  //SUBGFS_T    subgfs_T(gfs);
+	using PathXCH4 = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_XCH4>>;
+  using GFS_XCH4 = Dune::PDELab::GridFunctionSubSpace<GFS,PathXCH4>;
+  //SUBGFS_XCH4    subgfs_XCH4(gfs);
+	using PathYH2O = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_YH2O>>;
+  using GFS_YH2O = Dune::PDELab::GridFunctionSubSpace<GFS,PathYH2O>;
+  //SUBGFS_YH2O    subgfs_YH2O(gfs);
+	using Pathc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_C>>;
+  using GFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
+  //SUBGFS_XC    subgfs_XC(gfs);
 
   using LocalBasisType_Pw = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_Pw = Dune::PDELab::LocalBasisCache<LocalBasisType_Pw>;
@@ -299,7 +331,6 @@ public:
       auto &phi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsu_Pw.finiteElement().localBasis());
       auto &psi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
       auto &phi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
-       
       auto &psi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
       auto &phi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
       auto &psi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
@@ -325,10 +356,10 @@ public:
       RF Sg = 0.0;
       for (size_type i = 0; i < lfsu_Sg.size(); i++){
         Sg += x(lfsu_Sg, i) * phi_Sg[i];
-        std::cout<< " Sg = " << phi_Sg[i] << std::endl;
+        //std::cout<< " Sg = " << phi_Sg[i] << std::endl;
        
       }
-      exit(0);
+      //exit(0);
       // evaluate Sh
       RF Sh = 0.0;
       for (size_type i = 0; i < lfsu_Sh.size(); i++){
@@ -454,8 +485,6 @@ public:
       K.mv(gradu_Pc, Kgradu_Pc);
 
       auto por = property.soil.SedimentPorosity(ip_global);
-      auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, 1.) / Xc_rho;
-      auto rho_w = property.water.density(T * Xc_T, Pw * Xc_P) / Xc_rho;
       //auto rho_h = property.hydrate.density() / Xc_rho;
 
       //  adding terms regarding components
@@ -473,6 +502,9 @@ public:
       auto zCH4 = property.eos.evaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
       //  end of terms regarding components
 
+
+      auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, zCH4) / Xc_rho;
+      auto rho_w = property.water.density(T * Xc_T, Pw * Xc_P) / Xc_rho;
       
       auto krW = property.hydraulicProperty.krW(Sw, Sh) / (property.water.dynamicViscosity(T * Xc_T, Pw * Xc_P) / Xc_mu);
       auto krN = property.hydraulicProperty.krNW(Sw, Sh) / (property.methane.dynamicViscosity(T * Xc_T, Pg * Xc_P) / Xc_mu);
@@ -484,7 +516,7 @@ public:
       auto q_h = Xc_source_m * property.reactionKinetics.hydrateDissociationRate(T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
       auto Q = Xc_source_h * property.reactionKinetics.heatOfDissociation(T * Xc_T, Pg * Xc_P, Sh, Sw, por, ip_global);
       
-      auto Cp_g = property.methane.Cp(T * Xc_T, Pg * Xc_P, 1.) / Xc_C;
+      auto Cp_g = property.methane.Cp(T * Xc_T, Pg * Xc_P, zCH4) / Xc_C;
       auto Cp_w = property.water.Cp(T * Xc_T, Pw * Xc_P) / Xc_C;
       auto kth_g = property.methane.thermalConductivity(T * Xc_T, Pg * Xc_P) / Xc_kth;
       auto kth_w = property.water.thermalConductivity(T * Xc_T, Pw * Xc_P) / Xc_kth;
@@ -588,7 +620,8 @@ public:
       }
       for (size_type i = 0; i < lfsv_T.size(); i++)
       {
-        r.accumulate(lfsv_T, i, (rho_g * krN * ((Kgradu_Pw + Kgradu_Pc) * gradpsi_T[i]) * Cp_g * T + rho_w * krW * (Kgradu_Pw * gradpsi_T[i]) * Cp_w * T + kth_eff * (gradu_T * gradpsi_T[i]) 
+        r.accumulate(lfsv_T, i, (rho_g * krN * ((Kgradu_Pw + Kgradu_Pc) * gradpsi_T[i]) * Cp_g * T 
+                                + rho_w * krW * (Kgradu_Pw * gradpsi_T[i]) * Cp_w * T + kth_eff * (gradu_T * gradpsi_T[i]) 
                                               - Q * psi_T[i]) * factor);
       }
     } //End Quadrature Rule
@@ -1076,8 +1109,6 @@ public:
       }
 
       auto por_s = property.soil.SedimentPorosity(ip_global_s);
-      auto rho_g_s = property.methane.density(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_rho;
-      auto rho_w_s = property.water.density(T_s * Xc_T, Pw_s * Xc_P) / Xc_rho;
       auto krW_s = property.hydraulicProperty.krW(Sw_s, Sh_s) / (property.water.dynamicViscosity(T_s * Xc_T, Pw_s * Xc_P) / Xc_mu);
       auto krN_s = property.hydraulicProperty.krNW(Sw_s, Sh_s) / (property.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
       
@@ -1095,7 +1126,10 @@ public:
       auto zCH4_s = property.eos.evaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P);
       //  end of terms regarding components
 
-      auto Cp_g_s = property.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_C;
+      auto rho_g_s = property.methane.density(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) / Xc_rho;
+      auto rho_w_s = property.water.density(T_s * Xc_T, Pw_s * Xc_P) / Xc_rho;
+      
+      auto Cp_g_s = property.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) / Xc_C;
       auto Cp_w_s = property.water.Cp(T_s * Xc_T, Pw_s * Xc_P) / Xc_C;
       auto kth_g_s = property.methane.thermalConductivity(T_s * Xc_T, Pg_s * Xc_P) / Xc_kth;
       auto kth_w_s = property.water.thermalConductivity(T_s * Xc_T, Pw_s * Xc_P) / Xc_kth;
@@ -1105,8 +1139,6 @@ public:
       kth_eff_s *= Xc_diff_h;
 
       auto por_n = property.soil.SedimentPorosity(ip_global_n);
-      auto rho_g_n = property.methane.density(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_rho;
-      auto rho_w_n = property.water.density(T_n * Xc_T, Pw_n * Xc_P) / Xc_rho;
       auto krW_n = property.hydraulicProperty.krW(Sw_n, Sh_n) / (property.water.dynamicViscosity(T_n * Xc_T, Pw_n * Xc_P) / Xc_mu);
       auto krN_n = property.hydraulicProperty.krNW(Sw_n, Sh_n) / (property.methane.dynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) / Xc_mu);
       
@@ -1125,7 +1157,10 @@ public:
       auto zCH4_n = property.eos.evaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P);
       //  end of terms regarding components
 
-      auto Cp_g_n = property.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_C;
+      auto rho_g_n = property.methane.density(T_n * Xc_T, Pg_n * Xc_P, zCH4_n) / Xc_rho;
+      auto rho_w_n = property.water.density(T_n * Xc_T, Pw_n * Xc_P) / Xc_rho;
+      
+      auto Cp_g_n = property.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, zCH4_n) / Xc_C;
       auto Cp_w_n = property.water.Cp(T_n * Xc_T, Pw_n * Xc_P) / Xc_C;
       auto kth_g_n = property.methane.thermalConductivity(T_n * Xc_T, Pg_n * Xc_P) / Xc_kth;
       auto kth_w_n = property.water.thermalConductivity(T_n * Xc_T, Pw_n * Xc_P) / Xc_kth;
@@ -1283,7 +1318,7 @@ public:
 
       
       double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
-      double term_penalty_p = penalty_factor_w * (Pc_s - Pc_n);
+      double term_penalty_p = penalty_factor_g * ((Pw_s + Pc_s) - (Pw_n + Pc_n));
       // diffusion term
       for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
       {
@@ -1575,10 +1610,10 @@ public:
       if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
       {
 
-        double flux_w = bcvalue[Indices::PVId_Pc];
+        double flux_g = bcvalue[Indices::PVId_Pc];
         for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, flux_w * psi_Pc_s[i] * factor);
+          r.accumulate(lfsv_Pc_s, i, flux_g * psi_Pc_s[i] * factor);
         }
       }
 
@@ -1592,7 +1627,8 @@ public:
         }
       }
 
-      if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann and
+      if (bctype[Indices::PVId_T] == Indices::BCId_neumann and
+          bctype[Indices::PVId_Pc] == Indices::BCId_neumann and
           bctype[Indices::PVId_Pw] == Indices::BCId_neumann and
           bctype[Indices::PVId_XCH4] == Indices::BCId_neumann and
           bctype[Indices::PVId_C] == Indices::BCId_neumann and
@@ -1629,7 +1665,15 @@ public:
       RF Sh_s = 0.0;
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i];
-      RF Sh_n = Sh_s;
+      RF Sh_n = 0.;
+      if (bctype[Indices::PVId_Sh] == Indices::BCId_neumann)
+      {
+        Sh_n = Sh_s;
+      }
+      else if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
+      {
+        Sh_n = bcvalue[Indices::PVId_Sh] ;
+      }
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1659,7 +1703,7 @@ public:
       {
         //auto PcSF1_n = paramclass.hydraulicProperty.PcSF1(Sh_n);
         //Pc_n=paramclass.hydraulicProperty.suctionPressure(Sw_n,Sh_n)*PcSF1_n;
-        Pc_n = bcvalue[Indices::PVId_Pc] * property.hydraulicProperty.PcSF1(Sh_n) / Xc_P;
+        Pc_n = bcvalue[Indices::PVId_Pc];// * property.hydraulicProperty.PcSF1(Sh_n) / Xc_P;
       }
 
       // evaluate T
@@ -1848,8 +1892,6 @@ public:
         omegaup_w_n = 1.0;
       }
 
-      auto rho_g_s = property.methane.density(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_rho;
-      auto rho_w_s = property.water.density(T_s * Xc_T, Pw_s * Xc_P) / Xc_rho;
       auto por_s = property.soil.SedimentPorosity(ip_global_s);
       auto krW_s = property.hydraulicProperty.krW(Sw_s, Sh_s) / (property.water.dynamicViscosity(T_s * Xc_T, Pw_s * Xc_P) / Xc_mu);
       auto krN_s = property.hydraulicProperty.krNW(Sw_s, Sh_s) / (property.methane.dynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) / Xc_mu);
@@ -1868,7 +1910,10 @@ public:
       auto zCH4_s = property.eos.evaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P);
       //  end of terms regarding components
 
-      auto Cp_g_s = property.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, 1.) / Xc_C;
+      auto rho_g_s = property.methane.density(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) / Xc_rho;
+      auto rho_w_s = property.water.density(T_s * Xc_T, Pw_s * Xc_P) / Xc_rho;
+      
+      auto Cp_g_s = property.methane.Cp(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) / Xc_C;
       auto Cp_w_s = property.water.Cp(T_s * Xc_T, Pw_s * Xc_P) / Xc_C;
       auto kth_g_s = property.methane.thermalConductivity(T_s * Xc_T, Pg_s * Xc_P) / Xc_kth;
       auto kth_w_s = property.water.thermalConductivity(T_s * Xc_T, Pw_s * Xc_P) / Xc_kth;
@@ -1886,7 +1931,7 @@ public:
       auto DCH4_w_n = tau_n * por_n * property.mixture.binaryDiffCoeffInLiquid(T_n * Xc_T, Pg_n * Xc_P);
       auto DC_w_n = tau_n * por_n * property.mixture.DiffCoeffSaltInLiquid(T_n * Xc_T, Pg_n * Xc_P);
       //  end of terms regarding components
-      auto Cp_g_n = property.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, 1.) / Xc_C;
+      auto Cp_g_n = property.methane.Cp(T_n * Xc_T, Pg_n * Xc_P, zCH4_s) / Xc_C;
       auto Cp_w_n = property.water.Cp(T_n * Xc_T, Pw_n * Xc_P) / Xc_C;
       auto kth_g_n = property.methane.thermalConductivity(T_n * Xc_T, Pg_n * Xc_P) / Xc_kth;
       auto kth_w_n = property.water.thermalConductivity(T_n * Xc_T, Pw_n * Xc_P) / Xc_kth;
@@ -2001,7 +2046,7 @@ public:
         double term_nipg_w = theta_w * (Pw_s - Pw_n);
         
         double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
-        double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n);
+        double term_penalty_g = penalty_factor_g * (Pc_s - Pc_n);
         
         // diffusion term
         for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
@@ -2020,7 +2065,7 @@ public:
         // standard IP term integral
         for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
         {
-          r.accumulate(lfsv_Pc_s, i, term_penalty_w * psi_Pc_s[i] * factor);
+          r.accumulate(lfsv_Pc_s, i, term_penalty_g * psi_Pc_s[i] * factor);
         }
       }
 
@@ -2063,13 +2108,13 @@ public:
         
         double term_diffusion_T_1 = -h_g * krN * omega_s * rho_g_s * (Kgradu_Pw_s + Kgradu_Pc_s) * n_F_local;
         double term_diffusion_T_2 = -h_w * krW * omega_s * rho_w_s * (Kgradu_Pw_s * n_F_local);
-        if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
-        {
-          term_diffusion_T_1 = -bcvalue[Indices::PVId_Pw] * h_g;
-        }
         if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
         {
-          term_diffusion_T_2 = -bcvalue[Indices::PVId_Pc] * h_w;
+          term_diffusion_T_1 = -bcvalue[Indices::PVId_Pc] * h_g;
+        }
+        if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
+        {
+          term_diffusion_T_2 = -bcvalue[Indices::PVId_Pw] * h_w;
         }
         double term_diffusion_T_3 = -kth_eff * (omega_s * (gradu_T_s * n_F_local));
         double term_diffusion_T = term_diffusion_T_1 + term_diffusion_T_2 + term_diffusion_T_3;

@@ -27,16 +27,16 @@ public:
 
 			/******************************************************************************/
 			// SATURATIONS
-			double Sg = property.parameter.InitialSg(xglobal);
-			double Sh = property.parameter.InitialSh(xglobal);
-			double Sw = 1.-Sg-Sh;
+			double Sg = 0.;//property.parameter.InitialSg(xglobal);
+			double Sh = 0.3;//property.parameter.InitialSh(xglobal);
+			//double Sw = 1.-Sg-Sh;
 			
 			/******************************************************************************/
 			// PRESSURES
-			double porosity = property.soil.SedimentPorosity(xglobal);
+			//double porosity = property.soil.SedimentPorosity(xglobal);
 			//double Pc = property.hydraulicProperty.CapillaryPressure(element,xlocal,Sw,porosity)
 			//			* property.characteristicValue.P_c; /*Pa*/
-			double Pw = property.parameter.InitialPw(xglobal);  /*Pa*/
+			double Pw = 2.e6;//property.parameter.InitialPw(xglobal);  /*Pa*/
 			//double Pg = property.parameter.InitialPg(xglobal);  /*Pa*/
 			
 			/******************************************************************************/
@@ -52,12 +52,12 @@ public:
 			/******************************************************************************/
 			//double Pw = 2.*1.e6; /*Pa*/
 			
-			double T = property.parameter.InitialT(xglobal);; /*K*/
-			double XCH4 = property.parameter.InitialXCH4(xglobal);;
-			double YH2O = property.parameter.InitialYH2O(xglobal);;
-			double XC = property.parameter.InitialXC(xglobal);;
+			double T = 4.+273.15;//property.parameter.InitialT(xglobal);; /*K*/
+			double XCH4 = 0.;//property.parameter.InitialXCH4(xglobal);;
+			double YH2O = 0.0005;//property.parameter.InitialYH2O(xglobal);;
+			double XC = 5.5e-3;//property.parameter.InitialXC(xglobal);;
 			
-			double Pc = property.hydraulicProperty.suctionPressure(Sw,Sh) * property.hydraulicProperty.PcSF1(Sh);
+			double Pc = 8.48e4;//property.hydraulicProperty.suctionPressure(Sw,Sh) * property.hydraulicProperty.PcSF1(Sh);
 			
 
 			icvalue[Indices::PVId_Pw] = Pw ; //P_w + P_c ;

@@ -35,16 +35,10 @@ private:
 
 public:
 	// pattern assembly flags
-	enum
-	{
-		doPatternVolume = true
-	};
+	enum{doPatternVolume = true	};
 
 	// residual assembly flags
-	enum
-	{
-		doAlphaVolume = true
-	};
+	enum{doAlphaVolume = true	};
 
 	// constructor remembers parameters
 	TimeOperator(const GV &gv_, const Params&	 property_, unsigned int intorder_ = 4)
@@ -203,11 +197,13 @@ public:
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
 			auto por = property.soil.SedimentPorosity(ip_global);
-			auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, 1.) / Xc_rho;
+
+      		auto zCH4 = property.eos.evaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
+			auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, zCH4) / Xc_rho;
 			auto rho_w = property.water.density(T * Xc_T, Pw * Xc_P) / Xc_rho;
 			auto rho_h = property.hydrate.density() / Xc_rho;
 			auto rho_s = property.soil.density() / Xc_rho;
-			auto Cv_g = property.methane.Cv(T * Xc_T, Pg * Xc_P, 1.) / Xc_C;
+			auto Cv_g = property.methane.Cv(T * Xc_T, Pg * Xc_P, zCH4) / Xc_C;
 			auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P) / Xc_C;
 			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;
 			auto Cv_s = property.soil.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;

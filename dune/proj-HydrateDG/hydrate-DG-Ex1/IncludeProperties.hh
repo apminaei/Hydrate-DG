@@ -19,8 +19,6 @@ class Properties{
 		ModelSubSystems modelSubSystem;
 		IncludeModels includeModel;
 		CharacteristicValues characteristicValue;
-		MeshParameters<PTree> mesh;
-		Parameters<PTree> parameter;
 		TimeStepControl timeStepControl;
 		TimeSteppingStrategies timeSteppingStrategy;
 		//GravityVector gravityVector;
@@ -30,6 +28,8 @@ class Properties{
 		//ProblemSpecs problemSpecs;
 		/*************************************************************************/
 		
+		//MeshParameters<PTree> mesh;
+		Parameters<PTree> parameter;
 		Soil<GV, PTree> soil;
 		Methane methane;
 		Water water;
@@ -43,7 +43,6 @@ class Properties{
 	  	Properties ( const GV& gv_, const PTree& ptree_ )
 		: gv( gv_ ),
 		  ptree(ptree_),
-		  mesh(ptree_),
 		  parameter(ptree_),
 		  soil(gv_,ptree_),
 		  reactionKinetics(gv_, ptree_),

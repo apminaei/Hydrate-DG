@@ -50,15 +50,15 @@ public:
   {
 		Sg_t0 = ptree.get("initial.Sg",(double)0.0);
 		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
-		Pg_t0 = ptree.get("initial.Pg",(double)2.e6);
+		Pg_t0 = ptree.get("initial.Pg",(double)2.0848e6);
 		T_t0 = ptree.get("initial.T",(double)4.) + 273.05; // in Kelvin
 		Sh_t0 = ptree.get("initial.Sh",(double)0.3);
-		YH2O_t0 = ptree.get("initial.YH2O",(double)0.001);
+		YH2O_t0 = ptree.get("initial.YH2O",(double)0.0005);
 		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
 		XC_t0 = ptree.get("initial.XC",(double)5.5e-3);
 
 		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)2.e6);
-		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.001);
+		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.0);
 		
 		numMaterials = ptree.get("sediment.number_of_materials",(int)1);
 

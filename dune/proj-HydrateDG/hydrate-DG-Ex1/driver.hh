@@ -80,7 +80,7 @@ void driver(const GV &gv, // GridView
 
 	// typedef PowerGridFunctionSpace< GFS_P, Indices::numOfPVs, VBE, Dune::PDELab::LexicographicOrderingTag > GFS;
 	// GFS gfs(gfs_P);
-	gfs.update(); // initializing the gfs
+	
 	
 	// BCTypeParam0<GV> u0_bctype(gv);
     // BCTypeParam1<GV> u1_bctype(gv);
@@ -88,7 +88,8 @@ void driver(const GV &gv, // GridView
 	
 	// U_BCTypeParam u_bctype( u0_bctype, u0_bctype,u0_bctype,u0_bctype,u0_bctype,u0_bctype,u0_bctype,u0_bctype );
     typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
-    CC cc;                         // constraints needed due
+    CC cc;                       
+	gfs.update(); // initializing the gfs
     //Dune::PDELab::constraints( u_bctype, gfs, cc);  // to artificial boundaries
     std::cout << "constrained dofs = " << cc.size() << " of " << gfs.globalSize() << std::endl;
 
@@ -183,7 +184,7 @@ void driver(const GV &gv, // GridView
 	TLOP tlop(gv, property);
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
-	MBE mbe(66);
+	MBE mbe(20);
 
 	typedef Dune::PDELab::GridOperator<GFS, GFS, LOP, MBE, Real, Real, Real, CC, CC> GOLOP;
 	GOLOP goLOP(gfs, cc, gfs, cc, lop, mbe);
@@ -210,14 +211,14 @@ void driver(const GV &gv, // GridView
 	if (gfs.gridView().comm().size() > 1)
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
-	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	LS ls(gfs, cc, 500, 2);
+	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
+	//LS ls(gfs, cc, 500, 2);
 
 	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	//LS ls(gfs, 1000, 1, true, true);
 
-	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
-	//LS ls(gfs,1000,1,true,true);
+	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
+	LS ls(gfs,1000,1,true,true);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
 	//LS ls(gfs, cc);

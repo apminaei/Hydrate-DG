@@ -37,15 +37,15 @@ public :
 		//auto bcT = Dune::PDELab::makeBoundaryConditionFromCallable(gv);
 		bctype[indices.PVId_C ] = indices.BCId_neumann ;
 		//bctypebool[indices.PVId_C ] = false;
-		bctype[indices.PVId_Sh] = indices.BCId_neumann ;
+		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		//bctypebool[indices.PVId_Sh ] = false;
 		bctype[indices.PVId_Pc] = indices.BCId_neumann ;
 		//bctypebool[indices.PVId_Pc ] = false;
-		bctype[indices.PVId_Sg] = indices.BCId_neumann ;
+		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		//bctypebool[indices.PVId_Sg ] = false;
-		bctype[indices.PVId_XCH4 ] = indices.BCId_neumann ;
+		bctype[indices.PVId_XCH4 ] = indices.BCId_dirichlet ;
 		//bctypebool[indices.PVId_XCH4 ] = false;
-		bctype[indices.PVId_YH2O ] = indices.BCId_neumann ;
+		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		//bctypebool[indices.PVId_YH2O ] = false;
 		//if( property.mesh.isTopBoundary(globalPos) ){
@@ -79,11 +79,11 @@ public :
 		bcvalue[indices.PVId_T ] = 4.+273.15 ;
 		bcvalue[indices.PVId_Pw ] = 2.e6 ;
 		bcvalue[indices.PVId_C ] = 0. ;
-		bcvalue[indices.PVId_Sh] = 0. ;
-		bcvalue[indices.PVId_Pc] = 0. ;
+		bcvalue[indices.PVId_Sh] = 0.3 ;
+		bcvalue[indices.PVId_Pc] = 8.48e4 ;
 		bcvalue[indices.PVId_Sg] = 0. ;
 		bcvalue[indices.PVId_XCH4 ] = 0. ;
-		bcvalue[indices.PVId_YH2O ] = 0. ;
+		bcvalue[indices.PVId_YH2O ] = 0.0005 ;
 		//if( property.mesh.isTopBoundary(globalPos) ){
 		// if ((0. <= time )  and (time <= (200.*3600))/* second */) {
 		// 	bcvalue[indices.PVId_Pw] = 2.e6 ; /* Pa */

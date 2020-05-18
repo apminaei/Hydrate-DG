@@ -7,7 +7,7 @@
 
 #ifndef INCLUDESDUNE_HH_
 #define INCLUDESDUNE_HH_
-#define YASP
+#define ALUGRID
 //#define PARALLEL
 
 #include<dune/common/parametertreeparser.hh>

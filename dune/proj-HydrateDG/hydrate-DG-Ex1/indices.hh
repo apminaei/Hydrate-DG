@@ -22,13 +22,13 @@ public:
 	static const unsigned int compId_CH4 	 = 1;
 
 
-	/* PRIMARY VARIABLES */
+	/* PRIMARY VARIABLES */  // NOTE: The order of the indices must be the same as the order in the GFS, initial and boundary conditions
 	static const unsigned int numOfPVs 	 = 8 ;
 	static const unsigned int PVId_Pw  	= 0;
 	static const unsigned int PVId_Pc  	= 1;
-	static const unsigned int PVId_Sg  	= 2;
-	static const unsigned int PVId_Sh 	= 3;
-	static const unsigned int PVId_T   	= 4;
+	static const unsigned int PVId_T   	= 2;
+	static const unsigned int PVId_Sg  	= 3;
+	static const unsigned int PVId_Sh 	= 4;
 	static const unsigned int PVId_XCH4	= 5 ;
 	static const unsigned int PVId_YH2O	= 6 ;
 	static const unsigned int PVId_C   	= 7;

@@ -44,7 +44,7 @@ public:
 		double lambda = 1.2 ;
 		double Sgr = 0. ;
 		double Swr = 0. ;
-		double beta = 0. ;
+		double beta = 1. ;
 
 		std::vector<double> BCParams (numOfParams,0.);
 		BCParams[id_Pentry] = prop_L[0][2] ; /*Pa*/

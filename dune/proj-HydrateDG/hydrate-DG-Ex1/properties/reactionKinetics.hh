@@ -89,7 +89,7 @@ public:
 		}
 
 		//		P_eq = C_l * exp( A_l - B_l/( T ) ); // defined in Pascals
-		return P_eq;
+		return 3.4e6;//P_eq;
 	}
 
 	// KIM BISHNOI KINETICS MODEL FOR HYDRATE DISSOCIATION:
