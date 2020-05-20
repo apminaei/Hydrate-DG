@@ -15,21 +15,13 @@
 #define INCLUDESPROBLEM_HH_
 
 
-#include"indices.hh"
-#include"./properties/characteristicValues.hh"
+#include"../operators/indices.hh"
+#include"characteristicValues.hh"
 #include"./grids/grid.hh"
 
 /*PARAMETERS AND PROPERTIES*/
-#include"./properties/parameters.hh"
-#include"./properties/methane.hh"
-#include"./properties/water.hh"
-#include"./properties/mixture.hh"
-#include"./properties/eosPengRobinson.hh"
-#include"./properties/hydraulicProperties.hh"
-#include"./properties/hydrate.hh"
-#include"./properties/soil.hh"
-#include"./properties/reactionKinetics.hh"
-#include"IncludeProperties.hh"
+#include"parameters.hh"
+#include"./properties/IncludeProperties.hh"
 
 /*MAIN*/
 

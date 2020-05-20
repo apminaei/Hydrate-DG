@@ -1,11 +1,11 @@
 #install headers
-install(FILES characteristicValues.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES eosPengRobinson.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES hydrate.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES hydraulicProperties.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES methane.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES mixture.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
-install(FILES parameters.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES reactionKinetics.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES soil.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
+install(FILES salt.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
 install(FILES water.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)
+install(FILES IncludeProperties.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/proj-HydrateDG/hydrate-DG-Ex1/properties)

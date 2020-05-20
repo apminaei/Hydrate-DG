@@ -123,7 +123,7 @@ public:
 		}
 		Coeffs = polynomialCoefficients(T,P);
 		double compressibilityFactor = method( Coeffs );
-		return compressibilityFactor ;
+		return std::max(compressibilityFactor,0.1)  ;
 	}
 
 };

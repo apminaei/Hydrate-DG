@@ -27,37 +27,28 @@ public:
 
 			/******************************************************************************/
 			// SATURATIONS
-			double Sg = 0.;//property.parameter.InitialSg(xglobal);
-			double Sh = 0.3;//property.parameter.InitialSh(xglobal);
-			//double Sw = 1.-Sg-Sh;
+			double Sg = property.parameter.InitialSg(xglobal);
+			double Sh = property.parameter.InitialSh(xglobal);
+			double Sw = 1.-Sg-Sh;
 			
 			/******************************************************************************/
 			// PRESSURES
 			//double porosity = property.soil.SedimentPorosity(xglobal);
-			//double Pc = property.hydraulicProperty.CapillaryPressure(element,xlocal,Sw,porosity)
-			//			* property.characteristicValue.P_c; /*Pa*/
-			double Pw = 2.e6;//property.parameter.InitialPw(xglobal);  /*Pa*/
-			//double Pg = property.parameter.InitialPg(xglobal);  /*Pa*/
+			double Pc = property.hydraulicProperty.suctionPressure(Sw, Sh)* property.hydraulicProperty.PcSF1(Sh)
+						* property.characteristicValue.P_c; /*Pa*/
+			double Pw = property.parameter.InitialPw(xglobal);  /*Pa*/
+			double Pg = Pw+Pc;//  /*Pa*/
 			
+			double T = property.parameter.InitialT(xglobal)+273.15; /*K*/
 			/******************************************************************************/
 			// MOLE FRACTIONS
-			// auto S = property.parameter.ReferenceSalinity();
-			// auto T = property.parameter.ReferenceTemperature();
-			// auto zCH4 = property.eos.EvaluateCompressibilityFactor( T,Pg );
-			// auto Xf = property.mixture.EquilibriumMoleFractions( T, Pg, S, zCH4);
-
-			// auto xch4 = Xf[Indices::compId_XCH4];
-			// auto yh2o = Xf[Indices::compId_YH2O];
-
+			double XC = property.parameter.InitialXC(xglobal);
+			auto z_CH4 = property.eos.evaluateCompressibilityFactor( T,Pg );
+		
 			/******************************************************************************/
-			//double Pw = 2.*1.e6; /*Pa*/
 			
-			double T = 4.+273.15;//property.parameter.InitialT(xglobal);; /*K*/
-			double XCH4 = 0.;//property.parameter.InitialXCH4(xglobal);;
-			double YH2O = 0.0005;//property.parameter.InitialYH2O(xglobal);;
-			double XC = 5.5e-3;//property.parameter.InitialXC(xglobal);;
-			
-			double Pc = 8.48e4;//property.hydraulicProperty.suctionPressure(Sw,Sh) * property.hydraulicProperty.PcSF1(Sh);
+			double XCH4 = property.mixture.mole_x_CH4(T, Pg ,z_CH4, XC);
+			double YH2O = property.mixture.mole_y_H2O(T, Pg ,z_CH4, XC);
 			
 
 			icvalue[Indices::PVId_Pw] = Pw ; //P_w + P_c ;

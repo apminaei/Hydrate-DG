@@ -30,38 +30,25 @@ public :
 		//auto xglobal = intersection.geometry().global(xlocal);
 		
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		//std::vector< bool > bctypebool(Indices::numOfPVs, false);
-
-		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
-		//bctypebool[indices.PVId_T ] = true;
-		//auto bcT = Dune::PDELab::makeBoundaryConditionFromCallable(gv);
-		bctype[indices.PVId_C ] = indices.BCId_neumann ;
-		//bctypebool[indices.PVId_C ] = false;
-		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		//bctypebool[indices.PVId_Sh ] = false;
-		bctype[indices.PVId_Pc] = indices.BCId_neumann ;
-		//bctypebool[indices.PVId_Pc ] = false;
-		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		//bctypebool[indices.PVId_Sg ] = false;
-		bctype[indices.PVId_XCH4 ] = indices.BCId_dirichlet ;
-		//bctypebool[indices.PVId_XCH4 ] = false;
-		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
-		bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
-		//bctypebool[indices.PVId_YH2O ] = false;
-		//if( property.mesh.isTopBoundary(globalPos) ){
-		// if ((0. < time )  and (time <= (200.*3600))/* s */) {
-		// 	bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
-		// 	//bctypebool[indices.PVId_Pw ] = true;
-		// }
-		// else if ( ((200.*3600) < time )  and (time <= (350.*3600)) /* s */) {
-		// 	bctype[indices.PVId_Pw] = indices.BCId_neumann ;
-		// 	//bctypebool[indices.PVId_Pw ] = false;
-		// }
-		// else {
-		// 	bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
-		// 	//bctypebool[indices.PVId_Pw ] = true;
-		// }
-		//  //std::cout<< "Pw_boundary = " << y << std::endl;
+		
+		if(property.mesh.isLeftBoundary(globalPos)){
+			bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
+		
+			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+			
+			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_C] = indices.BCId_dirichlet ;
+		}
+		
+		if( property.mesh.isRightBoundary(globalPos) ){
+			bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
+		
+			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+			
+			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_C] = indices.BCId_dirichlet ;
+		}
+		 //std::cout<< "Pw_boundary = " << y << std::endl;
 		
 		return bctype;
 	}
@@ -76,59 +63,24 @@ public :
 
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
 		
-		bcvalue[indices.PVId_T ] = 4.+273.15 ;
-		bcvalue[indices.PVId_Pw ] = 2.e6 ;
-		bcvalue[indices.PVId_C ] = 0. ;
-		bcvalue[indices.PVId_Sh] = 0.3 ;
-		bcvalue[indices.PVId_Pc] = 8.48e4 ;
-		bcvalue[indices.PVId_Sg] = 0. ;
-		bcvalue[indices.PVId_XCH4 ] = 0. ;
-		bcvalue[indices.PVId_YH2O ] = 0.0005 ;
-		//if( property.mesh.isTopBoundary(globalPos) ){
-		// if ((0. <= time )  and (time <= (200.*3600))/* second */) {
-		// 	bcvalue[indices.PVId_Pw] = 2.e6 ; /* Pa */
-		// }
-		// else if ( ((200.*3600) < time )  and (time <= (350.*3600)) /* s */) {
-		// 	bcvalue[indices.PVId_Pw] = 0. ;
-		// }
-		// else if ( ((350.*3600) < time )  and (time <= (450.*3600)) /* s */) {
-		// 	bcvalue[indices.PVId_Pw] = 5.e6 ;
-		// }
-		// else{
-		// 	bcvalue[indices.PVId_Pw] = 5.e6 + 10. * (time - 450. * 3600) ;
-		// }
+		if(property.mesh.isLeftBoundary(globalPos)){
+			bcvalue[indices.PVId_T ] = 60. + 273.15 ;
 		
-		// if( property.mesh.isTopBoundary(globalPos) ){
-		// 	bcvalue[indices.PVId_Pw] = 0.;//indices.BCId_neumann ;
-		// 	bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
-		// 	bcvalue[indices.PVId_Sg] = 0.;//indices.BCId_neumann ;
-		// 	//bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
-		// }
-		// else if( property.mesh.isBottomBoundary(globalPos) ){
-		// 	bcvalue[indices.PVId_Pw] = 0.;//indices.BCId_neumann ;
-		// 	bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
-		// 	bcvalue[indices.PVId_Sg] = 0.;//indices.BCId_neumann ;
-		// 	//bcvalue[indices.PVId_T ] = 0.;//indices.BCId_neumann ;
-		// }
-		// else if( property.mesh.isLeftBoundary(globalPos) ){
-		// 	HydraulicProperties hydraulicProperty;
-		// 	//if( (globalPos[1] > Z_length*(3./8.) - eps) and (globalPos[1] < Z_length*(5./8.) + eps) ){
-		// 		bcvalue[indices.PVId_Pw] = 6.*1.e6;//11.*1.e6;//indices.BCId_dirichlet ;
-		// 		bcvalue[indices.PVId_Pc] = hydraulicProperty.Pentry();//indices.BCId_neumann ;
-		// 		bcvalue[indices.PVId_Sg] = 0.;//indices.BCId_neumann ;
-		// 	//}else{
-		// 	// 	bcvalue[indices.PVId_Pw] = 0.;//indices.BCId_neumann ;
-		// 	// 	bcvalue[indices.PVId_Pc] = 0.;//indices.BCId_neumann ;
-		// 	// 	bcvalue[indices.PVId_Sg] = 0.;//indices.BCId_neumann ;
-		// 	// }
-		// 	//bcvalue[indices.PVId_T ] = 0.;//indices.BCId_neumann ;
-		// }
-		// else if( property.mesh.isRightBoundary(globalPos) ){
-		// 	bcvalue[indices.PVId_Pw] = 0.;//ProblemICValues(globalPos)[indices.PVId_Pw];//indices.BCId_dirichlet ;
-		// 	bcvalue[indices.PVId_Pc] = 0.;//ProblemICValues(globalPos)[indices.PVId_Pc];//indices.BCId_dirichlet ;
-		// 	bcvalue[indices.PVId_Sg] = 0.;//ProblemICValues(globalPos)[indices.PVId_Sg];//indices.BCId_dirichlet ;
-		// 	//bcvalue[indices.PVId_T ] = 0.;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
-		// }
+			bcvalue[indices.PVId_Sg] = 0.8 ;
+			
+			bcvalue[indices.PVId_Pw] = 1.5e6 ;
+			bcvalue[indices.PVId_C] = 5.5e-3 ;
+		}
+		
+		if( property.mesh.isRightBoundary(globalPos) ){
+			bcvalue[indices.PVId_T ] = property.parameter.InitialT(globalPos) ;
+		
+			bcvalue[indices.PVId_Sg] = property.parameter.InitialSg(globalPos) ;
+			
+			bcvalue[indices.PVId_Pw] = property.parameter.InitialPw(globalPos); ;
+			bcvalue[indices.PVId_C] = property.parameter.InitialXC(globalPos); ;
+		}
+		
 
 		return bcvalue;
 	}

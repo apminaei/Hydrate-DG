@@ -36,7 +36,7 @@ public:
     const int dim = Traits::GridViewType::Grid::dimension;
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
-    y = 2.e6;//icvalue.evaluate(e,xlocal)[Indices::PVId_Pw]/CharacteristicValues::P_c ;	/* Pa */
+    y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pw]/CharacteristicValues::P_c ;	/* Pa */
     //std::cout<< "Pw_boundary = " << y << std::endl;
     return;
   }
@@ -73,7 +73,7 @@ public:
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
    
-    y = 8.48e4;//icvalue.evaluate(e,xlocal)[Indices::PVId_Pc]/CharacteristicValues::P_c ;	/* Pa */
+    y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pc]/CharacteristicValues::P_c ;	/* Pa */
     //std::cout<< "Pc_boundary = " << y << std::endl;
     return;
   }
@@ -108,7 +108,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= 0.0;//icvalue.evaluate(e,xlocal)[Indices::PVId_Sg] ; //initial water saturation
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_Sg] ; //initial water saturation
     return;
   }
   //! get a reference to the grid view
@@ -142,7 +142,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= 0.3;//icvalue.evaluate(e,xlocal)[Indices::PVId_Sh] ; //initial hydrate saturation
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_Sh] ; //initial hydrate saturation
 
       		//std::cout << " Sh = " << y << std::endl;
     return;
@@ -177,7 +177,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= 277.15;//icvalue.evaluate(e,xlocal)[Indices::PVId_T]/CharacteristicValues::T_c ; //initial temperature
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_T]/CharacteristicValues::T_c ; //initial temperature
     return;
   }
   //! get a reference to the grid view
@@ -209,7 +209,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= 0.0;//icvalue.evaluate(e,xlocal)[Indices::PVId_XCH4]/CharacteristicValues::x_c ; //initial ch4 mole fraction
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_XCH4]/CharacteristicValues::x_c ; //initial ch4 mole fraction
     return;
   }
   //! get a reference to the grid view
@@ -241,7 +241,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= 0.0005;//icvalue.evaluate(e,xlocal)[Indices::PVId_YH2O]/CharacteristicValues::x_c ; //initial h2o mole fraction
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_YH2O]/CharacteristicValues::x_c ; //initial h2o mole fraction
     return;
   }
   //! get a reference to the grid view
@@ -273,7 +273,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y=5.5e-3;//icvalue.evaluate(e,xlocal)[Indices::PVId_C]/CharacteristicValues::x_c ; //initial salt mole fraction
+    y=icvalue.evaluate(e,xlocal)[Indices::PVId_C]/CharacteristicValues::x_c ; //initial salt mole fraction
     return;
   }
   //! get a reference to the grid view

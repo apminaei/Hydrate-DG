@@ -103,7 +103,7 @@ public:
 
 		// Cp_i = A + B*T + C*T*T +D*T*T*T ;		/* [kJ/(kg*K)] */
 		// Cp_i*1000.0
-		return  2.16524;		/* [J/(kg*K)] */
+		return  2165.24;		/* [J/(kg*K)] */
 	}
 
 	double Cp_res( double T, double Pg, double z_CH4 ) const {
@@ -195,7 +195,7 @@ public:
 		// double kHenry = k0_H*exp( dlnkH_d1byT *( 1.0/T - 1.0/298.15 ) ); /* [mol*kg^-1*Bar^-1] */
 
 		// return kHenry * molarMass() * 1.0e-5; /* [Pa^-1] */
-		return 1.434e11;
+		return 3.e-10;
 	}
 
 };

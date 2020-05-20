@@ -8,81 +8,78 @@
 #ifndef PARAMETERS_MIXTURE_HH_
 #define PARAMETERS_MIXTURE_HH_
 
-
+template<typename PTree>
 class Mixture
 {
 private:
+	const PTree& ptree;
 	Methane methane;
 	Water water;
-
+	Parameters<PTree> parameter;
+	CharacteristicValues X_c;
 public:
-
+	
+	//! constructor
+	Mixture (const PTree& ptree_)
+	:ptree(ptree_),
+	parameter(ptree_)
+	{}
 	/* CALCULATION OF COMPOSITIONS */
 
-	double fnc_CH4( double T, double Pg ) const {
-
-		return 1.0/(Pg * methane.henrysConstant( T ));
-
+	double fnc_CH4( double T, double Pg , double z_CH4) const {
+		return (z_CH4*Pg)/methane.henrysConstant( T ) ;
 	}
-
 	double fnc_H2O( double T, double Pg ) const {
-
-		return water.saturatedVaporPressure( T )/Pg;
-
+		return Pg / water.saturatedVaporPressure( T );
 	}
 
 	/* MOLE FRACTIONS ( x -> liquid ; y -> gas ) */
-
-	double mole_x_CH4( double T, double Pg ) const {
-
-		return ( 1.0 - fnc_H2O( T,Pg ) )/( fnc_CH4( T,Pg ) - fnc_H2O( T,Pg ) );
-
+	double mole_y_H2O( double T, double Pg, double z_CH4 , double Xc) const {
+			return ((1.-Xc)-fnc_CH4( T,Pg ,z_CH4))/(fnc_H2O( T,Pg )-fnc_CH4( T,Pg ,z_CH4));//( 1.0 - fnc_H2O( T,Pg ,z_CH4) )/( 1. - fnc_CH4( T,Pg )*  fnc_H2O( T,Pg , z_CH4) );
 	}
 
-	double mole_x_H2O( double T, double Pg ) const {
-
-		return 1.0 - mole_x_CH4( T, Pg ) ;//( 1.0 - fnc_CH4( T,Pg ) )/( fnc_H2O( T,Pg ) - fnc_CH4( T,Pg ) );
-
+	double mole_y_CH4( double T, double Pg , double z_CH4, double Xc) const {
+		return 1.0 - mole_y_H2O( T, Pg , z_CH4,Xc) ;//( 1.0 - fnc_CH4( T,Pg ) )/( fnc_H2O( T,Pg ) - fnc_CH4( T,Pg ) );
 	}
 
-	double mole_y_CH4( double T, double Pg ) const {
-
-		return fnc_CH4( T,Pg )*( 1.0 - fnc_H2O( T,Pg ) )/( fnc_CH4( T,Pg ) - fnc_H2O( T,Pg ) );
-
+	double mole_x_H2O( double T, double Pg , double z_CH4, double Xc) const {
+		return mole_y_H2O( T, Pg , z_CH4 ,Xc) * fnc_H2O( T,Pg ) ;
 	}
 
-	double mole_y_H2O( double T, double Pg ) const {
-
-		return 1.0 - mole_y_CH4( T, Pg ) ;//fnc_H2O( T,Pg )*( 1.0 - fnc_CH4( T,Pg ) )/( fnc_H2O( T,Pg ) - fnc_CH4( T,Pg ) );
-
+	double mole_x_CH4( double T, double Pg , double z_CH4, double Xc) const {
+		return 1. - Xc - mole_x_H2O( T, Pg , z_CH4 ,Xc);
 	}
 
+	
 
-	/* MASS FRACTIONS ( X -> liquid ; Y -> gas ) */
+	
 
-	double X_CH4( double T, double Pg ) const {
-		// M_i*x_i/(sum(M_i*xi))
-		return methane.molarMass( ) * mole_x_CH4( T,Pg )/( methane.molarMass( ) * mole_x_CH4( T,Pg ) + water.molarMass( ) * mole_x_H2O( T,Pg ) );
 
-	}
+	// /* MASS FRACTIONS ( X -> liquid ; Y -> gas ) */
 
-	double X_H2O( double T, double Pg ) const {
-		// M_i*x_i/(sum(M_i*xi))
-		return water.molarMass( ) * mole_x_H2O( T,Pg )/( methane.molarMass( ) * mole_x_CH4( T,Pg ) + water.molarMass( ) * mole_x_H2O( T,Pg ) );
+	// double X_CH4( double T, double Pg , double z_CH4) const {
+	// 	// M_i*x_i/(sum(M_i*xi))
+	// 	return methane.molarMass( ) * mole_x_CH4( T,Pg , z_CH4)/( methane.molarMass( ) * mole_x_CH4( T,Pg , z_CH4) + water.molarMass( ) * mole_x_H2O( T,Pg, z_CH4 ) );
 
-	}
+	// }
 
-	double Y_CH4( double T, double Pg ) const {
-		// M_i*x_i/(sum(M_i*xi))
-		return methane.molarMass( ) * mole_y_CH4( T,Pg )/( methane.molarMass( ) * mole_y_CH4( T,Pg ) + water.molarMass( ) * mole_y_H2O( T,Pg ) );
+	// double X_H2O( double T, double Pg , double z_CH4) const {
+	// 	// M_i*x_i/(sum(M_i*xi))
+	// 	return water.molarMass( ) * mole_x_H2O( T,Pg , z_CH4)/( methane.molarMass( ) * mole_x_CH4( T,Pg , z_CH4) + water.molarMass( ) * mole_x_H2O( T,Pg , z_CH4) );
 
-	}
+	// }
 
-	double Y_H2O( double T, double Pg ) const {
-		// M_i*x_i/(sum(M_i*xi))
-		return methane.molarMass( ) * mole_y_H2O( T,Pg )/( methane.molarMass( ) * mole_y_CH4( T,Pg ) + water.molarMass( ) * mole_y_H2O( T,Pg ) );
+	// double Y_CH4( double T, double Pg , double z_CH4) const {
+	// 	// M_i*x_i/(sum(M_i*xi))
+	// 	return methane.molarMass( ) * mole_y_CH4( T,Pg , z_CH4)/( methane.molarMass( ) * mole_y_CH4( T,Pg , z_CH4) + water.molarMass( ) * mole_y_H2O( T,Pg , z_CH4) );
 
-	}
+	// }
+
+	// double Y_H2O( double T, double Pg , double z_CH4) const {
+	// 	// M_i*x_i/(sum(M_i*xi))
+	// 	return methane.molarMass( ) * mole_y_H2O( T,Pg , z_CH4)/( methane.molarMass( ) * mole_y_CH4( T,Pg , z_CH4) + water.molarMass( ) * mole_y_H2O( T,Pg , z_CH4) );
+
+	// }
 
 	/* MASS TRANSFER COEFFICIENTS */
 
@@ -123,93 +120,93 @@ public:
 
 	/* AVERAGE MIXTURE PROPERTIES FOR EACH PHASE */
 
-	double avgGasDensity( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgGasDensity( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double rhoW = water.vaporDensity( T , Pg );
-		double rhoNW = methane.density( T , Pg , z_CH4 );
+	// 	double rhoW = water.vaporDensity( T , Pg );
+	// 	double rhoNW = methane.density( T , Pg , z_CH4 );
 
-		double avgRhoNW = rhoNW * Y_CH4( T,Pg ) + rhoW * Y_H2O( T,Pg ) ;
+	// 	double avgRhoNW = rhoNW * Y_CH4( T,Pg ) + rhoW * Y_H2O( T,Pg ) ;
 
-		return avgRhoNW;
+	// 	return avgRhoNW;
 
-	}
+	// }
 
-	double avgLiquidDensity( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgLiquidDensity( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double rhoW = water.density( T,Pw );
-		double rhoNW = methane.density( T,Pw,z_CH4 );
+	// 	double rhoW = water.density( T,Pw );
+	// 	double rhoNW = methane.density( T,Pw,z_CH4 );
 
-		double avgRhoW = rhoNW * X_CH4( T,Pg ) + rhoW * X_H2O( T,Pg ) ;
+	// 	double avgRhoW = rhoNW * X_CH4( T,Pg ) + rhoW * X_H2O( T,Pg ) ;
 
-		return avgRhoW;
+	// 	return avgRhoW;
 
-	}
+	// }
 
-	double avgGasCp( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgGasCp( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double CpW = water.Cp( T,Pg );
-		double CpNW = methane.Cp( T,Pg,z_CH4 );
+	// 	double CpW = water.Cp( T,Pg );
+	// 	double CpNW = methane.Cp( T,Pg,z_CH4 );
 
-		double avgCpNW = Y_CH4( T,Pg ) * CpNW + Y_H2O( T,Pg ) * CpW ;
+	// 	double avgCpNW = Y_CH4( T,Pg ) * CpNW + Y_H2O( T,Pg ) * CpW ;
 
-		return avgCpNW;
+	// 	return avgCpNW;
 
-	}
+	// }
 
-	double avgLiquidCp( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgLiquidCp( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double CpW = water.Cp( T,Pw );
-		double CpNW = methane.Cp( T,Pw,z_CH4 );
+	// 	double CpW = water.Cp( T,Pw );
+	// 	double CpNW = methane.Cp( T,Pw,z_CH4 );
 
-		double avgCpW = X_CH4( T,Pg ) * CpNW + X_H2O( T,Pg ) * CpW ;
+	// 	double avgCpW = X_CH4( T,Pg ) * CpNW + X_H2O( T,Pg ) * CpW ;
 
-		return avgCpW;
+	// 	return avgCpW;
 
-	}
+	// }
 
-	double avgGasCv( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgGasCv( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double CvW = water.Cv( T,Pg );
-		double CvNW = methane.Cv( T,Pg,z_CH4 );
+	// 	double CvW = water.Cv( T,Pg );
+	// 	double CvNW = methane.Cv( T,Pg,z_CH4 );
 
-		double avgCvNW = Y_CH4( T,Pg ) * CvNW + Y_H2O( T,Pg ) * CvW ;
+	// 	double avgCvNW = Y_CH4( T,Pg ) * CvNW + Y_H2O( T,Pg ) * CvW ;
 
-		return avgCvNW;
+	// 	return avgCvNW;
 
-	}
+	// }
 
-	double avgLiquidCv( double T, double Pg, double Pw, double z_CH4 ) const {
+	// double avgLiquidCv( double T, double Pg, double Pw, double z_CH4 ) const {
 
-		double CvW = water.Cp( T,Pw );
-		double CvNW = methane.Cp( T,Pw,z_CH4 );
+	// 	double CvW = water.Cp( T,Pw );
+	// 	double CvNW = methane.Cp( T,Pw,z_CH4 );
 
-		double avgCvW = X_CH4( T,Pg ) * CvNW + X_H2O( T,Pg ) * CvW ;
+	// 	double avgCvW = X_CH4( T,Pg ) * CvNW + X_H2O( T,Pg ) * CvW ;
 
-		return avgCvW;
+	// 	return avgCvW;
 
-	}
+	// }
 
-	double avgGasViscosity( double T, double Pg, double Pw ) const {
+	// double avgGasViscosity( double T, double Pg, double Pw ) const {
 
-		double muW = water.dynamicViscosity( T,Pg );
-		double muNW = methane.dynamicViscosity( T,Pg );
+	// 	double muW = water.dynamicViscosity( T,Pg );
+	// 	double muNW = methane.dynamicViscosity( T,Pg );
 
-		double avgMuNW = muNW * X_CH4( T,Pg ) + muW * X_H2O( T,Pg ) ;
+	// 	double avgMuNW = muNW * X_CH4( T,Pg ) + muW * X_H2O( T,Pg ) ;
 
-		return avgMuNW;
+	// 	return avgMuNW;
 
-	}
+	// }
 
-	double avgLiquidViscosity( double T, double Pg, double Pw ) const {
+	// double avgLiquidViscosity( double T, double Pg, double Pw ) const {
 
-		double muW = water.dynamicViscosity( T,Pw );
-		double muNW = methane.dynamicViscosity( T,Pw );
+	// 	double muW = water.dynamicViscosity( T,Pw );
+	// 	double muNW = methane.dynamicViscosity( T,Pw );
 
-		double avgMuW = muNW * X_CH4( T,Pg ) + muW * X_H2O( T,Pg ) ;
+	// 	double avgMuW = muNW * X_CH4( T,Pg ) + muW * X_H2O( T,Pg ) ;
 
-		return avgMuW;
+	// 	return avgMuW;
 
-	}
+	// }
 
 };
 

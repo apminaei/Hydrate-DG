@@ -121,19 +121,7 @@ public:
 	}
 
 
-	// bool isRight( Dune::FieldVector<double,dimension> globalPos ) const {
-	// 	if( globalPos[0] > Xmax - eps ){
-	// 		return true;
-	// 	}
-	// 	else return false;
-	// }
-
-	// bool isLeft( Dune::FieldVector<double,dimension> globalPos ) const {
-	// 	if( globalPos[0] < 0. + eps ){
-	// 		return true;
-	// 	}
-	// 	else return false;
-	// }
+	
 
 	bool isInlet( Dune::FieldVector<double,dimension> globalPos ) const {
 		if( isLeftBoundary(globalPos) and (globalPos[1] < Zmaxinlet and globalPos[1] > Zmininlet) ){

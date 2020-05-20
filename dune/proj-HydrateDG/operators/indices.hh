@@ -18,8 +18,13 @@ public:
 	static const unsigned int phaseId_gas 	 = 1;
 
 	/* COMPONENTS */
-	static const unsigned int compId_H2O 	 = 0;
-	static const unsigned int compId_CH4 	 = 1;
+	// static const unsigned int compId_H2O 	 = 0;
+	// static const unsigned int compId_CH4 	 = 1;
+	const static int numOfConcs  = 4;
+	const static int concId_XCH4 = 0;
+	const static int concId_XH2O = 1;
+	const static int concId_YCH4 = 2;
+	const static int concId_YH2O = 3;
 
 
 	/* PRIMARY VARIABLES */  // NOTE: The order of the indices must be the same as the order in the GFS, initial and boundary conditions

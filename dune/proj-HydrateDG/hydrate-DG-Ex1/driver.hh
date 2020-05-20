@@ -169,8 +169,8 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::IIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::IIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::IIPG;
-	double alpha_g = 10.;
-	double alpha_w = 10.;
+	double alpha_g = 1.e6;
+	double alpha_w = 1.e6;
 	double alpha_s = 10.;
 	double alpha_T = 10000.;
 	double alpha_x = 10.;
@@ -211,14 +211,14 @@ void driver(const GV &gv, // GridView
 	if (gfs.gridView().comm().size() > 1)
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
-	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	//LS ls(gfs, cc, 500, 2);
+	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
+	LS ls(gfs, cc, 5000, 2);
 
 	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	//LS ls(gfs, 1000, 1, true, true);
 
-	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
-	LS ls(gfs,1000,1,true,true);
+	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
+	//LS ls(gfs,5000,1,true,true);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
 	//LS ls(gfs, cc);
@@ -242,12 +242,14 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
 	PDESOLVER pdesolver(igo, ls);
 	// 	select control parameters for non-linear PDE-solver
+	//typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
 	typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
 	lineSearchStrategy linesearchstrategy(pdesolver);
-	pdesolver.setVerbosityLevel(2);
-	pdesolver.setReduction(1e-6);
-	pdesolver.setMinLinearReduction(1e-6);
-	pdesolver.setAbsoluteLimit(1e-6);
+	pdesolver.setParameters(ptree.sub("newton"));
+	// pdesolver.setVerbosityLevel(2);
+	// pdesolver.setReduction(1e-6);
+	// pdesolver.setMinLinearReduction(1e-6);
+	// pdesolver.setAbsoluteLimit(1e-6);
 	
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 

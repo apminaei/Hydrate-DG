@@ -210,8 +210,8 @@ public:
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			//  adding terms regarding components
-			auto YCH4 = property.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P);
-			auto XH2O = property.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P);
+			auto YCH4 = property.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P, zCH4, XC);
+			auto XH2O = property.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P, zCH4, XC);
 			//  end of terms regarding components
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i

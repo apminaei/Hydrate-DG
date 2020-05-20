@@ -51,7 +51,7 @@ public:
 		Sg_t0 = ptree.get("initial.Sg",(double)0.0);
 		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
 		Pg_t0 = ptree.get("initial.Pg",(double)2.0848e6);
-		T_t0 = ptree.get("initial.T",(double)4.) + 273.05; // in Kelvin
+		T_t0 = ptree.get("initial.T",(double)4.) ; // in Kelvin
 		Sh_t0 = ptree.get("initial.Sh",(double)0.3);
 		YH2O_t0 = ptree.get("initial.YH2O",(double)0.0005);
 		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
