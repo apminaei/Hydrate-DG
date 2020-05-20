@@ -15,8 +15,8 @@
 #include<exception>
 #include<chrono>
 
-#include "dune/proj-HydrateDG/IncludesDUNE.hh"
-#include "dune/proj-HydrateDG/hydrate-DG-Ex1/IncludesProblem.hh"
+#include "dune/Hydrate-DG/IncludesDUNE.hh"
+#include "dune/Hydrate-DG/akerbp2D_pockmark/include_problem.hh"
 
 
 //#define ALUGRID		already defined in IncludeDUNE.hh
@@ -50,24 +50,10 @@ int main(int argc, char **argv)
 		}
 
 		int level = 1;
-		// sscanf(argv[1], "%d", &level); //argument 'refinement level'
-		// std::cout << "level=" << argv[1] << "\t";
-
-		// double dt;
-		// sscanf(argv[2], "%lg", &dt); //argument 'time step size'
-		// std::cout << "dt=" << argv[2] << "\t";
-
-		// double t_END;
-		// sscanf(argv[3], "%lg", &t_END); //argument 'end time'
-		// std::cout << "t_END=" << argv[3] << "\t";
-
-		// double t_OP;
-		// sscanf(argv[4], "%lg", &t_OP); //argument 'op Interval'
-		// std::cout << "t_OP=" << argv[4] << std::endl;
 
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-master/proj-HydrateDG/dune/proj-HydrateDG/hydrate-DG-Ex1/inputs/";
+	    std::string input_file = "/home/amir/dune-master/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 

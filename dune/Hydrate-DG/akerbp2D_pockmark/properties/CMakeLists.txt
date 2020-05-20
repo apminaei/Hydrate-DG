@@ -1,0 +1,10 @@
+#install headers
+install(FILES CH4.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES eosCH4.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES hydrate_phase_change.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES hydrate.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES hydraulic_properties.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES include_properties.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES mixture.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES soil.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)
+install(FILES salt.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark/properties)

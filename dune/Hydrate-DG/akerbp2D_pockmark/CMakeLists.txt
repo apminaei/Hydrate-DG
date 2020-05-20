@@ -1,0 +1,10 @@
+#install headers
+install(FILES boundary_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark)
+install(FILES initial_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark)
+install(FILES driver.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark)
+install(FILES include_problem.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark)
+install(FILES parameters.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/akerbp2D_pockmark)
+add_subdirectory("grids")
+add_subdirectory("inputs")
+add_subdirectory("outputs")
+add_subdirectory("properties")
