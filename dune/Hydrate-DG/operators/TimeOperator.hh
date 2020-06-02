@@ -36,9 +36,10 @@ private:
 public:
 	// pattern assembly flags
 	enum{doPatternVolume = true	};
-
 	// residual assembly flags
 	enum{doAlphaVolume = true	};
+
+  	typedef typename GV::IndexSet IndexSet;
 
 	// constructor remembers parameters
 	TimeOperator(const GV &gv_, const Params&	 property_, unsigned int intorder_ = 4)
@@ -99,6 +100,11 @@ public:
 			Traits::LocalBasisType::Traits::RangeType;
 		using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
+		// Reference to cell
+	  	const auto& cell = eg.entity();
+		const IndexSet &indexSet = gv.indexSet();
+		int cell_number = indexSet.index(cell);
+
 		// Get geometry
 		auto geo = eg.geometry();
 
@@ -150,7 +156,7 @@ public:
 			lfsv_XC.finiteElement().localBasis().evaluateFunction(ip.position(), psi_XC);
 
 			auto ip_global = geo.global(ip.position());
-
+			auto ip_local = geo.local(ip_global);
 			// evaluate Pw
 			RF Pw = 0.0;
 			for (size_type i = 0; i < lfsu_Pw.size(); i++)
@@ -193,26 +199,33 @@ public:
 
 			RF Sw = 1. - Sg - Sh;
 			// evaluate Pw
+			auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
+      		auto por = property.soil.SedimentPorosity(cell, ip_local);
+      		auto suctionPressure = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
+      		auto PcSF1 = property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+      
+      		//auto Pc = suctionPressure * PcSF1;
 			RF Pg = Pw + Pc;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
-			auto por = property.soil.SedimentPorosity(ip_global);
-
-      		auto zCH4 = property.eos.evaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
-			auto rho_g = property.methane.density(T * Xc_T, Pg * Xc_P, zCH4) / Xc_rho;
-			auto rho_w = property.water.density(T * Xc_T, Pw * Xc_P) / Xc_rho;
-			auto rho_h = property.hydrate.density() / Xc_rho;
-			auto rho_s = property.soil.density() / Xc_rho;
-			auto Cv_g = property.methane.Cv(T * Xc_T, Pg * Xc_P, zCH4) / Xc_C;
-			auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P) / Xc_C;
-			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;
-			auto Cv_s = property.soil.Cv(T * Xc_T, Peff * Xc_P) / Xc_C;
+			//auto por = property.soil.SedimentPorosity(cell, ip_local);
+			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+      		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
+			auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
+			auto rho_w = property.water.Density(T * Xc_T, Pw * Xc_P, S);
+			auto rho_h = property.hydrate.Density() ;
+			auto rho_s = property.soil.Density() ;
+			auto Cv_g = property.gas.Cv(T * Xc_T, Pg * Xc_P, zCH4) ;
+			auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P, S) ;
+			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) ;
+			auto Cv_s = property.soil.Cv();
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			//  adding terms regarding components
-			auto YCH4 = property.mixture.mole_y_CH4(T * Xc_T, Pg * Xc_P, zCH4, XC);
-			auto XH2O = property.mixture.mole_x_H2O(T * Xc_T, Pg * Xc_P, zCH4, XC);
+			auto YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
+			auto XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			//  end of terms regarding components
+			// std::cout << " VLequil_s = " << VLequil_s[Indices::compId_YCH4] << " VLequil_s = " << VLequil_s[Indices::compId_XH2O] << std::endl;
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());

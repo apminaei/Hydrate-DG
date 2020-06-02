@@ -37,22 +37,24 @@ public:
 		double P_eq = 1.0e6*exp(- 1.6892692e3 - 0.15162984*T + 5.60912482e4/T + 2.72067506E2*log(T)
 								+ (S/1.80655e-3)*( 2.06621298e4 + 14.18127*T - 8.3417066e-3*T*T - 3.78757519E5/T - 4.01544417e3*log(T) )
 								+ (S/1.80655e-3)*(S/1.80655e-3)*( 6.04018045e2 + 0.420253434*T - 2.501548e-4*T*T - 1.09745335E4/T - 1.17640966e2*log(T) ) );
+		//double P_eq = 1.0e0*exp(38.592-(8533.8/T)+4.4824*S );
 
-
+		// std::cout << " P_eq = " << P_eq << " T = " << T<< std::endl;
+		// exit(0);
 		return P_eq/characteristicValue.P_c; /*ndim*/
 	}
 
 	//rate constant for hydrate dissociation;
 	double DissociationRateConstant (double T) const {
 
-		double kd_diss = parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
+		double kd_diss = 1.e-12;//parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
 		return kd_diss;
 	}
 
 	//rate constant for hydrate reformation;
 	double FormationRateConstant_ingas (double T) const {
 
-		double kd_form = parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
+		double kd_form = 1.e-12;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
 		return kd_form;
 
 	}
@@ -81,7 +83,7 @@ public:
 
 // 		std::cout<< "A_s = " << A_s << std::endl ;
 
-		return A_s;
+		return 1.e5;
 	}
 
 	// rate of gas generation:
@@ -112,7 +114,7 @@ public:
 					  * potential_P
 					  ;
 		}
-
+		
 	    return gas_gen; /*[kg/m³s]*/
 	}
 
@@ -133,7 +135,7 @@ public:
       double Q_decomp/*[W/m³]*/= - ( gasGenRate / hydrate.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
 								 * 1.;
-
+		
       return Q_decomp;/*[W/m³]*/
 	}
 

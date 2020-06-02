@@ -1,3 +1,4 @@
+/* DiffCoeff is NONDIMENSIONAL */
 class Salt
 {
 private:
@@ -12,12 +13,12 @@ public:
 
 	double DiffCoeff( double T/*K*/, double Pw/*Pa*/ ) const {
 
-		double D = 1.*1.0e-9;	/* m^2/s */
+		double D = 1.e-9;	/* m^2/s */
 		return D/characteristicValue.dispersivity_c; /*ndim*/
 	}
 
 	double Source( ) const {
-		return 0.; /*kg.m^-3.s^-1*/
+		return 0.; /*kg/m³s*/
 	}
 
 };

@@ -18,21 +18,24 @@ void driver(const GV &gv, // GridView
 	typedef typename GV::Grid::ctype Coord;
 	typedef double Real;
 	const int dim = GV::dimension;
-
+	Real time = 0.0;
+	Real dt = 0.0;
+	
+	Properties property(gv,ptree);
 	/* Non-dimensionalize time prams */
-	Real dt = ptree.get("time.dt_initial",(double)1.)/ property.characteristicValue.t_c;
+	dt = ptree.get("time.dt_initial",(double)1.)/ property.characteristicValue.t_c;
 	Real t_END = ptree.get("time.time_end",(double)86400.) / property.characteristicValue.t_c;
 	Real t_OP = ptree.get("output.time_interval",(double)1.) / property.characteristicValue.t_c;
 	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) / property.characteristicValue.t_c;
 	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) / property.characteristicValue.t_c;
-
-	Real time = 0.0;
+	bool adaptive_time_control = ptree.get("adaptive_time_control.flag",(bool)true);
+	
 	Real dtstart = dt;
 	Real time_op = time;
-	
-	Properties property(gv,ptree,&time,&dt);
-	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)4);
-	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)2);
+	//std::cout << " time = " << time << " t_end = " << t_END <<  " dt_min = " << dt_min << " dt = " << dt << std::endl;
+	//exit(0);
+	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)8);
+	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 
 	const int degree_S = 1;
 	const int degree_P = 1;
@@ -46,7 +49,7 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ConformingDirichletConstraints CON0;	// pure Neumann: no constraints
 #endif									
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;//OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::cube> FEM_P;// 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;//;// 
 	FEM_P fem_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_S;// basis function
 	FEM_S fem_S;
@@ -72,9 +75,9 @@ void driver(const GV &gv, // GridView
 
 	// gfs for composite system Pw,Pc,Sg,Sh,T,XCH4,YH2O
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_P, GFS_P, GFS_T, GFS_S, GFS_S, GFS_X,GFS_Y,GFS_X>
+													 GFS_P, GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X>
 		GFS;
-	GFS gfs(gfs_P, gfs_P, gfs_T, gfs_S, gfs_S, gfs_x, gfs_y,gfs_x);
+	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
 
 	// typedef PowerGridFunctionSpace< GFS_P, Indices::numOfPVs, VBE, Dune::PDELab::LexicographicOrderingTag > GFS;
 	// GFS gfs(gfs_P);
@@ -126,18 +129,18 @@ void driver(const GV &gv, // GridView
 	U unew(gfs, 0.0);
 
 
-	//	MAKE FUNCTION FOR INITIAL VALUES
+	//	MAKE FUNCTION FOR INITIAL VALUES   Which must be nondim 
 	typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
-	Pw_InitialType Pw_initial(gv,property);
+	Pw_InitialType Pw_initial(gv,property); /* ndim */
 
 	typedef Pc_Initial<GV,Properties,Real> Pc_InitialType;
-	Pc_InitialType Pc_initial(gv,property);
+	Pc_InitialType Pc_initial(gv,property); /* ndim */
 	typedef Sg_Initial<GV,Properties,Real> Sg_InitialType;
 	Sg_InitialType Sg_initial(gv,property);
 	typedef Sh_Initial<GV,Properties,Real> Sh_InitialType;
 	Sh_InitialType Sh_initial(gv,property);
 	typedef T_Initial<GV,Properties,Real> T_InitialType;
-	T_InitialType T_initial(gv,property);
+	T_InitialType T_initial(gv,property); /* ndim */
 	typedef XCH4_Initial<GV,Properties,Real> XCH4_InitialType;
 	XCH4_InitialType XCH4_initial(gv,property);
 	typedef YH2O_Initial<GV,Properties,Real> YH2O_InitialType;
@@ -146,13 +149,13 @@ void driver(const GV &gv, // GridView
 	XC_InitialType XC_initial(gv,property);
 	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
 												Pc_InitialType,
-												T_InitialType,
 												Sg_InitialType,
 												Sh_InitialType,
+												T_InitialType,
 												XCH4_InitialType,
 												YH2O_InitialType, XC_InitialType>
 		InitialType;
-	InitialType initial(Pw_initial, Pc_initial, T_initial, Sg_initial, Sh_initial, XCH4_initial, YH2O_initial, XC_initial);
+	InitialType initial(Pw_initial, Pc_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
 
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
@@ -167,15 +170,15 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::IIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::IIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::IIPG;
-	double alpha_g = 1.e6;
-	double alpha_w = 1.e6;
-	double alpha_s = 10.;
-	double alpha_T = 10000.;
-	double alpha_x = 10.;
-	double alpha_y = 10.;
+	double alpha_g = 0.e1;
+	double alpha_w = 0.e1;
+	double alpha_s = 0.e0;
+	double alpha_T = 0.e1;
+	double alpha_x = 0.e0;
+	double alpha_y = 0.e0;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
-	
+	//time *= (1./property.characteristicValue.t_c);
 	LOP lop(gv, property, &unew, gfs, &time, &dt, 6, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
@@ -215,8 +218,8 @@ void driver(const GV &gv, // GridView
 	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	//LS ls(gfs, 1000, 1, true, true);
 
-	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
-	//LS ls(gfs,5000,1,true,true);
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
+	// LS ls(gfs,5000,1,true,true);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
 	//LS ls(gfs, cc);
@@ -254,13 +257,13 @@ void driver(const GV &gv, // GridView
 
 	// SELECT TIME-STEPPER
 	Dune::PDELab::ImplicitEulerParameter<Real> method1;
-	Dune::PDELab::OneStepThetaParameter<Real> method2(0.0); //Crank-Nicholson -> 0.5, Implicit Euler -> 1.0, Explicit Euler -> 0.0
+	Dune::PDELab::OneStepThetaParameter<Real> method2(0.5); //Crank-Nicholson -> 0.5, Implicit Euler -> 1.0, Explicit Euler -> 0.0
 	Dune::PDELab::Alexander2Parameter<Real> method3;
 	Dune::PDELab::Alexander3Parameter<Real> method4;
 	Dune::PDELab::FractionalStepParameter<Real> method5;
 	Dune::PDELab::HeunParameter<Real> method6;
 	Dune::PDELab::Shu3Parameter<Real> method7;
-	Dune::PDELab::RK4Parameter<Real> method8;
+	Dune::PDELab::RK4Parameter<Real> method8; // didnot work
 
 	Dune::PDELab::TimeSteppingParameterInterface<Real> *pmethod = &method1;
 
@@ -306,9 +309,9 @@ void driver(const GV &gv, // GridView
 	// primary variables
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
@@ -326,9 +329,9 @@ void driver(const GV &gv, // GridView
 	bool exceptionCaught = false;
 
 	int newton_iterations = 0;
-
+	
 	//	BEGIN TIME LOOP
-	while (time < t_END - 1e-8)
+	while ( time < t_END - 1e-8)
 	{
 		std::cout << "_____________________________________________________" << std::endl;
 		
@@ -385,10 +388,10 @@ void driver(const GV &gv, // GridView
 			//vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			// primary variables
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
@@ -411,7 +414,7 @@ void driver(const GV &gv, // GridView
 		std::cout << " " << std::endl;
 		std::cout << " time = " << time * property.characteristicValue.t_c;
 
-		if (property.timeStepControl.adaptiveTimeStepControl)
+		if (adaptive_time_control)
 		{
 			if (newton_iterations > maxAllowableIterations)
 			{
@@ -430,7 +433,7 @@ void driver(const GV &gv, // GridView
 		std::cout << " , time+dt = " << (time + dt) * property.characteristicValue.t_c
 				  << " , opTime = " << t_OP * opcount * property.characteristicValue.t_c;
 
-		if (time + dt > t_OP * opcount - 1.e-6)
+		if (time + dt > t_OP * opcount - 1.e-7)
 		{
 			dtLast = dt;
 			dt = t_OP * opcount - time;

@@ -1,19 +1,19 @@
-template<typename GV, typename Parameters, typename PGMap>
+/* ALL PARAMETERS ARE NONDIMENSIONAL */
+template<typename GV, typename Parameters>
 class Soil
 {
 private:
 	  const GV& gv;
-	  const Parameters& parameter;
-	  const PGMap& pgmap ;
 	  
+	  
+	const Parameters& parameter;
 	  CharacteristicValues characteristicValue;
 	  const static int dim = GV::dimension;
 
 public:
-
   //! construct from grid view
-  Soil ( const GV& gv_ , const Parameters& parameter_ , const PGMap& pgmap_ )
-  : gv( gv_ ), parameter(parameter_), pgmap( pgmap_ )
+  Soil ( const GV& gv_ , const Parameters& parameter_ )
+  : gv( gv_ ), parameter(parameter_)
   {}
 
 
@@ -23,23 +23,16 @@ public:
 
 		Dune::FieldVector<double,dim> x = element.geometry().global(xlocal);
 
-		auto z_L = parameter.layer_ztop();
 		auto prop_L = parameter.layer_properties();
 
 		double por = 0.;
 
-		if( x[dim-1]>z_L[0] ){
-			por = prop_L[0][0];
-		}
-		for( int i=1; i<z_L.size(); i++ ){
-			if( x[dim-1]>z_L[i] and x[dim-1]<z_L[i-1] ){
-				por = prop_L[i][0];
-			}
-		}
-		if( parameter.isFracture(x) ){
-			auto prop_frac = parameter.fracture_layer_properties();
-			por = prop_frac[0];
-		}
+		por = prop_L[0][0];
+
+		// if( parameter.mesh.isLens(x) ){
+		// 	por = prop_L[1][0];
+		// }
+		
 
 		return por;
 	}
@@ -50,41 +43,37 @@ public:
 
 		Dune::FieldVector<double,dim> x = element.geometry().global(xlocal);
 		
-		auto z_L = parameter.layer_ztop();
+		
 		auto prop_L = parameter.layer_properties();
 
 		double K = 0.; /*m^2*/
 
-		if( x[dim-1]>z_L[0] ){
-			K = prop_L[0][1];
-		}
-		for( int i=1; i<z_L.size(); i++ ){
-			if( x[dim-1]>z_L[i] and x[dim-1]<z_L[i-1] ){
-				K = prop_L[i][1];
-			}
-		}
-		if( parameter.isFracture(x) ){
-			auto prop_frac = parameter.fracture_layer_properties();
-			K = prop_frac[1];
-		}
+		K = prop_L[0][1];
+
+		// if( parameter.mesh.isLens(x) ){
+		// 	K = prop_L[1][1];
+		// }
+		
 
 		return K/characteristicValue.permeability_c; /*ndim*/
 	}
 
 	// vector coefficient
-	Dune::FieldVector<double,dim>
-	SedimentPermeabilityVector
+	Dune::FieldMatrix<double,dim,dim>
+	SedimentPermeabilityTensor
 	(const typename GV::Traits::template Codim<0>::Entity& element,
 	 const Dune::FieldVector<double,dim>& xlocal) const {
 
 		double K_xx = SedimentPermeability(element,xlocal);
 		double K_yy = K_xx;
-		Dune::FieldVector<double,dim> PermeabilityVector;
-
-		PermeabilityVector[0] = K_xx ;
-		PermeabilityVector[1] = K_yy ;
-
-		return PermeabilityVector; /*ndim*/
+		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor;
+		
+		PermeabilityTensor[0][0] = K_xx ;
+		PermeabilityTensor[0][1] = 0. ;
+		PermeabilityTensor[1][0] = 0. ;
+		PermeabilityTensor[1][1] = K_yy ;
+		
+		return PermeabilityTensor; /*ndim*/
 	}
 
 	double SoilGrainRadius

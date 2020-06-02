@@ -1,3 +1,4 @@
+/* ALL PARAMETERS ARE NONDIMENSIONAL */
 class Mixture
 {
 private:
@@ -21,8 +22,9 @@ public:
 
 		Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
 		Y_CH4 = 1.-Y_H2O;
-		X_H2O = Y_H2O * f_H2O;
-		X_CH4 = 1. - Xc - X_H2O;
+		
+		X_CH4 = f_CH4*Y_CH4;// (z*water.SaturatedVaporPressure( T,S ))*(f_H2O+ Xc -1.)/(methane.SolubilityCoefficient(T,S)-(z*water.SaturatedVaporPressure( T,S )));
+		X_H2O = f_H2O*Y_H2O;//1.-X_CH4-Xc;
 
 		std::vector<double> X(Indices::numOfComps,0.);
 		X[Indices::compId_XCH4] = X_CH4;
@@ -68,7 +70,7 @@ public:
 
 		D = ( a0 + a1*T + a2/Pg ) ;
 
-		return D/X_c.dispersivity_c; /*ndim*/
+		return 0.637e-6/X_c.dispersivity_c; /*ndim*/
 
 	}
 
@@ -81,7 +83,7 @@ public:
 
 		D = B * exp(-A/T) * 1.0e-6;
 
-		return D/X_c.dispersivity_c; /*ndim*/
+		return 1.57e-11/X_c.dispersivity_c; /*ndim*/
 	}
 
 };

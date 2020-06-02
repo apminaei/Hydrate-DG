@@ -1,3 +1,5 @@
+/* ALL PARAMETERS ARE NONDIMENSIONAL */
+
 class Water
 {
 private:
@@ -45,7 +47,7 @@ public:
 				+ alpha_S*(S-S_0)
 			  );
 
-		return rho/characteristicValue.density_c; /*ndim*/
+		return 1026.77/characteristicValue.density_c; /*ndim*/
 	}
 
 	double DynamicViscosity( double T/*K*/, double Pw/*Pa*/, double S ) const {
@@ -65,7 +67,7 @@ public:
 		mu = mu_0 * exp( a + b * Tr + c * Tr*Tr );
 #endif
 
-		return mu/characteristicValue.viscosity_c;/*ndim*/
+		return 0.0014/characteristicValue.viscosity_c;/*ndim*/
 	}
 
 	double ThermalConductivity( double T/*K*/, double Pw/*Pa*/, double S ) const {
@@ -75,7 +77,7 @@ public:
 
 		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );
 
-		return kth/characteristicValue.thermalconductivity_c; /*ndim*/
+		return 0.5854/characteristicValue.thermalconductivity_c; /*ndim*/
 	}
 
 	double Cp( double T/*K*/, double Pw/*Pa*/, double S ) const {
@@ -123,8 +125,10 @@ public:
 								+ c6*pow((1-Tr),7.5) );
 
 		psat = Pc * exp(lnppc);   /* [Pa] */
-
-		return psat/characteristicValue.P_c; /*ndim*/
+		//std::cout <<" P_H_sat_dim = " << T  <<" P_H_sat_dim = " << Tc <<" P_H_sat_dim = " << Tr <<std::endl;
+		//psat *=(1./characteristicValue.P_c);
+		//std::cout <<" P_H_sat_nondim = " << lnppc  <<std::endl;
+		return 1072.92/characteristicValue.P_c; /*ndim*/
 	}
 
 };

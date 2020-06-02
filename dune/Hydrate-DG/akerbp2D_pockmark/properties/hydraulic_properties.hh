@@ -2,21 +2,21 @@ template<typename GV, typename Parameters>
 class HydraulicProperties
 {
 private:
-	  const GV& gv;
-	  const Parameters& parameter;
+	const GV& gv;
+	const Parameters& parameter;
 	  
-	  const static int dim = GV::dimension;
+	const static int dim = GV::dimension;
 
-	  const static int numOfParams  = 6;
-	  const static int id_Pentry 	= 0;
-	  const static int id_lambda 	= 1;
-	  const static int id_Swr 		= 2;
-	  const static int id_Sgr 		= 3;
-	  const static int id_m			= 4;
-	  const static int id_beta		= 5;
+	const static int numOfParams  	= 6;
+	const static int id_Pentry 		= 0;
+	const static int id_lambda 		= 1;
+	const static int id_Swr 		= 2;
+	const static int id_Sgr 		= 3;
+	const static int id_m			= 4;
+	const static int id_beta		= 5;
 
-	  Soil<GV,Parameters> soil;
-	  CharacteristicValues characteristicValue;
+	Soil<GV,Parameters> soil;
+	CharacteristicValues characteristicValue;
 
 public:
 
@@ -36,36 +36,23 @@ public:
 
 		std::vector<double> BCParams (numOfParams,0.);
 
-		auto z_L = parameter.layer_ztop();
 		auto prop_L = parameter.layer_properties();
 
-		if( x[dim-1]>z_L[0] ){
-			BCParams[id_Pentry] = prop_L[0][2] ; /*Pa*/
-			BCParams[id_lambda] = prop_L[0][3] ;
-			BCParams[id_Swr] 	= prop_L[0][4] ;
-			BCParams[id_Sgr] 	= prop_L[0][5] ;
-			BCParams[id_m] 		= prop_L[0][6] ;
-			BCParams[id_beta] 	= prop_L[0][7] ;
-		}
-		for( int i=1; i<z_L.size(); i++ ){
-			if( x[dim-1]>z_L[i] and x[dim-1]<z_L[i-1] ){
-				BCParams[id_Pentry] = prop_L[i][2] ; /*Pa*/
-				BCParams[id_lambda] = prop_L[i][3] ;
-				BCParams[id_Swr] 	= prop_L[i][4] ;
-				BCParams[id_Sgr] 	= prop_L[i][5] ;
-				BCParams[id_m] 		= prop_L[i][6] ;
-				BCParams[id_beta] 	= prop_L[i][7] ;
-			}
-		}
-		if( parameter.isFracture(x) ){
-			auto prop_frac = parameter.fracture_layer_properties();
-			BCParams[id_Pentry] = prop_frac[2] ; /*Pa*/
-			BCParams[id_lambda] = prop_frac[3] ;
-			BCParams[id_Swr] 	= prop_frac[4] ;
-			BCParams[id_Sgr] 	= prop_frac[5] ;
-			BCParams[id_m] 		= prop_frac[6] ;
-			BCParams[id_beta] 	= prop_frac[7] ;
-		}
+		BCParams[id_Pentry] = prop_L[0][2] ; /*Pa*/
+		BCParams[id_lambda] = prop_L[0][3] ;
+		BCParams[id_Swr]    = prop_L[0][4] ;
+		BCParams[id_Sgr]    = prop_L[0][5] ;
+		BCParams[id_m]   	= prop_L[0][6] ;
+		BCParams[id_beta]   = prop_L[0][7] ;
+
+		// if( parameter.mesh.isLens(x) ){
+		// 	BCParams[id_Pentry] = prop_L[1][2] ; /*Pa*/
+		// 	BCParams[id_lambda] = prop_L[1][3] ;
+		// 	BCParams[id_Swr]    = prop_L[1][4] ;
+		// 	BCParams[id_Sgr]    = prop_L[1][5] ;
+		// 	BCParams[id_m]   	= prop_L[0][6] ;
+		// 	BCParams[id_beta]   = prop_L[1][7] ;
+		// }
 
 		return BCParams;
 	}
@@ -114,7 +101,27 @@ public:
 		return dSwe;
 	}
 
-	/* SUCTION/CAPILLARY PRESSURE */
+	double dPcSF1_dSh( double Sh ,double lambda,
+				  double m) const {
+		double dPcSF=0. ;
+		double eta = (lambda * m - 1.)/(lambda*m);
+		double a = 0.95;
+		if( Sh < a ){
+			dPcSF = eta * std::pow( 1.0-Sh , -eta-1.0 );
+		}
+		else if( Sh >= a ){
+			double dPcSF_a = eta * pow( 1.0 - a , -eta-1.0 );
+			double ddPcSF_a = eta * (eta+1.) * std::pow( 1.0 - a , -eta-2.0 );
+			dPcSF = dPcSF_a + ddPcSF_a * ( Sh - a );
+		}
+		else {
+			std::cout<< " ERROR in HydraulicProperties::dPcSF1:dSh( Sh ),   Sh = " << Sh << std::endl;
+			exit(0);
+		}
+		return dPcSF ;
+	}
+
+	/* SUCTION/CAPILLARY PRESSURE   NonDimensional*/
 
 	double CapillaryPressure(  const typename GV::Traits::template Codim<0>::Entity& element,
   	   	   	 	 	 	 	   const Dune::FieldVector<double,dim>& xlocal ,
@@ -171,7 +178,7 @@ public:
 		double SF_por = PcSF2( porosity, porosity_0, beta );
 
 		Pc *=SF_Sh*SF_por; /*Pa*/
-		return Pc/characteristicValue.P_c; /*ndim*/
+		return Pc/characteristicValue.P_c; /*nondim*/ // 
 	}
 
 	double dPc_dSwe( double Swe,
@@ -196,7 +203,7 @@ public:
 					 << "  , dPc  = " << dPc << std::endl;
 //			exit(0);
 		}
-
+		
 		return dPc; /*Pa*/
 	}
 

@@ -1,3 +1,4 @@
+/* ALL PARAMETERS ARE NONDIMENSIONAL */
 class Methane
 {
 private:
@@ -32,7 +33,7 @@ public:
 		double R_CH4 = Ru/MolarMass();
 		rho = Pg/( z_CH4 * R_CH4 * T);
 
-		return rho/characteristicValue.density_c; /*ndim*/
+		return 19.605/characteristicValue.density_c; /*ndim*/
 	}
 
 	double DynamicViscosity(double T/*K*/, double Pg/*Pa*/) const {
@@ -51,7 +52,7 @@ public:
 				); // Pa.s -> ref: Frauenhofer Comsol Model
 		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
 
-		return mu/characteristicValue.viscosity_c;/*ndim*/
+		return 1.1045e-5/characteristicValue.viscosity_c;/*ndim*/
 
 	}
 
@@ -73,8 +74,8 @@ public:
 		double A3 =   0.1224609018 * 1.e-8 ;
 		kth = A0 + A1 * T + A2 * T*T + A3 * T*T*T ;
 #endif
-
-		return kth/characteristicValue.thermalconductivity_c;/*ndim*/
+		
+		return 0.03107/characteristicValue.thermalconductivity_c;/*ndim*/
 	}
 
 	double Cp_ideal( double T/*K*/, double Pg/*Pa*/ ) const {
@@ -147,8 +148,8 @@ public:
 		/* [J/(kg*K)] */
 
 		Cp = Cp_ideal( T, Pg ) + Cp_res( T, Pg, z_CH4 );		/* [J/(kg*K)] */
-
-		return Cp/characteristicValue.specificheat_c; /*ndim*/
+		
+		return 2165.24/characteristicValue.specificheat_c; /*ndim*/
 	}
 
 	double Cv(double T/*K*/, double Pg/*Pa*/, double z_CH4 ) const {
@@ -207,7 +208,7 @@ public:
 		double Pc /*[MPa]*/ = water.CriticalPressure()/1e6;	//critical pressure of water
 		double tau = 1 - T/Tc;    							//dimensionless temperature
 		double Ts = T/Tc;         							//reduced temperature
-
+		//std::cout<< "Ts = " << Ts << " Pc = " << Pc << " S = " << S << std::endl;
 		// vapor pressure of water
 		double a1 = -7.85951783;
 		double a2 =  1.84408259;
@@ -215,16 +216,18 @@ public:
 		double a4 =  22.6807411;
 		double a5 = -15.9618719;
 		double a6 =  1.80122502;
-		double pvap /*[MPa]*/ = Pc * exp( Tc/T * ( a1*tau + a2*pow(tau,1.5) + a3*pow(tau,3) + a4*pow(tau,3.5) + a5*pow(tau,4) + a6*pow(tau,7.5) ) );
-
+		double pvap /*[MPa]*/ = Pc * exp( Tc/T * ( a1*tau + a2*pow(tau,1.5) + a3*pow(tau,3) + a4*pow(tau,3.5) 
+															+ a5*pow(tau,4) + a6*pow(tau,7.5) ) );
+		//double pvap /*[MPa]*/ = water.SaturatedVaporPressure( T/*K*/, S );
+		//std::cout<< "pvap = " << pvap << std::endl;
 		// Henry constant
 		double A = -11.0094;
 		double B = 4.8362;
 		double C = 12.5220;
 		kHenry /*MPa*/ = exp( log(pvap) + A/Ts + B*pow((1 - Ts),0.355)/Ts + C*exp(1 - Ts)*pow(Ts,(-0.41)) );
 		kHenry *= 1.e6; /* [Pa] */
-
-		return kHenry/characteristicValue.P_c; /*ndim*/
+		
+		return 1.343e11/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
 	}
 
 };

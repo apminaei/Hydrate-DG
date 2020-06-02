@@ -1,3 +1,8 @@
+
+/*
+	Check for the pressure? Pg or Pw
+
+*/
 class BaseEoS{
 private:
 	constexpr static double eps = 1.e-6;

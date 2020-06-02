@@ -1,3 +1,4 @@
+/* ALL PARAMETERS ARE NONDIMENSIONAL */
 class Hydrate {
 
 private:
@@ -41,8 +42,9 @@ public:
 		/* Cp: unit -> J/kg.K */
 
 		Cp = ( 1.9370547e-05*T*T*T - 1.5151760e-02*T*T + 3.9553876*T - 342.70565 )*1.0e3;
-
-		return Cp/characteristicValue.specificheat_c; /*ndim*/
+// std::cout<< "rho = " << Cp << " T = " << P  << std::endl;
+// 			exit(0);
+		return 2216/characteristicValue.specificheat_c; /*ndim*/
 
 	}
 

@@ -3,7 +3,9 @@
  * 
  *  class of initial primary variables that depends on 
  *  user defined initial values and properties of the problem
- *      
+ *   
+ *  All Values from initial_conditions are dimensional and must be transfered to nondim here 
+ *    
  */
 
 #ifndef INITIAL_HH_
@@ -209,7 +211,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= icvalue.evaluate(e,xlocal)[Indices::PVId_XCH4]/CharacteristicValues::x_c ; //initial ch4 mole fraction
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_XCH4] ; //initial ch4 mole fraction /CharacteristicValues::x_c
     return;
   }
   //! get a reference to the grid view
@@ -241,7 +243,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y= icvalue.evaluate(e,xlocal)[Indices::PVId_YH2O]/CharacteristicValues::x_c ; //initial h2o mole fraction
+    y= icvalue.evaluate(e,xlocal)[Indices::PVId_YH2O] ; //initial h2o mole fraction /CharacteristicValues::x_c
     return;
   }
   //! get a reference to the grid view
@@ -273,7 +275,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-    y=icvalue.evaluate(e,xlocal)[Indices::PVId_C]/CharacteristicValues::x_c ; //initial salt mole fraction
+    y=icvalue.evaluate(e,xlocal)[Indices::PVId_C]; //initial salt mole fraction /CharacteristicValues::x_c 
     return;
   }
   //! get a reference to the grid view

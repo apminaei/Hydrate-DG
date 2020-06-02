@@ -11,31 +11,31 @@ public:
 
 	/* PHASES */
 #ifdef PLOT_VELOCITIES
-	static const unsigned unsigned int numOfPhases = 2;
-	static const unsigned unsigned int phaseId_g = 0;
-	static const unsigned unsigned int phaseId_w = 1;
+	static const unsigned int numOfPhases = 2;
+	static const unsigned int phaseId_g = 0;
+	static const unsigned int phaseId_w = 1;
 #endif
 	//static const unsigned int phaseId_liquid = 0;
 	//static const unsigned int phaseId_gas 	 = 1;
 
 	/* COMPONENTS */
-	static const unsigned int numOfComps  = 4;
-	static const unsigned int compId_XCH4 = 0;
-	static const unsigned int compId_XH2O = 1;
-	static const unsigned int compId_YCH4 = 2;
-	static const unsigned int compId_YH2O = 3;
+	static const int numOfComps  = 4;
+	static const int compId_XCH4 = 0;
+	static const int compId_XH2O = 1;
+	static const int compId_YCH4 = 2;
+	static const int compId_YH2O = 3;
 
 
 	/* PRIMARY VARIABLES */  // NOTE: The order of the indices must be the same as the order in the GFS, initial and boundary conditions
-	static const unsigned int numOfPVs 	 = 8 ;
-	static const unsigned int PVId_Pw  	= 0;
-	static const unsigned int PVId_Pc  	= 1;
-	static const unsigned int PVId_T   	= 2;
-	static const unsigned int PVId_Sg  	= 3;
-	static const unsigned int PVId_Sh 	= 4;
-	static const unsigned int PVId_XCH4	= 5 ;
-	static const unsigned int PVId_YH2O	= 6 ;
-	static const unsigned int PVId_C   	= 7;
+	static const int numOfPVs 	 = 8 ;
+	static const int PVId_Pw  	= 0;
+	static const int PVId_Pc  	= 1;
+	static const int PVId_Sg  	= 2;
+	static const int PVId_Sh	= 3;
+	static const int PVId_T 	= 4;
+	static const int PVId_XCH4	= 5 ;
+	static const int PVId_YH2O	= 6 ;
+	static const int PVId_C   	= 7;
 
 	static const unsigned int numOfSVs 	= 16;
 	static const unsigned int SVId_Pg	= 0;  // gas phase pressure
@@ -75,8 +75,8 @@ public:
 	static const unsigned int BCId_gas		= 1;
 	static const unsigned int BCId_salt 	= 2;
 	static const unsigned int BCId_heat		= 3;
-	static const unsigned int BCId_dirichlet		= 0;
-	static const unsigned int BCId_neumann 	 		= 1;
+	static const unsigned int BCId_dirichlet		= 1;
+	static const unsigned int BCId_neumann 	 		= 0;
 	static const unsigned int BCId_depressurization = 2;
 
 
