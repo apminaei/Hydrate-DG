@@ -875,7 +875,8 @@ public:
     Dune::FieldVector<RF, dim> v_g(0.0);
     Dune::FieldVector<RF, dim> v_w(0.0);
 
-    Dune::FieldVector<RF, dim> Kg(0.0);
+    Dune::FieldVector<RF, dim> Kg_s(0.0);
+    Dune::FieldVector<RF, dim> Kg_n(0.0);
 
     // Transformation matrix
     typename IG::Entity::Geometry::JacobianInverseTransposed jac;
@@ -1127,7 +1128,7 @@ public:
         gradu_Pw_s.axpy(x_s(lfsu_Pw_s, i), gradphi_Pw_s[i]);
       gradu_Pw_n = 0.0;
       for (size_type i = 0; i < lfsu_Pw_n.size(); i++)
-        gradu_Pw_n.axpy(x_s(lfsu_Pw_n, i), gradphi_Pw_n[i]);
+        gradu_Pw_n.axpy(x_n(lfsu_Pw_n, i), gradphi_Pw_n[i]);
 
       // compute gradient of Pc
       gradu_Pc_s = 0.0;
@@ -1135,7 +1136,7 @@ public:
         gradu_Pc_s.axpy(x_s(lfsu_Pc_s, i), gradphi_Pc_s[i]);
       gradu_Pc_n = 0.0;
       for (size_type i = 0; i < lfsu_Pc_n.size(); i++)
-        gradu_Pc_n.axpy(x_s(lfsu_Pc_n, i), gradphi_Pc_n[i]);
+        gradu_Pc_n.axpy(x_n(lfsu_Pc_n, i), gradphi_Pc_n[i]);
 
       // compute gradient of Sg
       gradu_Sg_s = 0.0;
@@ -1241,7 +1242,8 @@ public:
       auto gradu_Pg_n = gradu_Pw_n + gradu_Pc_n;//- coeff_grad_Sw_n * gradu_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * gradu_Sh_n;
       
       auto g = -property.parameter.g();
-      K_s.mv(g, Kg);
+      K_s.mv(g, Kg_s);
+      K_n.mv(g, Kg_n);
 
 
       
@@ -1349,6 +1351,53 @@ public:
         // exit(0);
       // integration factor
       auto factor = ip.weight() * geo.integrationElement(ip.position());
+
+      auto convectiveflux_CH4_g_s = rho_g_s * (1. - YH2O_s) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
+      auto convectiveflux_CH4_w_s = rho_w_s * (XCH4_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_H2O_g_s = rho_g_s * YH2O_s * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
+      auto convectiveflux_H2O_w_s = rho_w_s * (1. - XCH4_s - XC_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_SALT_w_s = rho_w_s * (XC_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_Heat_w_s = rho_w_s * Cp_w_s * (T_s - T_ref) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_Heat_g_s = rho_g_s * Cp_g_s * (T_s - T_ref) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
+
+      auto j_H2O_g_s = rho_g_s * Sg_s * DH2O_g_s * gradu_YH2O_s;
+      auto j_CH4_w_s = rho_w_s * Sw_s * DCH4_w_s * gradu_XCH4_s;
+      auto j_SALT_w_s = rho_w_s * Sw_s * DCH4_w_s * gradu_XC_s;
+      auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
+      auto j_CH4_g_s = - j_H2O_g_s;
+
+      auto convectiveflux_CH4_s = convectiveflux_CH4_g_s + convectiveflux_CH4_w_s;
+      auto convectiveflux_H2O_s = convectiveflux_H2O_g_s + convectiveflux_H2O_w_s;
+      auto convectiveflux_Heat_s = convectiveflux_Heat_g_s + convectiveflux_Heat_w_s;
+
+      auto diffusiveflux_CH4_s = j_CH4_g_s + j_CH4_w_s;
+      auto diffusiveflux_H2O_s = j_H2O_g_s + j_H2O_w_s;
+      auto diffusiveflux_SALT_s = j_SALT_w_s;
+      auto diffusiveflux_Heat_s = kth_eff_s * gradu_T_s;
+      // *******************   //
+      auto convectiveflux_CH4_g_n = rho_g_n * (1. - YH2O_n) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
+      auto convectiveflux_CH4_w_n = rho_w_n * (XCH4_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_H2O_g_n = rho_g_n * YH2O_n * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
+      auto convectiveflux_H2O_w_n = rho_w_n * (1. - XCH4_n - XC_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_SALT_w_n = rho_w_n * (XC_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_Heat_w_n = rho_w_n * Cp_w_n * (T_n - T_ref) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_Heat_g_n = rho_g_n * Cp_g_n * (T_n - T_ref) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
+
+      auto j_H2O_g_n = rho_g_n * Sg_n * DH2O_g_n * gradu_YH2O_n;
+      auto j_CH4_w_n = rho_w_n * Sw_n * DCH4_w_n * gradu_XCH4_n;
+      auto j_SALT_w_n = rho_w_n * Sw_n * DCH4_w_n * gradu_XC_n;
+      auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
+      auto j_CH4_g_n = - j_H2O_g_n;
+
+      auto convectiveflux_CH4_n = convectiveflux_CH4_g_n + convectiveflux_CH4_w_n;
+      auto convectiveflux_H2O_n = convectiveflux_H2O_g_n + convectiveflux_H2O_w_n;
+      auto convectiveflux_Heat_n = convectiveflux_Heat_g_n + convectiveflux_Heat_w_n;
+
+      auto diffusiveflux_CH4_n = j_CH4_g_n + j_CH4_w_n;
+      auto diffusiveflux_H2O_n = j_H2O_g_n + j_H2O_w_n;
+      auto diffusiveflux_SALT_n = j_SALT_w_n;
+      auto diffusiveflux_Heat_n = kth_eff_n * gradu_T_n;
+
 
       //Methane
       auto DH2O_g = omegaup_g_s * DH2O_g_s + omegaup_g_n * DH2O_g_n; // = DCH4_g
