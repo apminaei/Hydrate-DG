@@ -2135,7 +2135,7 @@ public:
       }
       else if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
-        grad_Pw_n = 1 * grad_Pw_s + 0.0 * (Pw_n-Pw_cell_center) * Coeff_numeric_derivaritve / Xc_P ;
+        grad_Pw_n = 0 * grad_Pw_s + 1.0 * (Pw_n-Pw_cell_center) * Coeff_numeric_derivaritve / Xc_P ;
       }
 
       // evaluate normal flux of Sh
@@ -2147,7 +2147,7 @@ public:
       }
       else if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
       {
-        grad_Sh_n = 1 * grad_Sh_s + 0.0 * (Sh_n-Sh_cell_center) * Coeff_numeric_derivaritve ;
+        grad_Sh_n = 0 * grad_Sh_s + 1.0 * (Sh_n-Sh_cell_center) * Coeff_numeric_derivaritve ;
       }
 
       // evaluate normal flux of Sg
@@ -2159,7 +2159,7 @@ public:
       }
       else if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
       {
-        grad_Sg_n = 1 * grad_Sg_s + 0.0 * (Sg_n-Sg_cell_center) * Coeff_numeric_derivaritve ;
+        grad_Sg_n = 0 * grad_Sg_s + 1.0 * (Sg_n-Sg_cell_center) * Coeff_numeric_derivaritve ;
       }
 
       // evaluate normal flux of Pc
@@ -2171,7 +2171,7 @@ public:
       }
       else if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
       {
-        grad_Pc_n = 1 * grad_Pc_s + 0.0 * (Pc_n-Pc_cell_center) * Coeff_numeric_derivaritve / Xc_P;
+        grad_Pc_n = 0 * grad_Pc_s + 1.0 * (Pc_n-Pc_cell_center) * Coeff_numeric_derivaritve / Xc_P;
       }
 
       // evaluate normal flux of T
@@ -2183,7 +2183,7 @@ public:
       }
       else if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
-        grad_T_n = 1 * grad_T_s + 0.0 * (T_n-T_cell_center) * Coeff_numeric_derivaritve / Xc_T;
+        grad_T_n = 0 * grad_T_s + 1.0 * (T_n-T_cell_center) * Coeff_numeric_derivaritve / Xc_T;
       }
 
       // evaluate normal flux of XCH4
@@ -2195,7 +2195,7 @@ public:
       }
       else if (bctype[Indices::PVId_XCH4] == Indices::BCId_dirichlet)
       {
-        grad_XCH4_n = 1 * grad_XCH4_s + 0.0 * (XCH4_n-XCH4_cell_center) * Coeff_numeric_derivaritve ;
+        grad_XCH4_n = 0 * grad_XCH4_s + 1.0 * (XCH4_n-XCH4_cell_center) * Coeff_numeric_derivaritve ;
       }
 
       // evaluate normal flux of YH2O
@@ -2207,7 +2207,7 @@ public:
       }
       else if (bctype[Indices::PVId_YH2O] == Indices::BCId_dirichlet)
       {
-        grad_YH2O_n = 1 * grad_YH2O_s + 0.0 * (YH2O_n-YH2O_cell_center) * Coeff_numeric_derivaritve ;
+        grad_YH2O_n = 0 * grad_YH2O_s + 1.0 * (YH2O_n-YH2O_cell_center) * Coeff_numeric_derivaritve ;
       }
 
       // evaluate normal flux of XC
@@ -2219,7 +2219,7 @@ public:
       }
       else if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
       {
-        grad_XC_n = 1 * grad_XC_s + 0.0 * (XC_n-XC_cell_center) * Coeff_numeric_derivaritve ;
+        grad_XC_n = 0 * grad_XC_s + 1.0 * (XC_n-XC_cell_center) * Coeff_numeric_derivaritve ;
       }
       
       RF Sw_s = 1. - Sg_s - Sh_s;
@@ -2260,8 +2260,8 @@ public:
       auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
 
       //auto Kgradu_Pg_s = Kgradu_Pw_s + coeff_grad_Sg_s * Kgradu_Sg_s + (coeff_grad_Sh_s + coeff_grad_Sg_s) * Kgradu_Sh_s;
-      auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
-      //auto grad_Pg_s = grad_Pw_s + grad_Pc_s ;
+      //auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
+      auto grad_Pg_s = grad_Pw_s + grad_Pc_s ;
 
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
       double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
@@ -2309,8 +2309,8 @@ public:
       auto coeff_grad_Sh_n = dPcSF1_dSh_n + dPc_dSwe_n * dSwe_dSh_s ;
 
       //auto Kgradu_Pg_s = Kgradu_Pw_s + coeff_grad_Sg_s * Kgradu_Sg_s + (coeff_grad_Sh_s + coeff_grad_Sg_s) * Kgradu_Sh_s;
-      auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
-      //auto grad_Pg_n = grad_Pw_n + grad_Pc_n ;
+      //auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
+      auto grad_Pg_n = grad_Pw_n + grad_Pc_n ;
 
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
       double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
