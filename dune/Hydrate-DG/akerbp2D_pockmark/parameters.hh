@@ -85,11 +85,11 @@ public:
 		//reference state
 		ref_salinity = ptree.get("reference_state.salinity",(double)0.);
 		ref_saltconcentration = ref_salinity * (18.0/58.4); /*MolarMass_H2O/MolarMass_salt*/
-		ref_temperature = 273.15+ptree.get("reference_state.temperature",(double)0.);
+		ref_temperature = (273.15+ptree.get("reference_state.temperature",(double)0.))/X_c.T_c;
 
 
-		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-18);/*mol/m².Pa.s*/
-		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-18);/*mol/m².Pa.s*/
+		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-12);/*mol/m².Pa.s*/
+		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-12);/*mol/m².Pa.s*/
 		time_initial_problem = ptree.get("initial_problem.time_end",(double)5.); /*years*/
 		time_initial_problem *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
 		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate",(double)1.e-12);/*mol/m².Pa.s*/

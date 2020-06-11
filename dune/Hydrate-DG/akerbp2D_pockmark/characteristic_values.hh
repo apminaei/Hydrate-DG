@@ -3,15 +3,15 @@ class CharacteristicValues{
 public:
 
 	constexpr static double x_c = 1.; 
-	constexpr static double t_c = 7.2e4; // t_end Characteristic value for time
-	constexpr static double P_c = 5.e4; // Pentry Characteristic value for Pressure
-	constexpr static double T_c = 273.15e0; // T_ref Characteristic value for Temperature
-	constexpr static double permeability_c = 1.e-12;
-	constexpr static double density_c = 1000.;
-	constexpr static double viscosity_c = 1.e-3;
-	constexpr static double specificheat_c = 1000.;
+	constexpr static double t_c = 1.;//7.2e4; // t_end Characteristic value for time
+	constexpr static double P_c = 1.;//5.e4; // Pentry Characteristic value for Pressure
+	constexpr static double T_c = 1.;//273.15e0; // T_ref Characteristic value for Temperature
+	constexpr static double permeability_c = 1.e0;
+	constexpr static double density_c = 1.;
+	constexpr static double viscosity_c = 1.e0;
+	constexpr static double specificheat_c = 1.;
 	constexpr static double thermalconductivity_c = 1.;
-	constexpr static double dispersivity_c = 1.e-9;
+	constexpr static double dispersivity_c = 1.e0;
 
 	constexpr static double X_source_mass 		= t_c/density_c;// Correct
 	constexpr static double X_convective_mass 	= ( permeability_c/(x_c*x_c) ) * ( P_c*t_c/viscosity_c );// Correct

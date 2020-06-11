@@ -56,7 +56,7 @@ public:
 	}
 
 	bool isRightBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( globalPos[0] > X_length - eps )
+		if( globalPos[0] > Xmax - eps )
 			return true;
 		else
 			return false;
@@ -81,14 +81,14 @@ public:
 
 	bool isTopBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
 		if( dimension == 2 ){
-			if( globalPos[1] > Z_length - eps ){
+			if( globalPos[1] > Zmax - eps ){
 				return true;
 			}
 			else
 				return false;
 		}
 		else if( dimension == 3 ){
-			if( globalPos[2] < Z_length - eps ){
+			if( globalPos[2] < Zmax - eps ){
 				return true;
 			}
 			else

@@ -58,7 +58,7 @@ public:
 		return K/characteristicValue.permeability_c; /*ndim*/
 	}
 
-	// vector coefficient
+	// 
 	Dune::FieldMatrix<double,dim,dim>
 	SedimentPermeabilityTensor
 	(const typename GV::Traits::template Codim<0>::Entity& element,
@@ -74,6 +74,25 @@ public:
 		PermeabilityTensor[1][1] = K_yy ;
 		
 		return PermeabilityTensor; /*ndim*/
+	}
+
+	// vector coefficient
+	Dune::FieldMatrix<double,dim,dim>
+	SedimentPermeabilityTensorInverse
+	(const typename GV::Traits::template Codim<0>::Entity& element,
+	 const Dune::FieldVector<double,dim>& xlocal) const {
+
+		double K_xx = SedimentPermeability(element,xlocal);
+		double K_yy = K_xx;
+		Dune::FieldMatrix<double,dim, dim> PermeabilityTensorIn;
+		
+		PermeabilityTensorIn[0][0] = K_yy ;
+		PermeabilityTensorIn[0][1] = 0. ;
+		PermeabilityTensorIn[1][0] = 0. ;
+		PermeabilityTensorIn[1][1] = K_xx ;
+		auto det = PermeabilityTensorIn[0][0]*PermeabilityTensorIn[1][1]-PermeabilityTensorIn[0][1]*PermeabilityTensorIn[1][0];
+		
+		return 1./det*PermeabilityTensorIn; /*ndim*/
 	}
 
 	double SoilGrainRadius

@@ -254,7 +254,7 @@ public:
  */
 template<typename GV, typename Properties,  typename RF>
 class XC_Initial
-  : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, XCH4_Initial<GV,Properties,RF> >
+  : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, XC_Initial<GV,Properties,RF> >
 {
 private:
 	  const GV& gv;

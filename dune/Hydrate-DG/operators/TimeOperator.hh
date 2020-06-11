@@ -5,8 +5,6 @@
  *      Author: shubhangi
  */
 
-#ifndef FLOW_TIMEOPERATOR_HH_
-#define FLOW_TIMEOPERATOR_HH_
 using namespace Dune::PDELab;
 
 template <class GV, typename Params>
@@ -99,7 +97,7 @@ public:
 		using RangeType = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
 			Traits::LocalBasisType::Traits::RangeType;
 		using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
-
+		auto T_ref = property.parameter.ReferenceTemperature();
 		// Reference to cell
 	  	const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
@@ -225,21 +223,21 @@ public:
 			auto YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
 			auto XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			//  end of terms regarding components
-			// std::cout << " VLequil_s = " << VLequil_s[Indices::compId_YCH4] << " VLequil_s = " << VLequil_s[Indices::compId_XH2O] << std::endl;
+			//std::cout << " Sg = " << Sg << " Sh = time operator" << Sh << std::endl;
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
-			for (size_type i = 0; i < lfsv_Pw.size(); i++)
+			for (size_type i = 0; i < lfsv_Pc.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YCH4 * Sg + rho_w * por * XCH4 * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pc, i, ((rho_g * por * YCH4 * Sg + rho_w * por * XCH4 * Sw) * psi_Pc[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
 				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
 			}
-			for (size_type i = 0; i < lfsv_Pc.size(); i++)
+			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pc, i, ((rho_g * por * YH2O * Sg + rho_w * por * XH2O * Sw) * psi_Pc[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * XH2O * Sw) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{
@@ -247,11 +245,10 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_T.size(); i++)
 			{
-				r.accumulate(lfsv_T, i, (Cv_eff * T * psi_T[i]) * factor);
+				r.accumulate(lfsv_T, i, (Cv_eff * (T-T_ref) * psi_T[i]) * factor);
 			}
 
 		} 	//End Quadrature Rule
 	}	// End of alpha volume
 	
 };
-#endif /* FLOW_TIMEOPERATOR_HH_ */

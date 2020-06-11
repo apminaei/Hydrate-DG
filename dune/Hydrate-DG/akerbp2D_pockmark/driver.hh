@@ -34,7 +34,7 @@ void driver(const GV &gv, // GridView
 	Real time_op = time;
 	//std::cout << " time = " << time << " t_end = " << t_END <<  " dt_min = " << dt_min << " dt = " << dt << std::endl;
 	//exit(0);
-	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)8);
+	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)12);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 
 	const int degree_S = 1;
@@ -49,7 +49,7 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ConformingDirichletConstraints CON0;	// pure Neumann: no constraints
 #endif									
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;//;// 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;// 
 	FEM_P fem_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_S;// basis function
 	FEM_S fem_S;
@@ -172,10 +172,10 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::IIPG;
 	double alpha_g = 0.e1;
 	double alpha_w = 0.e1;
-	double alpha_s = 0.e0;
+	double alpha_s = 0.e1;
 	double alpha_T = 0.e1;
-	double alpha_x = 0.e0;
-	double alpha_y = 0.e0;
+	double alpha_x = 0.e1;
+	double alpha_y = 0.e1;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
@@ -185,7 +185,7 @@ void driver(const GV &gv, // GridView
 	TLOP tlop(gv, property);
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
-	MBE mbe(20);
+	MBE mbe(100);
 
 	typedef Dune::PDELab::GridOperator<GFS, GFS, LOP, MBE, Real, Real, Real, CC, CC> GOLOP;
 	GOLOP goLOP(gfs, cc, gfs, cc, lop, mbe);
@@ -213,10 +213,10 @@ void driver(const GV &gv, // GridView
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
 	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	LS ls(gfs, cc, 5000, 2);
+	LS ls(gfs, cc, 100, 2);
 
-	//typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	//LS ls(gfs, 1000, 1, true, true);
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
+	// LS ls(gfs, 100, 1, true, true);
 
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
 	// LS ls(gfs,5000,1,true,true);
@@ -231,25 +231,41 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, 100, verbose);
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 #else
-	//typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;
-	//LS ls(1000, true);
+	// typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;
+	// LS ls(1000, true);
 
 	typedef Dune::PDELab::ISTLBackend_SEQ_SuperLU LS;
 	LS ls;
 	std::cout << " LS DONE ! " << std::endl;
 #endif
 
+    //    SELECT SOLVER FOR NON-LINEAR PROBLEM
+    using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
+    PDESOLVER pdesolver( igo, ls );
+    //     select control parameters for non-linear PDE-solver
+	pdesolver.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
+    //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
+	pdesolver.setReassembleThreshold(0.0);
+    pdesolver.setVerbosityLevel(2);
+    pdesolver.setReduction(1e-5);
+    pdesolver.setMinLinearReduction(1e-5);
+	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    pdesolver.setForceIteration(true);
+	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-5)); 
+
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
-	typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
-	PDESOLVER pdesolver(igo, ls);
+	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
+	// PDESOLVER pdesolver(igo, ls);
 	
 	// 	select control parameters for non-linear PDE-solver
 	//typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
-	typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
-	lineSearchStrategy linesearchstrategy(pdesolver);
-	pdesolver.setParameters(ptree.sub("newton"));
+	
+	//typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
+	//lineSearchStrategy linesearchstrategy(pdesolver);
+	
+	//pdesolver.setParameters(ptree.sub("newton"));
 	// pdesolver.setVerbosityLevel(2);
-	// pdesolver.setReduction(1e-6);
+	// pdesolver.setReduction(1e-3);
 	// pdesolver.setMinLinearReduction(1e-6);
 	// pdesolver.setAbsoluteLimit(1e-6);
 	
@@ -293,7 +309,7 @@ void driver(const GV &gv, // GridView
 
 	//	VTK
 	auto pathName = "/home/amir/dune-master/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
-	auto fileName = "Hydrate_methane_";
+	auto fileName = ptree.get("output.file_name",(std::string)"test");
 	const std::string str = "";
 	//Dune::PDELab::FilenameHelper fn(pathName + fileName);
 
@@ -412,17 +428,17 @@ void driver(const GV &gv, // GridView
 		//		2. ADVANCE TIME:
 		time += dt;
 		std::cout << " " << std::endl;
-		std::cout << " time = " << time * property.characteristicValue.t_c;
+		std::cout << " time = " << time ;
 
 		if (adaptive_time_control)
 		{
 			if (newton_iterations > maxAllowableIterations)
 			{
-				dt = std::max(dt , dt_min);
+				dt = std::max(dt*0.6 , dt_min);
 			}
 			else if (newton_iterations <= minAllowableIterations)
 			{
-				dt = std::min(dt * 2, dt_max);
+				dt = std::min(dt * 1.1, dt_max);
 			}
 		}
 		else
@@ -430,24 +446,24 @@ void driver(const GV &gv, // GridView
 			dt = dtstart;
 		}
 
-		std::cout << " , time+dt = " << (time + dt) * property.characteristicValue.t_c
-				  << " , opTime = " << t_OP * opcount * property.characteristicValue.t_c;
+		std::cout << " , time+dt = " << (time + dt) 
+				  << " , opTime = " << t_OP * opcount ;
 
 		if (time + dt > t_OP * opcount - 1.e-7)
 		{
 			dtLast = dt;
 			dt = t_OP * opcount - time;
 
-			std::cout << " , because timeNext > opNext , dt set to : " << dt * property.characteristicValue.t_c << std::endl;
+			std::cout << " , because timeNext > opNext , dt set to : " << dt  << std::endl;
 			dtFlag = 0;
 		}
 		dtFlag += 1;
 
 		if (opcount > 1 and dtFlag == 2)
 		{
-			dt = std::max(dt, dtLast * 0.6);
+			dt = std::max(dt, dtLast * 0.5);
 		}
-		std::cout << " , dt  : " << dt * property.characteristicValue.t_c << std::endl;
+		std::cout << " , dt  : " << dt << std::endl;
 		std::cout << " " << std::endl;
 
 		std::cout << " READY FOR NEXT ITERATION. " << std::endl;

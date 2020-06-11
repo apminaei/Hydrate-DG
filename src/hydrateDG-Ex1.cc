@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		typedef Dune::YaspGrid<dim> Grid;
 		std::bitset<dim> periodic(false);
 
-		int overlap = 2;
+		int overlap = 1;
 		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
 		grid->refineOptions(false); // keep overlap in cells
 
