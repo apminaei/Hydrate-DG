@@ -773,7 +773,9 @@ public:
     // Get geometry of intersection in local coordinates of cell_inside and cell_outside
     auto geo_in_inside = ig.geometryInInside();
     auto geo_in_outside = ig.geometryInOutside();
-
+    // cell geometries
+    auto ref_el_inside 	= referenceElement(geo_inside);
+    auto inside_cell_center_local 	= ref_el_inside.position(0,0);
     // face diameter; this should be revised for anisotropic meshes?
     auto h_F = std::min(geo_inside.volume(), geo_outside.volume()) / geo.volume(); // Houston!
 
@@ -895,6 +897,9 @@ public:
       auto ip_global_s = geo_inside.global(iplocal_s);
       auto ip_global_n = geo_outside.global(iplocal_n);
 
+      auto d = iplocal_s;  
+	    d -= inside_cell_center_local;
+	    auto distance = d.two_norm();
       //std::cout << "ip_global_s " << ip_global_s << "  local " << iplocal_s <<  "  ip position "<< ip.position() <<  std::endl;
       // evaluate basis functions
 
@@ -1314,37 +1319,32 @@ public:
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       //kth_eff_n *= Xc_diff_h;
       //std::cout << " Sg_s = " << Sg_s << " Sh alpha skeleton = " << Sh_s << std::endl;
-      double normalpotential_g = omega_s * ((gradu_Pg_s - rho_g_s * g )* n_F_local) + omega_n * ((gradu_Pg_n - rho_g_n * g) * n_F_local);
-      double normalpotential_w = omega_s * ((gradu_Pw_s - rho_w_s * g )* n_F_local) + omega_n * ((gradu_Pw_n - rho_w_n * g) * n_F_local);
+      // upwinding wrt gas-phase velocity
+			auto normalgravity = g * n_F_local;
+			normalgravity *= Xc_grav;
+			auto normalpotential_g = 0.5 * (gradu_Pg_s + gradu_Pg_n) * n_F_local
+								   + ( 0.5*(rho_g_s + rho_g_n) ) * normalgravity ;
+			double omegaup_g_s = 0.0, omegaup_g_n = 0.0;
+			if( normalpotential_g>=0.){
+				omegaup_g_s = 0.5;
+				omegaup_g_n = 0.5;
+			}else{
+				omegaup_g_s = 0.5;
+				omegaup_g_n = 0.5;
+			}
 
-      RF omegaup_g_s, omegaup_g_n;
-      if (normalpotential_g <= 0.0)
-      {
-        omegaup_g_s = 0.5;
-        omegaup_g_n = 0.5;
-      }
-      else
-      {
-        omegaup_g_s = 0.5;
-        omegaup_g_n = 0.5;
-      }
-
-      RF omegaup_w_s, omegaup_w_n;
-      if (normalpotential_w <= 0.0)
-      {
-        omegaup_w_s = 0.5;
-        omegaup_w_n = 0.5;
-      }
-      else
-      {
-        omegaup_w_s = 0.5;
-        omegaup_w_n = 0.5;
-      }
-
-      // auto krN = omegaup_g_s * krN_s + omegaup_g_n * krN_n;
-      // auto krW = omegaup_w_s * krW_s + omegaup_w_n * krW_n;
-      // auto h_g = omegaup_g_s * Cp_g_s * (T_s-T_ref) + omegaup_g_n * Cp_g_n * (T_n-T_ref);
-      // auto h_w = omegaup_w_s * Cp_w_s * (T_s-T_ref) + omegaup_w_n * Cp_w_n * (T_n-T_ref);
+			//upwinding wrt water-phase velocity
+			auto normalpotential_w = 0.5 * (gradu_Pw_s + gradu_Pw_n) * n_F_local
+								   + ( 0.5*(rho_w_s + rho_w_n) ) * normalgravity ;
+			double omegaup_w_s = 0.0, omegaup_w_n = 0.0;
+			if( normalpotential_w>=0.){
+				omegaup_w_s = 0.5;
+				omegaup_w_n = 0.5;
+			}else{
+				omegaup_w_s = 0.5;
+				omegaup_w_n = 0.5;
+			}
+     
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
        //std::cout << "H_M_w_n = " << H_M_w_n << " P_H_sat_n = " << P_H_sat_n << " Cp_g_n = " << Cp_g_n << " rho_g_n = " << rho_g_n <<std::endl;
     //     " source_m = " << Xc_source_m << " source_h = " << Xc_source_h << std::endl;
@@ -1429,7 +1429,7 @@ public:
       
       // double term_nipg_m_x = theta_x * (XCH4_s - XCH4_n);
 
-      double term_penalty_g = penalty_factor_g * (Pg_s - Pg_n);
+      double term_penalty_g = penalty_factor_g * (Pc_s - Pc_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
       {
@@ -2344,6 +2344,7 @@ public:
       auto kth_h_n = property.hydrate.ThermalConductivity(T_n * Xc_T, Peff_n * Xc_P);
       auto kth_s_n = property.soil.ThermalConductivity() ;
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       auto h_g_n =  Cp_g_n * (T_n-T_ref) ;
       auto h_w_n =  Cp_w_n * (T_n-T_ref) ;
       // std::cout << " Sg_s = " << Sg_s << " Sh alpha boundary = " << Sh_s << std::endl;
@@ -2351,34 +2352,208 @@ public:
       omega_s = 0.0;
       omega_n = 1.0;
       //KInverse_s.mv(v_g, Kinv_v_g_s);
-      double normalpotential_g = omega_s * (grad_Pg_s - rho_g_s * g * n_F_local) + omega_n * (grad_Pg_n - rho_g_n * g * n_F_local);
-      double normalpotential_w = omega_s * (grad_Pw_s - rho_w_s * g * n_F_local) + omega_n * (grad_Pw_n - rho_w_n * g * n_F_local);
+      // upwinding wrt gas-phase velocity
+			auto normalgravity = g * n_F_local;
+			normalgravity *= Xc_grav;
+			auto normalpotential_g = 0.5 * (grad_Pg_s + grad_Pg_n)
+								   + ( 0.5*(rho_g_s + rho_g_n) ) * normalgravity ;
+			double omegaup_g_s = 0.0, omegaup_g_n = 0.0;
+			if( normalpotential_g>=0.){
+				omegaup_g_s = 0.5;
+				omegaup_g_n = 0.5;
+			}else{
+				omegaup_g_s = 0.5;
+				omegaup_g_n = 0.5;
+			}
 
-      RF omegaup_g_s, omegaup_g_n;
-      if (normalpotential_g <= 0.0)
-      {
-        omegaup_g_s = 0.0;
-        omegaup_g_n = 1;
-      }
-      else
-      {
-        omegaup_g_s = 0.0;
-        omegaup_g_n = 1;
-      }
+			//upwinding wrt water-phase velocity
+			auto normalpotential_w = 0.5 * (grad_Pw_s + grad_Pw_n)
+								   + ( 0.5*(rho_w_s + rho_w_n) ) * normalgravity ;
+			double omegaup_w_s = 0.0, omegaup_w_n = 0.0;
+			if( normalpotential_w>=0.){
+				omegaup_w_s = 0.5;
+				omegaup_w_n = 0.5;
+			}else{
+				omegaup_w_s = 0.5;
+				omegaup_w_n = 0.5;
+			}
 
-      RF omegaup_w_s, omegaup_w_n;
-      if (normalpotential_w <= 0.0)
+      
+      //   fluxes and diff. flux
+      auto convectiveflux_CH4_g_s = rho_g_s * (YCH4_s) * K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
+      auto convectiveflux_CH4_w_s = rho_w_s * (XCH4_s) * K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
+      auto convectiveflux_H2O_g_s = rho_g_s * YH2O_s * K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
+      auto convectiveflux_H2O_w_s = rho_w_s * (XH2O_s) * K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
+      auto convectiveflux_SALT_w_s = rho_w_s * (XC_s) * K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
+      auto convectiveflux_Heat_w_s = rho_w_s * Cp_w_s * (T_s - T_ref) * K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
+      auto convectiveflux_Heat_g_s = rho_g_s * Cp_g_s * (T_s - T_ref) * K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
+
+      auto j_H2O_g_s = rho_g_s * Sg_s * DH2O_g_s * grad_YH2O_s;
+      auto j_CH4_w_s = rho_w_s * Sw_s * DCH4_w_s * grad_XCH4_s;
+      auto j_SALT_w_s = rho_w_s * Sw_s * DCH4_w_s * grad_XC_s;
+      auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
+      auto j_CH4_g_s = - j_H2O_g_s;
+
+      auto convectiveflux_CH4_s = omegaup_g_s * convectiveflux_CH4_g_s + omegaup_w_s * convectiveflux_CH4_w_s;
+      auto convectiveflux_H2O_s = omegaup_g_s * convectiveflux_H2O_g_s + omegaup_w_s * convectiveflux_H2O_w_s;
+      auto convectiveflux_Heat_s = omegaup_g_s * convectiveflux_Heat_g_s + omegaup_w_s * convectiveflux_Heat_w_s;
+
+      auto diffusiveflux_CH4_s = j_CH4_g_s + j_CH4_w_s;
+      auto diffusiveflux_H2O_s = j_H2O_g_s + j_H2O_w_s;
+      auto diffusiveflux_SALT_s = j_SALT_w_s;
+      auto diffusiveflux_Heat_s = grad_T_s; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
+      // *******************   //
+      auto convectiveflux_CH4_g_n = rho_g_n * (YCH4_n) * K * krN_n * (grad_Pg_n - rho_g_n * normalgravity);
+      auto convectiveflux_CH4_w_n = rho_w_n * (XCH4_n) * K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
+      auto convectiveflux_H2O_g_n = rho_g_n * YH2O_n * K * krN_n * (grad_Pg_n - rho_g_n * normalgravity);
+      auto convectiveflux_H2O_w_n = rho_w_n * (XH2O_n) * K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
+      auto convectiveflux_SALT_w_n = rho_w_n * (XC_n) * K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
+      auto convectiveflux_Heat_w_n = rho_w_n * Cp_w_n * (T_n - T_ref) * K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
+      auto convectiveflux_Heat_g_n = rho_g_n * Cp_g_n * (T_n - T_ref) * K * krN_n * (grad_Pg_n - rho_g_n * normalgravity);
+
+      auto j_H2O_g_n = rho_g_n * Sg_n * DH2O_g_n * grad_YH2O_n;
+      auto j_CH4_w_n = rho_w_n * Sw_n * DCH4_w_n * grad_XCH4_n;
+      auto j_SALT_w_n = rho_w_n * Sw_n * DCH4_w_n * grad_XC_n;
+      auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
+      auto j_CH4_g_n = - j_H2O_g_n;
+
+      auto convectiveflux_CH4_n = omegaup_g_n * convectiveflux_CH4_g_n + omegaup_w_n * convectiveflux_CH4_w_n;
+      auto convectiveflux_H2O_n = omegaup_g_n * convectiveflux_H2O_g_n + omegaup_w_n * convectiveflux_H2O_w_n;
+      auto convectiveflux_Heat_n = omegaup_g_n * convectiveflux_Heat_g_n + omegaup_w_n * convectiveflux_Heat_w_n;
+
+      auto diffusiveflux_CH4_n = j_CH4_g_n + j_CH4_w_n;
+      auto diffusiveflux_H2O_n = j_H2O_g_n + j_H2O_w_n;
+      auto diffusiveflux_SALT_n = j_SALT_w_n;
+      auto diffusiveflux_Heat_n = grad_T_n; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
+
+
+      auto convectiveflux_CH4 = - ( convectiveflux_CH4_s + convectiveflux_CH4_n);
+      auto convectiveflux_H2O = - ( convectiveflux_H2O_s + convectiveflux_H2O_n);
+      auto convectiveflux_SALT = -(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
+      auto convectiveflux_Heat = - ( convectiveflux_Heat_s + convectiveflux_Heat_n);
+
+      auto diffusiveflux_CH4 = - 0.5 * ( diffusiveflux_CH4_s + diffusiveflux_CH4_n);
+      auto diffusiveflux_H2O = - 0.5 *  ( diffusiveflux_H2O_s + diffusiveflux_H2O_n);
+      auto diffusiveflux_SALT = - 0.5 *  ( diffusiveflux_SALT_s + diffusiveflux_SALT_n);
+      auto diffusiveflux_Heat = - kth_eff * (diffusiveflux_Heat_s + diffusiveflux_Heat_n);
+
+
+///*
+      //  ACCCUMULATE RESIDUALS  //
+			double tmp=0.;
+
+      // CH4-component-wise mass-balance
+      tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
+      double term_nipg_g = theta_g * (Pc_s - Pc_n);
+      double term_penalty_g = penalty_factor_g * (Pc_s - Pc_n);
+      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
       {
-        omegaup_w_s = 0.0;
-        omegaup_w_n = 1;
+        r.accumulate(lfsv_Pc_s, i, tmp * psi_Pc_s[i] * factor);
       }
-      else
+      // (non-)symmetric IP term
+      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
       {
-        omegaup_w_s = 0.0;
-        omegaup_w_n = 1;
+        r.accumulate(lfsv_Pc_s, i, - Xc_conv_m * term_nipg_g * K * krN_s * omegaup_g_s * rho_g_s 
+                                    * (YCH4_s) * n_F_local * gradpsi_Pc_s[i] * factor);
+      }
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+      {
+        r.accumulate(lfsv_Pc_s, i, term_penalty_g * psi_Pc_s[i] * factor);
+      }
+      
+      // SALT-component-wise mass-balance
+      tmp = Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
+      double term_nipg_c_x = theta_x * (XC_s - XC_n);
+      double term_penalty_c = penalty_factor_x * (XC_s - XC_n);
+      // diffusion term
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r.accumulate(lfsv_XC_s, i, tmp * psi_XC_s[i] * factor);
+      }
+      // (non-)symmetric IP term
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r.accumulate(lfsv_XC_s, i, - 0.5 *Xc_diff_m * term_nipg_c_x * rho_w_s 
+                                      * Sw_s * DCH4_w_s * gradpsi_XC_s[i] * n_F_local * factor);
+      }
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      }
+     
+      
+      // H2O-component-wise mass-balance
+      tmp = Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
+      double term_nipg_w = theta_w * (Pw_s - Pw_n);
+      double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
+      double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n);
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+      {
+        r.accumulate(lfsv_Pw_s, i, tmp * psi_Pw_s[i] * factor);
+      }
+      // (non-)symmetric IP term
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+      {
+        r.accumulate(lfsv_Pw_s, i, -Xc_conv_m * term_nipg_w * K * krW_s * omegaup_w_s * rho_w_s 
+                                    * (XH2O_s) * n_F_local * gradpsi_Pw_s[i] * factor);
+      }
+      //standard IP term integral
+      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+      {
+        r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
 
       
+      double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+      {
+        r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
+      }
+      double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+      {
+        r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
+      }
+      double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
+      {
+        r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
+      }
+
+      double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
+      {
+        r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
+      }
+      // ENERGY balance
+      tmp = Xc_conv_h * convectiveflux_Heat + Xc_diff_h * diffusiveflux_Heat;
+      double term_nipg_T = theta_T * (T_s - T_n);
+      double term_penalty_T = penalty_factor_T * (T_s - T_n);
+
+      for (size_type i = 0; i < lfsv_T_s.size(); i++)
+      {
+        r.accumulate(lfsv_T_s, i, tmp * psi_T_s[i] * factor);
+      }
+      
+      // (non-)symmetric IP term
+      for (size_type i = 0; i < lfsv_T_s.size(); i++)
+      {
+        r.accumulate(lfsv_T_s, i, -0.5 * Xc_diff_h * term_nipg_T * kth_eff * n_F_local * gradpsi_T_s[i] * factor);
+      }
+      
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_T_s.size(); i++)
+      {
+        r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
+      }
+      
+/*
       double dirichet_activate = 1. ;
       if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
       {
@@ -2593,7 +2768,7 @@ public:
       {
         r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
       }
- 
+      */
     } //End Quadrature Rule
   } //End of alpha_boundary
   
