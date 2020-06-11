@@ -1389,7 +1389,7 @@ public:
       auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
       auto j_CH4_g_n = - j_H2O_g_n;
 
-      auto convectiveflux_CH4_n = omegaup_g_n * convectiveflux_CH4_g_n + omegaup_w_n convectiveflux_CH4_w_n;
+      auto convectiveflux_CH4_n = omegaup_g_n * convectiveflux_CH4_g_n + omegaup_w_n * convectiveflux_CH4_w_n;
       auto convectiveflux_H2O_n = omegaup_g_n * convectiveflux_H2O_g_n + omegaup_w_n * convectiveflux_H2O_w_n;
       auto convectiveflux_Heat_n = omegaup_g_n * convectiveflux_Heat_g_n + omegaup_w_n * convectiveflux_Heat_w_n;
 
@@ -1418,12 +1418,12 @@ public:
       auto diffusiveflux_CH4 = - 0.5 * ( diffusiveflux_CH4_s + diffusiveflux_CH4_n) * n_F_local;
       auto diffusiveflux_H2O = - 0.5 *  ( diffusiveflux_H2O_s + diffusiveflux_H2O_n) * n_F_local;
       auto diffusiveflux_SALT = - 0.5 *  ( diffusiveflux_SALT_s + diffusiveflux_SALT_n) * n_F_local;
-      auto diffusiveflux_Heat = - k_eff * (diffusiveflux_Heat_s + diffusiveflux_Heat_n) * n_F_local;
+      auto diffusiveflux_Heat = - kth_eff * (diffusiveflux_Heat_s + diffusiveflux_Heat_n) * n_F_local;
 
       /*ACCCUMULATE RESIDUALS*/
 			double tmp=0.;
       // CH4-component-wise mass-balance
-      double tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
+      tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
 
       double term_nipg_g = theta_g * ((Pg_s) - (Pg_n));
       
@@ -1556,7 +1556,7 @@ public:
       }
       for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pw_n, i, (-Xc_conv_m * term_nipg_w * krW_n * omegaup_w_n * rho_w_n 
+        r_n.accumulate(lfsv_Pw_n, i, -Xc_conv_m * term_nipg_w * krW_n * omegaup_w_n * rho_w_n 
                                     * (1. - XC_n - XCH4_n) * Kn_F_n * gradpsi_Pw_n[i] * factor );
       }
       //standard IP term integral

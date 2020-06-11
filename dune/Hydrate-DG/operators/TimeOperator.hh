@@ -229,7 +229,7 @@ public:
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
 			for (size_type i = 0; i < lfsv_Pc.size(); i++)
 			{
-				r.accumulate(lfsv_Pc, i, ((rho_g * por * YCH4 * Sg + rho_w * por * XCH4 * Sw) * psi_Pc[i]) * factor);
+				r.accumulate(lfsv_Pc, i, ((rho_g * por * (1. -YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Pc[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
@@ -237,7 +237,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * XH2O * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. - XC - XCH4) * Sw) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{
@@ -245,7 +245,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_T.size(); i++)
 			{
-				r.accumulate(lfsv_T, i, (Cv_eff * (T-T_ref) * psi_T[i]) * factor);
+				r.accumulate(lfsv_T, i, Cv_eff * (T-T_ref) * psi_T[i] * factor);
 			}
 
 		} 	//End Quadrature Rule
