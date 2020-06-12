@@ -2441,7 +2441,47 @@ public:
 ///*
       //  ACCCUMULATE RESIDUALS  //
 			double tmp=0.;
-
+      if (bctype[Indices::PVId_Pc] == Indices::BCId_neumann)
+      {
+        tmp = -Xc_conv_m * (omegaup_g_s * convectiveflux_CH4_g_s + omegaup_g_n * convectiveflux_CH4_g_n) ;
+        for (size_type i = 0; i < lfsv_Pc_s.size(); i++)
+        {
+          r.accumulate(lfsv_Pc_s, i, tmp * psi_Pc_s[i] * factor);
+        }
+      }
+      if (bctype[Indices::PVId_C] == Indices::BCId_neumann)
+      {
+        tmp = -Xc_diff_m * (0.5 * diffusiveflux_SALT_s + 0.5 * diffusiveflux_SALT_n) ;
+        for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+        {
+          r.accumulate(lfsv_XC_s, i, tmp * psi_XC_s[i] * factor);
+        }
+      }
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
+      {
+        tmp = -Xc_conv_m * (omegaup_w_s * convectiveflux_H2O_w_s + omegaup_w_n * convectiveflux_H2O_w_n) ;
+        for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+        {
+          r.accumulate(lfsv_Pw_s, i, tmp * psi_Pw_s[i] * factor);
+        }
+      }
+      if (bctype[Indices::PVId_T] == Indices::BCId_neumann)
+      {
+        tmp = Xc_diff_h * diffusiveflux_Heat ;
+        for (size_type i = 0; i < lfsv_T_s.size(); i++)
+        {
+          r.accumulate(lfsv_T_s, i, tmp * psi_T_s[i] * factor);
+        }
+      }
+      if (bctype[Indices::PVId_T] == Indices::BCId_neumann and
+          bctype[Indices::PVId_Pc] == Indices::BCId_neumann and
+          bctype[Indices::PVId_Pw] == Indices::BCId_neumann and
+          bctype[Indices::PVId_C] == Indices::BCId_neumann)
+      {
+        continue;
+      }
+      if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
+      {
       // CH4-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
       double term_nipg_g = theta_g * (Pc_s - Pc_n);
@@ -2461,7 +2501,9 @@ public:
       {
         r.accumulate(lfsv_Pc_s, i, term_penalty_g * psi_Pc_s[i] * factor);
       }
-      
+      }
+      if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
+      {
       // SALT-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
       double term_nipg_c_x = theta_x * (XC_s - XC_n);
@@ -2482,8 +2524,9 @@ public:
       {
         r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
       }
-     
-      
+      }
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
+      {
       // H2O-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
       double term_nipg_w = theta_w * (Pw_s - Pw_n);
@@ -2504,33 +2547,45 @@ public:
       {
         r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
-
-      
+      }
+      if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
+      {
       double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
       }
+      }
+      if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
+      {
       double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
       {
         r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
       }
+      }
+      if (bctype[Indices::PVId_XCH4] == Indices::BCId_dirichlet)
+      {
       double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
       // standard IP term integral
       for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
       {
         r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
       }
-
+      }
+      if (bctype[Indices::PVId_YH2O] == Indices::BCId_dirichlet)
+      {
       double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
       // standard IP term integral
       for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
       {
         r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
       }
+      }
+      if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
+      {
       // ENERGY balance
       tmp = Xc_conv_h * convectiveflux_Heat + Xc_diff_h * diffusiveflux_Heat;
       double term_nipg_T = theta_T * (T_s - T_n);
@@ -2551,6 +2606,7 @@ public:
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
         r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
+      }
       }
       
 /*
