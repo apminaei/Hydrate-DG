@@ -203,7 +203,7 @@ public:
       		auto PcSF1 = property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
       
       		//auto Pc = suctionPressure * PcSF1;
-			RF Pg = Pw + Pc;
+			RF Pg = Pw + suctionPressure * PcSF1;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
 			//auto por = property.soil.SedimentPorosity(cell, ip_local);
@@ -220,16 +220,16 @@ public:
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			//  adding terms regarding components
-			auto YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			auto XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
+			auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
+			auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			//  end of terms regarding components
 			//std::cout << " Sg = " << Sg << " Sh = time operator" << Sh << std::endl;
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
-			for (size_type i = 0; i < lfsv_Pc.size(); i++)
+			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Pc, i, ((rho_g * por * (YCH4) * Sg + rho_w * por * XCH4 * Sw) * psi_Pc[i]) * factor);
+				r.accumulate(lfsv_Sg, i, ((rho_g * por * (YCH4) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{

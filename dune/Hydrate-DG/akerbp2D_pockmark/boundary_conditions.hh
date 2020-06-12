@@ -35,7 +35,7 @@ public :
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
 
-		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		bctype[indices.PVId_Pc] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
@@ -109,12 +109,12 @@ public :
 		auto por = property.soil.SedimentPorosity(cell_inside, iplocal);
 		double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por)
 						* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
-		auto Pg = property.parameter.InitialPw(globalPos) + Pc;
+		auto Pg = 2.e6/characteristicValues.P_c ; + Pc;
 		auto zCH4 = property.eos.EvaluateCompressibilityFactor(bcvalue[indices.PVId_T ] * characteristicValues.T_c, Pg * characteristicValues.P_c);
 		auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
 		bcvalue[indices.PVId_XCH4] = VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
 		bcvalue[indices.PVId_YH2O] = VLequil[Indices::compId_YH2O];
-		bcvalue[indices.PVId_Sg] = Sg ;
+		bcvalue[indices.PVId_Pc] = Pc ;
 		bcvalue[indices.PVId_Sh] = Sh ;
 		// if(property.mesh.isLeftBoundary(globalPos)){
 			

@@ -165,17 +165,17 @@ void driver(const GV &gv, // GridView
 	// std::cout << " bct[indices.PVId_Pw ] = " <<  bc.type( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	// std::cout << " bcvalue[indices.PVId_Pw ] = " <<  bc.value( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::IIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::IIPG;
-	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::IIPG;
-	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::IIPG;
-	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::IIPG;
-	double alpha_g = 0.e1;
-	double alpha_w = 0.e1;
-	double alpha_s = 0.e1;
-	double alpha_T = 0.e1;
-	double alpha_x = 0.e1;
-	double alpha_y = 0.e1;
+	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
+	double alpha_g = 0.e0;
+	double alpha_w = 0.e0;
+	double alpha_s = 0.e0;
+	double alpha_T = 0.e6;
+	double alpha_x = 0.e0;
+	double alpha_y = 0.e0;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
@@ -247,8 +247,8 @@ void driver(const GV &gv, // GridView
     //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
 	pdesolver.setReassembleThreshold(0.0);
     pdesolver.setVerbosityLevel(2);
-    pdesolver.setReduction(1e-5);
-    pdesolver.setMinLinearReduction(1e-5);
+    pdesolver.setReduction(1e-4);
+    pdesolver.setMinLinearReduction(1e-4);
 	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
     pdesolver.setForceIteration(true);
 	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-5)); 
