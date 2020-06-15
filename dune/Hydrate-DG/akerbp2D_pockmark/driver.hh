@@ -37,11 +37,11 @@ void driver(const GV &gv, // GridView
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)12);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 
-	const int degree_S = 1;
-	const int degree_P = 1;
-	const int degree_T = 1;
-	const int degree_X = 1;
-	const int degree_Y = 1;
+	const int degree_S = 0;
+	const int degree_P = 0;
+	const int degree_T = 0;
+	const int degree_X = 0;
+	const int degree_Y = 0;
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
@@ -173,7 +173,7 @@ void driver(const GV &gv, // GridView
 	double alpha_g = 0.e0;
 	double alpha_w = 0.e0;
 	double alpha_s = 0.e0;
-	double alpha_T = 0.e6;
+	double alpha_T = 0.e0;
 	double alpha_x = 0.e0;
 	double alpha_y = 0.e0;
 
@@ -371,7 +371,7 @@ void driver(const GV &gv, // GridView
 
 				unew = uold;
 
-				dt *= 0.5;
+				dt *= 0.9;
 				continue;
 			}
 			else
@@ -434,7 +434,7 @@ void driver(const GV &gv, // GridView
 		{
 			if (newton_iterations > maxAllowableIterations)
 			{
-				dt = std::max(dt*0.6 , dt_min);
+				dt = std::max(dt*0.9 , dt_min);
 			}
 			else if (newton_iterations <= minAllowableIterations)
 			{
@@ -461,7 +461,7 @@ void driver(const GV &gv, // GridView
 
 		if (opcount > 1 and dtFlag == 2)
 		{
-			dt = std::max(dt, dtLast * 0.5);
+			dt = std::max(dt, dtLast * 0.9);
 		}
 		std::cout << " , dt  : " << dt << std::endl;
 		std::cout << " " << std::endl;
