@@ -37,11 +37,11 @@ void driver(const GV &gv, // GridView
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)12);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 
-	const int degree_S = 0;
-	const int degree_P = 0;
-	const int degree_T = 0;
-	const int degree_X = 0;
-	const int degree_Y = 0;
+	const int degree_S = 1;
+	const int degree_P = 1;
+	const int degree_T = 1;
+	const int degree_X = 1;
+	const int degree_Y = 1;
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;

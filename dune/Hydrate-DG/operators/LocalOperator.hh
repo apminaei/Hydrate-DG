@@ -1389,12 +1389,12 @@ public:
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r_s.accumulate(lfsv_Sg_s, i,  -Xc_conv_m * term_nipg_g * krN_s * omegaup_g_s * rho_g_s 
-                                    * (YCH4_s) * Kn_F_s * gradpsi_Sg_s[i] * factor);
+                                    * (YCH4_s) * (- coeff_grad_Sw_s) * Kn_F_s * gradpsi_Sg_s[i] * factor);
       }
       for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
         r_n.accumulate(lfsv_Sg_n, i, -Xc_conv_m * term_nipg_g * krN_n * omegaup_g_n * rho_g_n 
-                                    * (YCH4_n) * Kn_F_n * gradpsi_Sg_n[i] * factor);
+                                    * (YCH4_n) * (- coeff_grad_Sw_n) * Kn_F_n * gradpsi_Sg_n[i] * factor);
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
@@ -2394,7 +2394,7 @@ public:
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r.accumulate(lfsv_Sg_s, i, - Xc_conv_m * term_nipg_g * K * krN_n * omegaup_g_n * rho_g_n 
-                                    * (YCH4_n) * n_F_local * gradpsi_Sg_s[i] * factor);
+                                    * (YCH4_n) * (- coeff_grad_Sw_n) * n_F_local * gradpsi_Sg_s[i] * factor);
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
