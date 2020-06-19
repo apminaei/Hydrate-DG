@@ -35,32 +35,32 @@ public :
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
 
-		bctype[indices.PVId_Pc] = indices.BCId_dirichlet ;
-		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		// bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		// bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
-		if( (time >= 0 ) and (time < (200*3600) )){
+		if( (time >= 0 ) and (time < (2.00*3600) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
-		else if ((time >= (200*3600) ) and (time < (350*3600)))
+		else if ((time >= (2.00*3600) ) and (time < (3.50*3600)))
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_neumann ;
 		}
-		else if (time >= (350*3600))	
+		else if (time >= (3.50*3600))	
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
-		// if(property.mesh.isLeftBoundary(globalPos)){
-		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		// }
+		if(property.mesh.isLeftBoundary(globalPos)){
+			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		}
 		
-		// if( property.mesh.isBottomBoundary(globalPos) ){
+		if( property.mesh.isBottomBoundary(globalPos) ){
 			
-		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		// }
+			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+			bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		}
 		
 		return bctype;
 	}
@@ -84,20 +84,20 @@ public :
 		
 		bcvalue[indices.PVId_T ] = (4.+273.15)/ characteristicValues.T_c;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
 		
-		if( (time >= 0 ) and (time < (200*3600) )){
+		if( (time >= 0 ) and (time < (2.00*3600) )){
 			bcvalue[indices.PVId_Pw] = 2.e6/characteristicValues.P_c ;
 		}
-		else if ((time >= (200*3600) ) and (time < (350*3600)))
+		else if ((time >= (2.00*3600) ) and (time < (3.50*3600)))
 		{
 			//std::cout << " gas_gen = " << time << std::endl;
 			
 			bcvalue[indices.PVId_Pw] = 0. ;
 		}
-		else if ((time >= (350*3600) ) and (time < (450*3600)))	
+		else if ((time >= (3.50*3600) ) and (time < (4.50*3600)))	
 		{
 			bcvalue[indices.PVId_Pw] = 5.e6/characteristicValues.P_c ;
 		}
-		else if (time >= (450*3600)  )	
+		else if (time >= (4.50*3600)  )	
 		{
 			bcvalue[indices.PVId_Pw] = (5.e6 + 10.*(time- 450*3600))/characteristicValues.P_c ;
 		}
@@ -114,21 +114,21 @@ public :
 		//auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
 		bcvalue[indices.PVId_XCH4] = property.parameter.InitialXCH4(globalPos);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
 		bcvalue[indices.PVId_YH2O] = property.parameter.InitialYH2O(globalPos);//VLequil[Indices::compId_YH2O];
-		bcvalue[indices.PVId_Pc] = 8.48e4 ;
-		bcvalue[indices.PVId_Sh] = Sh ;
-		// if(property.mesh.isLeftBoundary(globalPos)){
+		//bcvalue[indices.PVId_Sg] = Sg ;
+		//bcvalue[indices.PVId_Sh] = Sh ;
+		if(property.mesh.isLeftBoundary(globalPos)){
 			
-		// 	bcvalue[indices.PVId_Sg] = Sg ;
+			bcvalue[indices.PVId_Sg] = Sg ;
 			
-		// 	bcvalue[indices.PVId_Sh] = Sh ;
+			bcvalue[indices.PVId_Sh] = Sh ;
 			
-		// }
+		}
 		
-		// if( property.mesh.isBottomBoundary(globalPos) ){
+		if( property.mesh.isBottomBoundary(globalPos) ){
 			
-		// 	bcvalue[indices.PVId_Sg] = Sg ;
-		// 	bcvalue[indices.PVId_Sh] = Sh ;
-		// }
+			bcvalue[indices.PVId_Sg] = Sg ;
+			bcvalue[indices.PVId_Sh] = Sh ;
+		}
 		
 
 		return bcvalue;

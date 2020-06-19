@@ -64,8 +64,8 @@ public:
 		const auto &lfsu_Pw = lfsu.template child<Indices::PVId_Pw>();
 
 		//Capillary Pressure
-		const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
-		const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
+		// const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
+		// const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
 
 		//Water Saturation
 		const auto &lfsv_Sg = lfsv.template child<Indices::PVId_Sg>();
@@ -118,10 +118,10 @@ public:
 			std::vector<RangeType> psi_Pw(lfsv_Pw.size());
 			lfsv_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pw);
 
-			std::vector<RangeType> phi_Pc(lfsu_Pc.size());
-			lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
-			std::vector<RangeType> psi_Pc(lfsv_Pc.size());
-			lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
+			// std::vector<RangeType> phi_Pc(lfsu_Pc.size());
+			// lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
+			// std::vector<RangeType> psi_Pc(lfsv_Pc.size());
+			// lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
 
 			std::vector<RangeType> phi_Sg(lfsu_Sg.size());
 			lfsu_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sg);
@@ -171,9 +171,9 @@ public:
 				Sh += x(lfsu_Sh, i) * phi_Sh[i];
 
 			// evaluate Pc
-			RF Pc = 0.0;
-			for (size_type i = 0; i < lfsu_Pc.size(); i++)
-				Pc += x(lfsu_Pc, i) * phi_Pc[i];
+			// RF Pc = 0.0;
+			// for (size_type i = 0; i < lfsu_Pc.size(); i++)
+			// 	Pc += x(lfsu_Pc, i) * phi_Pc[i];
 
 			// evaluate T
 			RF T = 0.0;
@@ -229,7 +229,7 @@ public:
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (YCH4) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
+				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. -  YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
@@ -237,7 +237,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (XH2O) * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. -  XC - XCH4) * Sw) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{

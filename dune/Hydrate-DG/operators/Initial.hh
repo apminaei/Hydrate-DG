@@ -49,39 +49,39 @@ public:
 
 /** \brief A function for initial values of Pc
  */
-template<typename GV, typename Properties,  typename RF>
-class Pc_Initial
-  : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, Pc_Initial<GV,Properties,RF> >
-{
-private:
-	  const GV& gv;
-    const Properties& property;
-    ProblemInitialConditions<GV,Properties> icvalue;
-public:
-  typedef Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> > Traits;
+// template<typename GV, typename Properties,  typename RF>
+// class Pc_Initial
+//   : public Dune::PDELab::GridFunctionBase<Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> >, Pc_Initial<GV,Properties,RF> >
+// {
+// private:
+// 	  const GV& gv;
+//     const Properties& property;
+//     ProblemInitialConditions<GV,Properties> icvalue;
+// public:
+//   typedef Dune::PDELab::GridFunctionTraits<GV,RF,1,Dune::FieldVector<RF,1> > Traits;
 
-  //! construct from grid view
-  Pc_Initial ( const GV& gv_, const Properties& property_ )
-  : gv( gv_ ), property(property_), icvalue(gv_, property_)  {}
+//   //! construct from grid view
+//   Pc_Initial ( const GV& gv_, const Properties& property_ )
+//   : gv( gv_ ), property(property_), icvalue(gv_, property_)  {}
 
-  //! evaluate extended function on element
-  inline void evaluate (const typename Traits::ElementType& e,
-                        const typename Traits::DomainType& xlocal,
-                        typename Traits::RangeType& y) const
-  {
+//   //! evaluate extended function on element
+//   inline void evaluate (const typename Traits::ElementType& e,
+//                         const typename Traits::DomainType& xlocal,
+//                         typename Traits::RangeType& y) const
+//   {
 
-    const int dim = Traits::GridViewType::Grid::dimension;
-    typedef typename Traits::GridViewType::Grid::ctype ctype;
-    Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
+//     const int dim = Traits::GridViewType::Grid::dimension;
+//     typedef typename Traits::GridViewType::Grid::ctype ctype;
+//     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
    
-    y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pc]/CharacteristicValues::P_c ;	/* Pa */
-    //std::cout<< "Pc_boundary = " << y << std::endl;
-    return;
-  }
-  //! get a reference to the grid view
-  inline const GV& getGridView () {return gv;}
-};
+//     y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pc]/CharacteristicValues::P_c ;	/* Pa */
+//     //std::cout<< "Pc_boundary = " << y << std::endl;
+//     return;
+//   }
+//   //! get a reference to the grid view
+//   inline const GV& getGridView () {return gv;}
+// };
 
 
 

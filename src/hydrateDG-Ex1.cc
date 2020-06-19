@@ -12,8 +12,10 @@
 #include <string>
 #include <stdlib.h>
 #include <time.h>
-#include<exception>
-#include<chrono>
+#include <exception>
+#include <chrono>
+#include <stdio.h>
+//#include <filesystem>
 
 #include "dune/Hydrate-DG/IncludesDUNE.hh"
 #include "dune/Hydrate-DG/akerbp2D_pockmark/include_problem.hh"
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
 
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-master/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/inputs/";
+	    std::string input_file = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 

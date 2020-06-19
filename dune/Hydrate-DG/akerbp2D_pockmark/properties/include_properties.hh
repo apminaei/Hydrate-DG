@@ -58,34 +58,34 @@ public:
 
 	/******************************************************************************/
 
-  	// void ReportStatistics( std::string file_name,
-  	// 					   double time /*s*/,
-	// 					   double dt /*s*/,
-	// 					   int total_newton_iterations,
-	// 					   double clock_time_elapsed /*s*/ ) {
+  	void ReportStatistics( std::string file_name,
+  						   double time /*s*/,
+						   double dt /*s*/,
+						   int total_newton_iterations,
+						   double clock_time_elapsed /*s*/ ) {
 
-  	// 	std::fstream result;
+  		std::fstream result;
 
-  	// 	if(time == 0. ){
-  	// 		result.open(file_name, std::fstream::out | std::fstream::trunc);
-  	// 		result	<< "time [s]" << '\t'
-  	// 				<< "dt [s]"	<< '\t'
-	// 				<< "total no. of newton iterations" << '\t'
-	// 				<< "clock time [s]"
-  	// 				<< std::endl;
-  	// 		result.close();
-  	// 	}
+  		if(time == 0. ){
+  			result.open(file_name, std::fstream::out | std::fstream::trunc);
+  			result	<< "time [s]" << '\t'
+  					<< "dt [s]"	<< '\t'
+					<< "total no. of newton iterations" << '\t'
+					<< "clock time [s]"
+  					<< std::endl;
+  			result.close();
+  		}
 
-  	// 	result.open(file_name, std::fstream::app);
-  	// 	double t_new = time+dt;
+  		result.open(file_name, std::fstream::app);
+  		double t_new = time+dt;
 
-	// 	result	<< time	<< '\t'
-	// 			<< dt	<< '\t'
-	// 			<< total_newton_iterations << '\t'
-	// 			<< clock_time_elapsed
-	// 			<< std::endl;
-	// 	result.close();
-  	// }
+		result	<< time	<< '\t'
+				<< dt	<< '\t'
+				<< total_newton_iterations << '\t'
+				<< clock_time_elapsed
+				<< std::endl;
+		result.close();
+  	}
 
 	/******************************************************************************/
 

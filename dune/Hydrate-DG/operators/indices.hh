@@ -27,15 +27,15 @@ public:
 
 
 	/* PRIMARY VARIABLES */  // NOTE: The order of the indices must be the same as the order in the GFS, initial and boundary conditions
-	static const int numOfPVs 	 = 8 ;
+	static const int numOfPVs 	 = 7 ;
 	static const int PVId_Pw  	= 0;
-	static const int PVId_Pc  	= 1;
-	static const int PVId_Sg  	= 2;
-	static const int PVId_Sh	= 3;
-	static const int PVId_T 	= 4;
-	static const int PVId_XCH4	= 5 ;
-	static const int PVId_YH2O	= 6 ;
-	static const int PVId_C   	= 7;
+	//static const int PVId_Pc  	= 1;
+	static const int PVId_Sg  	= 1;
+	static const int PVId_Sh	= 2;
+	static const int PVId_T 	= 3;
+	static const int PVId_XCH4	= 4 ;
+	static const int PVId_YH2O	= 5 ;
+	static const int PVId_C   	= 6;
 
 	static const unsigned int numOfSVs 	= 16;
 	static const unsigned int SVId_Pg	= 0;  // gas phase pressure

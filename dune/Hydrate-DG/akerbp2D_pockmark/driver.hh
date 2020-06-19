@@ -36,7 +36,7 @@ void driver(const GV &gv, // GridView
 	//exit(0);
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)12);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
-
+	double clock_time_elapsed = 0.;
 	const int degree_S = 1;
 	const int degree_P = 1;
 	const int degree_T = 1;
@@ -75,9 +75,9 @@ void driver(const GV &gv, // GridView
 
 	// gfs for composite system Pw,Pc,Sg,Sh,T,XCH4,YH2O
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_P, GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X>
+													 GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X>
 		GFS;
-	GFS gfs(gfs_P, gfs_P, gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
+	GFS gfs(gfs_P,  gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
 
 	// typedef PowerGridFunctionSpace< GFS_P, Indices::numOfPVs, VBE, Dune::PDELab::LexicographicOrderingTag > GFS;
 	// GFS gfs(gfs_P);
@@ -100,9 +100,9 @@ void driver(const GV &gv, // GridView
 	using PathPw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>>;
     using SUBGFS_Pw = Dune::PDELab::GridFunctionSubSpace<GFS,PathPw>;
     SUBGFS_Pw    subgfs_Pw(gfs);
-	using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
-    using SUBGFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
-    SUBGFS_Pc    subgfs_Pc(gfs);
+	// using PathPc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pc>>;
+    // using SUBGFS_Pc = Dune::PDELab::GridFunctionSubSpace<GFS,PathPc>;
+    // SUBGFS_Pc    subgfs_Pc(gfs);
 	using PathSg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sg>>;
     using SUBGFS_Sg = Dune::PDELab::GridFunctionSubSpace<GFS,PathSg>;
     SUBGFS_Sg    subgfs_Sg(gfs);
@@ -133,8 +133,8 @@ void driver(const GV &gv, // GridView
 	typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
 	Pw_InitialType Pw_initial(gv,property); /* ndim */
 
-	typedef Pc_Initial<GV,Properties,Real> Pc_InitialType;
-	Pc_InitialType Pc_initial(gv,property); /* ndim */
+	// typedef Pc_Initial<GV,Properties,Real> Pc_InitialType;
+	// Pc_InitialType Pc_initial(gv,property); /* ndim */
 	typedef Sg_Initial<GV,Properties,Real> Sg_InitialType;
 	Sg_InitialType Sg_initial(gv,property);
 	typedef Sh_Initial<GV,Properties,Real> Sh_InitialType;
@@ -148,14 +148,13 @@ void driver(const GV &gv, // GridView
 	typedef XC_Initial<GV,Properties,Real> XC_InitialType;
 	XC_InitialType XC_initial(gv,property);
 	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
-												Pc_InitialType,
 												Sg_InitialType,
 												Sh_InitialType,
 												T_InitialType,
 												XCH4_InitialType,
 												YH2O_InitialType, XC_InitialType>
 		InitialType;
-	InitialType initial(Pw_initial, Pc_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
+	InitialType initial(Pw_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
 
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
@@ -170,12 +169,12 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
-	double alpha_g = 0.e0;
-	double alpha_w = 0.e0;
-	double alpha_s = 0.e0;
-	double alpha_T = 0.e0;
-	double alpha_x = 0.e0;
-	double alpha_y = 0.e0;
+	double alpha_g = 1.e1;
+	double alpha_w = 1.e1;
+	double alpha_s = 1.e2;
+	double alpha_T = 1.e1;
+	double alpha_x = 1.e1;
+	double alpha_y = 1.e1;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
@@ -213,7 +212,7 @@ void driver(const GV &gv, // GridView
 		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
 	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	LS ls(gfs, cc, 100, 2);
+	LS ls(gfs, cc, 1000, 2);
 
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	// LS ls(gfs, 100, 1, true, true);
@@ -248,10 +247,10 @@ void driver(const GV &gv, // GridView
 	pdesolver.setReassembleThreshold(0.0);
     pdesolver.setVerbosityLevel(2);
     pdesolver.setReduction(1e-4);
-    pdesolver.setMinLinearReduction(1e-4);
+    pdesolver.setMinLinearReduction(1e-3);
 	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
     pdesolver.setForceIteration(true);
-	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-5)); 
+	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
 
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
 	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
@@ -291,8 +290,8 @@ void driver(const GV &gv, // GridView
 	// primary variables
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pw, U> DGF_Pw;
 	DGF_Pw dgf_Pw(subgfs_Pw, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
-	DGF_Pc dgf_Pc(subgfs_Pc, uold);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pc, U> DGF_Pc;
+	// DGF_Pc dgf_Pc(subgfs_Pc, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sg, U> DGF_Sg;
 	DGF_Sg dgf_Sg(subgfs_Sg, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
@@ -308,8 +307,11 @@ void driver(const GV &gv, // GridView
 
 
 	//	VTK
-	auto pathName = "/home/amir/dune-master/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
-	auto fileName = ptree.get("output.file_name",(std::string)"test");
+	std::string fileName = ptree.get("output.file_name",(std::string)"test");
+	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
+	pathName += fileName ;
+	//std::filesystem::create_directory(pathName);
+	pathName += "/" ;
 	const std::string str = "";
 	//Dune::PDELab::FilenameHelper fn(pathName + fileName);
 
@@ -324,7 +326,7 @@ void driver(const GV &gv, // GridView
 	// add data field for all components of the space to the VTK writer
 	// primary variables
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
+	//vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
@@ -350,7 +352,7 @@ void driver(const GV &gv, // GridView
 	while ( time < t_END - 1e-8)
 	{
 		std::cout << "_____________________________________________________" << std::endl;
-		
+		clock_t start = clock();
 		try
 		{
 			std::cout << "****************************" << std::endl;
@@ -381,13 +383,43 @@ void driver(const GV &gv, // GridView
 			}
 		}
 
-		std::cout << "DONE" << std::endl;
-		std::cout << "_____________________________________________________" << std::endl;
+			clock_t end = clock();
+			double clock_time_this_step = (double) (end-start) / CLOCKS_PER_SEC;
+			clock_time_elapsed += clock_time_this_step;
+
+			if(helper.rank()==0){
+			std::cout<<"DONE"<<std::endl;
+			std::cout<<"_____________________________________________________"<<std::endl;
+			}
+
+			/*********************************************************************************************
+			 * OUTPUT
+			 *********************************************************************************************/
+			/* At each time step: **Statistics**
+			 * t_new,
+			 * dt,
+			 * fixed point iterations,
+			 * newton iterations per fixed point iteration,
+			 * total newton iterations
+			 */
+			if(helper.rank()==0){
+			std::string statistics_file = pathName;
+			statistics_file +=fileName;
+			statistics_file +="_statistics";
+			statistics_file += ".txt";
+			property.ReportStatistics( 	statistics_file,
+										time*CharacteristicValues::t_c,
+										dt*CharacteristicValues::t_c,
+										newton_iterations,
+										clock_time_elapsed );
+			}
+
+
 
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
 		DGF_Pw dgf_Pw(subgfs_Pw, unew);
-		DGF_Pc dgf_Pc(subgfs_Pc, unew);
+		//DGF_Pc dgf_Pc(subgfs_Pc, unew);
 		DGF_Sg dgf_Sg(subgfs_Sg, unew);
 		DGF_Sh dgf_Sh(subgfs_Sh, unew);
 		DGF_T dgf_T(subgfs_T, unew);
@@ -404,7 +436,7 @@ void driver(const GV &gv, // GridView
 			//vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			// primary variables
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
+			//vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
