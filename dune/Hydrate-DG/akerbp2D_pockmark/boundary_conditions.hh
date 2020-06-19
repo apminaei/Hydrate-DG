@@ -35,8 +35,8 @@ public :
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
 
-		// bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		// bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
@@ -51,16 +51,16 @@ public :
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
-		if(property.mesh.isLeftBoundary(globalPos)){
-			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-			bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		}
+		// if(property.mesh.isLeftBoundary(globalPos)){
+		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		// }
 		
-		if( property.mesh.isBottomBoundary(globalPos) ){
+		// if( property.mesh.isBottomBoundary(globalPos) ){
 			
-			bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-			bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		}
+		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		// }
 		
 		return bctype;
 	}
@@ -114,21 +114,21 @@ public :
 		//auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
 		bcvalue[indices.PVId_XCH4] = property.parameter.InitialXCH4(globalPos);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
 		bcvalue[indices.PVId_YH2O] = property.parameter.InitialYH2O(globalPos);//VLequil[Indices::compId_YH2O];
-		//bcvalue[indices.PVId_Sg] = Sg ;
-		//bcvalue[indices.PVId_Sh] = Sh ;
-		if(property.mesh.isLeftBoundary(globalPos)){
+		bcvalue[indices.PVId_Sg] = Sg ;
+		bcvalue[indices.PVId_Sh] = Sh ;
+		// if(property.mesh.isLeftBoundary(globalPos)){
 			
-			bcvalue[indices.PVId_Sg] = Sg ;
+		// 	bcvalue[indices.PVId_Sg] = Sg ;
 			
-			bcvalue[indices.PVId_Sh] = Sh ;
+		// 	bcvalue[indices.PVId_Sh] = Sh ;
 			
-		}
+		// }
 		
-		if( property.mesh.isBottomBoundary(globalPos) ){
+		// if( property.mesh.isBottomBoundary(globalPos) ){
 			
-			bcvalue[indices.PVId_Sg] = Sg ;
-			bcvalue[indices.PVId_Sh] = Sh ;
-		}
+		// 	bcvalue[indices.PVId_Sg] = Sg ;
+		// 	bcvalue[indices.PVId_Sh] = Sh ;
+		// }
 		
 
 		return bcvalue;
