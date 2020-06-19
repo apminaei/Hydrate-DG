@@ -1474,7 +1474,6 @@ public:
       tmp = Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
       
       double term_nipg_w = theta_w * (Pw_s - Pw_n);
-      //double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
       double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
@@ -2451,7 +2450,6 @@ public:
       // H2O-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
       double term_nipg_w = theta_w * (Pw_s - Pw_n);
-      double term_nipg_w_y = theta_y * (YH2O_s - YH2O_n);
       double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n);
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
