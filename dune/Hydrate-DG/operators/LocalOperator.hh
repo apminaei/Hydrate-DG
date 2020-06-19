@@ -614,44 +614,44 @@ public:
       }
       
       //Integrals regarding the NCP
-			// RF max1 = std::max(0., (Sg -1. + YCH4 + YH2O));
-			// for (size_type i=0; i<lfsv_YH2O.size(); i++){
-			// 	r.accumulate(lfsv_YH2O,i,( (Sg - max1) * psi_YH2O[i]  *factor));
-			// }
+			RF max1 = std::max(0., (Sg -1. + YCH4 + YH2O));
+			for (size_type i=0; i<lfsv_YH2O.size(); i++){
+				r.accumulate(lfsv_YH2O,i,( (Sg - max1) * psi_YH2O[i]  *factor));
+			}
 
-			// // Integrals regarding the NCP
-			// RF max2 = std::max(0., (Sw -1. + XC + XCH4 + XH2O ));
-			// for (size_type i=0; i<lfsv_XCH4.size(); i++){
-			// 	r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
-			// }
+			// Integrals regarding the NCP
+			RF max2 = std::max(0., (Sw -1. + XC + XCH4 + XH2O ));
+			for (size_type i=0; i<lfsv_XCH4.size(); i++){
+				r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
+			}
       
       
       //NCP -> water phase
-			double tmp = 0.;
-			//auto XH2O_alg = property.mixture.XH2O(YH2O,T*Xc_T,Pg*Xc_P,S);
-			if( ( Sw - ( 1. - XCH4 - XH2O - XC ) ) > 1.e-8 ){//active set.
-				tmp += 1. - XCH4 - XH2O - XC;//Active => phase is present => summation condition holds
-        //	std::cout<< "alpha_vol XCH4: " << tmp << std::endl;
-			}else{
-				tmp += Sw; // inactive set. Inactive => phase is absent => Sw=0
-			}
-      for (size_type i = 0; i < lfsv_XCH4.size(); i++)
-      {
-			r.accumulate(lfsv_XCH4 , i, +tmp * psi_XCH4[i]  *factor);
-      }
-			// NCP -> gas phase
-			tmp = 0.;
-			//auto YCH4_alg = property.mixture.YCH4(XCH4,T*Xc_T,Pg*Xc_P,S,zCH4);
-			if( ( Sg - ( 1. - YCH4 - YH2O ) ) > eps_ap ){ //active set.			
-				tmp +=  1. - YCH4 - YH2O ;//Active => phase is present => summation condition holds
-        //std::cout<< "alpha_vol YH2O: " << tmp << std::endl;
-			}else{
-				tmp += Sg;// inactive set. Inactive => phase is absent => Sg=0
-			}
-      for (size_type i = 0; i < lfsv_YH2O.size(); i++)
-      {
-			r.accumulate(lfsv_YH2O , i, +tmp * psi_YH2O[i]  *factor);
-      }
+			// double tmp = 0.;
+			// //auto XH2O_alg = property.mixture.XH2O(YH2O,T*Xc_T,Pg*Xc_P,S);
+			// if( ( Sw - ( 1. - XCH4 - XH2O - XC ) ) > 1.e-8 ){//active set.
+			// 	tmp += 1. - XCH4 - XH2O - XC;//Active => phase is present => summation condition holds
+      //   //	std::cout<< "alpha_vol XCH4: " << tmp << std::endl;
+			// }else{
+			// 	tmp += Sw; // inactive set. Inactive => phase is absent => Sw=0
+			// }
+      // for (size_type i = 0; i < lfsv_XCH4.size(); i++)
+      // {
+			// r.accumulate(lfsv_XCH4 , i, +tmp * psi_XCH4[i]  *factor);
+      // }
+			// // NCP -> gas phase
+			// tmp = 0.;
+			// //auto YCH4_alg = property.mixture.YCH4(XCH4,T*Xc_T,Pg*Xc_P,S,zCH4);
+			// if( ( Sg - ( 1. - YCH4 - YH2O ) ) > eps_ap ){ //active set.			
+			// 	tmp +=  1. - YCH4 - YH2O ;//Active => phase is present => summation condition holds
+      //   //std::cout<< "alpha_vol YH2O: " << tmp << std::endl;
+			// }else{
+			// 	tmp += Sg;// inactive set. Inactive => phase is absent => Sg=0
+			// }
+      // for (size_type i = 0; i < lfsv_YH2O.size(); i++)
+      // {
+			// r.accumulate(lfsv_YH2O , i, +tmp * psi_YH2O[i]  *factor);
+      // }
 
       // for (size_type i = 0; i < lfsv_Pc.size(); i++)
       // {
