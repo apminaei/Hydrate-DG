@@ -1402,7 +1402,7 @@ public:
       tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
 
       double term_nipg_g = theta_g * (Sg_s - Sg_n);
-      double term_penalty_sg = penalty_factor_g * (Sg_s - Sg_n);
+      double term_penalty_sg = penalty_factor_s * (Sg_s - Sg_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
