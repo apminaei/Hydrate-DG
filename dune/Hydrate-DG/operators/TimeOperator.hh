@@ -97,7 +97,7 @@ public:
 		using RangeType = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
 			Traits::LocalBasisType::Traits::RangeType;
 		using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
-		auto T_ref = property.parameter.ReferenceTemperature();
+		auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
 		// Reference to cell
 	  	const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();

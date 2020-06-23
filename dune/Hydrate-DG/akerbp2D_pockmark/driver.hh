@@ -166,8 +166,8 @@ void driver(const GV &gv, // GridView
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
 	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
+	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
 	double alpha_g = 1.e0;
 	double alpha_w = 1.e0;
@@ -349,73 +349,84 @@ void driver(const GV &gv, // GridView
 	int newton_iterations = 0;
 	
 	//	BEGIN TIME LOOP
-	while ( time < t_END - 1e-8)
+	while ( time < (t_END - 1e-8/property.characteristicValue.t_c))
 	{
-		std::cout << "_____________________________________________________" << std::endl;
+		if( exceptionCaught==false ){
+				dt = std::max(dt,dt_min);
+		}
+
+		if(helper.rank()==0){
+			std::cout<< "_____________________________________________________" <<std::endl;
+			std::cout<< " current opcount = " << opcount - 1 << std::endl;
+		}
+
 		clock_t start = clock();
-		try
-		{
-			std::cout << "****************************" << std::endl;
-			std::cout << "  CALLING osm.apply() !" << std::endl;
-			std::cout << "****************************" << std::endl;
-			osm.apply(time, dt, uold, unew);
+		try{
+			if(helper.rank()==0){
+			std::cout<<"****************************" << std::endl;
+			std::cout<<"  CALLING osm.apply() !"	  << std::endl;
+			std::cout<<"****************************" << std::endl;
+			}
+
+			osm.apply( time, dt, uold, unew );
 			
 			newton_iterations = osm.getPDESolver().result().iterations;
-			std::cout << "****************************" << std::endl;
-		
+
+			exceptionCaught = false;
+
+		}catch ( Dune::Exception &e ) {
 			exceptionCaught = true;
-		}
-		catch(Dune::Exception &e)
-		{
-				if (dt > 1e-6)
-			{
-				std::cout << "Catched Error, Dune reported error: " << e << std::endl;
+			if( (dt*property.characteristicValue.t_c) > 1e-8 ){
+
+				if(helper.rank()==0){
+					std::cout << "Catched Error, Dune reported error: " << e << std::endl;
+				}
 
 				unew = uold;
 
-				dt *= 0.9;
-				continue;
+				newton_iterations = 0;
+
+				dt *= 0.5;
+					continue;
 			}
 			else
 			{
-				std::cout << "ABORTING, due to DUNE error: " << e << std::endl;
+				if(helper.rank()==0){
+					std::cout << "ABORTING, due to DUNE error: " << e << std::endl;
+				}
 				exit(0);
 			}
 		}
+		clock_t end = clock();
+		double clock_time_this_step = (double) (end-start) / CLOCKS_PER_SEC;
+		clock_time_elapsed += clock_time_this_step;
 
-			clock_t end = clock();
-			double clock_time_this_step = (double) (end-start) / CLOCKS_PER_SEC;
-			clock_time_elapsed += clock_time_this_step;
-
-			if(helper.rank()==0){
+		if(helper.rank()==0){
 			std::cout<<"DONE"<<std::endl;
 			std::cout<<"_____________________________________________________"<<std::endl;
-			}
+		}
 
-			/*********************************************************************************************
-			 * OUTPUT
-			 *********************************************************************************************/
-			/* At each time step: **Statistics**
-			 * t_new,
-			 * dt,
-			 * fixed point iterations,
-			 * newton iterations per fixed point iteration,
-			 * total newton iterations
-			 */
-			if(helper.rank()==0){
+		/*********************************************************************************************
+		 * OUTPUT
+		 *********************************************************************************************/
+		/* At each time step: **Statistics**
+		 * t_new,
+		 * dt,
+		 * fixed point iterations,
+		 * newton iterations per fixed point iteration,
+		 * total newton iterations
+		 */
+		if(helper.rank()==0){
 			std::string statistics_file = pathName;
 			statistics_file +=fileName;
 			statistics_file +="_statistics";
 			statistics_file += ".txt";
 			property.ReportStatistics( 	statistics_file,
-										time*CharacteristicValues::t_c,
-										dt*CharacteristicValues::t_c,
+										time*property.characteristicValue.t_c,
+										dt*property.characteristicValue.t_c,
 										newton_iterations,
 										clock_time_elapsed );
-			}
-
-
-
+		}
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
 		DGF_Pw dgf_Pw(subgfs_Pw, unew);
@@ -446,10 +457,12 @@ void driver(const GV &gv, // GridView
 
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			vtkSequenceWriter.clear();
-			std::cout << " ******************************************************************* " << std::endl;
-			std::cout << " OUTPUT WRITTEN " << opcount << " ----processor: " << helper.rank() << std::endl;
-			std::cout << " ******************************************************************* " << std::endl;
-
+			if(helper.rank()==0){
+				std::cout<< " ******************************************************************* " << std::endl;
+				std::cout<< " OUTPUT WRITTEN " << opcount << " ----processor: " << helper.rank() << std::endl;
+				std::cout<< " ******************************************************************* " << std::endl;
+				std::cout<< std::flush;
+			}
 			timecount = time;
 			opcount = opcount + 1;
 		}
@@ -459,9 +472,11 @@ void driver(const GV &gv, // GridView
 		uold = unew;
 		//		2. ADVANCE TIME:
 		time += dt;
-		std::cout << " " << std::endl;
-		std::cout << " time = " << time ;
-
+		if(helper.rank()==0){
+			std::cout<<" "<< std::endl;
+			std::cout<< " time = " << time*property.characteristicValue.t_c ;
+			std::cout<< std::flush;
+		}
 		if (adaptive_time_control)
 		{
 			if (newton_iterations > maxAllowableIterations)
@@ -477,16 +492,20 @@ void driver(const GV &gv, // GridView
 		{
 			dt = dtstart;
 		}
-
-		std::cout << " , time+dt = " << (time + dt) 
-				  << " , opTime = " << t_OP * opcount ;
-
+		if(helper.rank()==0){
+			std::cout << " , time+dt = " << (time + dt)*property.characteristicValue.t_c
+					  << " , opTime = "  << t_OP * opcount * property.characteristicValue.t_c ;
+			std::cout<< std::flush;
+		}
 		if (time + dt > t_OP * opcount - 1.e-7)
 		{
 			dtLast = dt;
 			dt = t_OP * opcount - time;
 
-			std::cout << " , because timeNext > opNext , dt set to : " << dt  << std::endl;
+			if(helper.rank()==0){
+				std::cout<< " , because timeNext > opNext , dt set to : " << dt*property.characteristicValue.t_c << std::endl;
+				std::cout<< std::flush;
+			}
 			dtFlag = 0;
 		}
 		dtFlag += 1;
@@ -495,10 +514,12 @@ void driver(const GV &gv, // GridView
 		{
 			dt = std::max(dt, dtLast * 0.9);
 		}
-		std::cout << " , dt  : " << dt << std::endl;
-		std::cout << " " << std::endl;
-
-		std::cout << " READY FOR NEXT ITERATION. " << std::endl;
+		if(helper.rank()==0){
+			std::cout<< " , dt  : " << dt*property.characteristicValue.t_c << std::endl;
+			std::cout<<" "<< std::endl;
+			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
+			std::cout<< std::flush;
+		}
 	}
 };
 

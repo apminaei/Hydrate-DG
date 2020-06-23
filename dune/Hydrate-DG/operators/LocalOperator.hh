@@ -262,7 +262,7 @@ public:
 
     // Get geometry
     auto geo = eg.geometry();
-    auto T_ref = property.parameter.ReferenceTemperature();
+    auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
 
     // Initialize vectors outside for loop
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw(lfsu_Pw.size());
@@ -296,7 +296,7 @@ public:
     Dune::FieldVector<RF, dim> gradu_YH2O(0.0);
     Dune::FieldVector<RF, dim> gradu_XC(0.0);
     Dune::FieldVector<RF, dim> Kg(0.0);
-    auto g = -property.parameter.g();
+    auto gravity = -Xc_grav * property.parameter.g();
       
 
     // Transformation matrix
@@ -486,7 +486,7 @@ public:
       //K *= 1. / Xc_K; /*ndim K*/
       //K *= Xc_conv_m;
 
-      K.mv(g, Kg);
+      K.mv(gravity, Kg);
 
       // compute K * gradient of Pw
       K.mv(gradu_Pw, Kgradu_Pw);
@@ -519,7 +519,7 @@ public:
       auto XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);//VLequil[Indices::compId_XH2O];//
       
       auto Swe = property.hydraulicProperty.EffectiveSw(Sw,Sh,0.0,0.0);
-      auto dPc_dSwe = property.hydraulicProperty.dPc_dSwe(Swe, BrooksCParams[0], BrooksCParams[1]);
+      auto dPc_dSwe = property.hydraulicProperty.dPc_dSwe(Swe, BrooksCParams[0], BrooksCParams[1]); /*ndim */
       auto dSwe_dSw =  property.hydraulicProperty.dSwe_dSw(Sw,Sh,0.0,0.0);
       auto coeff_grad_Sw = dPc_dSwe * dSwe_dSw ;
 
@@ -740,7 +740,7 @@ public:
     // References to inside and outside cells
     const auto &cell_inside = ig.inside();
     const auto &cell_outside = ig.outside();
-    auto T_ref = property.parameter.ReferenceTemperature();
+    auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
     // Get geometries
     auto geo = ig.geometry();
     //const auto dimension = geo.mydimension;
@@ -1222,7 +1222,7 @@ public:
       K_n.mv(n_F, Kn_F_n);
 
       auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s,0.0,0.0);
-      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);
+      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
       auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0.0, 0.0);
       auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
 
@@ -1231,7 +1231,7 @@ public:
       auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
 
       auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n,0.0,0.0);
-      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);
+      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);/* ndim */
       auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_n, Sh_n, 0.0, 0.0);
       auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_n ;
 
@@ -1246,9 +1246,9 @@ public:
       auto Kgradu_Pg_n = Kgradu_Pw_n - coeff_grad_Sw_n * Kgradu_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * Kgradu_Sh_n;
       auto gradu_Pg_n = gradu_Pw_n - coeff_grad_Sw_n * gradu_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * gradu_Sh_n;
       
-      auto g = -property.parameter.g();
-      K_s.mv(g, Kg_s);
-      K_n.mv(g, Kg_n);
+      auto gravity = -Xc_grav * property.parameter.g();
+      K_s.mv(gravity, Kg_s);
+      K_n.mv(gravity, Kg_n);
 
       double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
@@ -1310,8 +1310,7 @@ public:
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       
       // upwinding wrt gas-phase velocity
-			auto normalgravity = g * n_F_local;
-			normalgravity *= Xc_grav;
+			auto normalgravity = gravity * n_F_local;
 			auto normalpotential_g = (Pg_n - Pg_cell_center)/distance
 								   + ( 0.5*(rho_g_s + rho_g_n) ) * normalgravity ;
 			double omegaup_g_s = 0.0, omegaup_g_n = 0.0;
@@ -1636,7 +1635,7 @@ public:
         Traits::LocalBasisType::Traits::RangeFieldType;
     using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
-    auto T_ref = property.parameter.ReferenceTemperature();
+    auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
     // dimensions
     const int dimension = GV::dimension;
     const int dim = IG::Entity::dimension;
@@ -1806,10 +1805,10 @@ public:
       BC bc( gv,property ) ;
       
       // evaluate boundary condition types for {Pw,Sg} or {Fw,Fg} 
-			auto bctype = bc.type(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t ) ;
+			auto bctype = bc.type(ig, ip.position(), (*time), (*dt)) ;
 
 			// evaluate boundary condition values for {Pw,Sg} or {Fw,Fg} 
-			auto bcvalue = bc.value(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t ) ;
+			auto bcvalue = bc.value(ig, ip.position(), (*time), (*dt) ) ;
       
       // evaluate basis functions at local quadrature points 
       auto &psi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
@@ -1842,7 +1841,7 @@ public:
       }
       else if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
-        Pw_n = bcvalue[Indices::PVId_Pw] / Xc_P;
+        Pw_n = bcvalue[Indices::PVId_Pw] ;
       }
 
       // evaluate Sh
@@ -1904,7 +1903,7 @@ public:
       }
       else if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
-        T_n = bcvalue[Indices::PVId_T] / Xc_T;
+        T_n = bcvalue[Indices::PVId_T] ;
       }
 
       // evaluate XCH4
@@ -2055,7 +2054,7 @@ public:
       }
       else if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
-        grad_Pw_n = 1 * grad_Pw_s + 0.0 * (Pw_n-Pw_cell_center) * Coeff_numeric_derivaritve / Xc_P ;
+        grad_Pw_n = 1 * grad_Pw_s + 0.0 * (Pw_n-Pw_cell_center) * Coeff_numeric_derivaritve;
       }
 
       // evaluate normal flux of Sh
@@ -2091,7 +2090,7 @@ public:
       // }
       // else if (bctype[Indices::PVId_Pc] == Indices::BCId_dirichlet)
       // {
-      //   grad_Pc_n = 1 * grad_Pc_s + 0.0 * (Pc_n-Pc_cell_center) * Coeff_numeric_derivaritve / Xc_P;
+      //   grad_Pc_n = 1 * grad_Pc_s + 0.0 * (Pc_n-Pc_cell_center) * Coeff_numeric_derivaritve ;
       // }
 
       // evaluate normal flux of T
@@ -2103,7 +2102,7 @@ public:
       }
       else if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
-        grad_T_n = 1 * grad_T_s + 0.0 * (T_n-T_cell_center) * Coeff_numeric_derivaritve / Xc_T;
+        grad_T_n = 1 * grad_T_s + 0.0 * (T_n-T_cell_center) * Coeff_numeric_derivaritve ;
       }
 
       // evaluate normal flux of XCH4
@@ -2169,11 +2168,11 @@ public:
 
       
 
-      auto g = -property.parameter.g();
+      auto gravity = -Xc_grav * property.parameter.g();
       auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s);
       
       auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s,0.0,0.0);
-      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);
+      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
       auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0.0, 0.0);
       auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
 
@@ -2222,7 +2221,7 @@ public:
       
 
       auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n,0.0,0.0);
-      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);
+      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);/* ndim */
       auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_n, Sh_n, 0.0, 0.0);
       auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_s ;
 
@@ -2275,8 +2274,7 @@ public:
       omega_n = 1.0;
       //KInverse_s.mv(v_g, Kinv_v_g_s);
       // upwinding wrt gas-phase velocity
-			auto normalgravity = g * n_F_local;
-			normalgravity *= Xc_grav;
+			auto normalgravity = gravity * n_F_local;
 			auto normalpotential_g = (Pg_n - Pg_cell_center)/distance
 								   + ( 0.5*(rho_g_s + rho_g_n) ) * normalgravity ;
 			double omegaup_g_s = 0.0, omegaup_g_n = 0.0;

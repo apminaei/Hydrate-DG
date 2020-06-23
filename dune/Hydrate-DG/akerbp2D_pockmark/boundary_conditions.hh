@@ -34,20 +34,20 @@ public :
 		//std::cout << " iplocal_s = " << iplocal << " ip_global_s = " << globalPos << std::endl;
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-
+		double Xc_time = 3600. / characteristicValues.t_c;
 		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
-		if( (time >= 0 ) and (time < (2.00*3600) )){
+		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
-		else if ((time >= (2.00*3600) ) and (time < (3.50*3600)))
+		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_neumann ;
 		}
-		else if (time >= (3.50*3600))	
+		else if (time >= (3.50*Xc_time))	
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
@@ -77,29 +77,29 @@ public :
 		    // References to inside and outside cells
 		const auto &cell_inside = intersection.inside();
 		//const auto &cell_outside = intersection.outside();
-
+		double Xc_time = 3600. / characteristicValues.t_c;
 		
 
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
 		
 		bcvalue[indices.PVId_T ] = (4.+273.15)/ characteristicValues.T_c;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
 		
-		if( (time >= 0 ) and (time < (2.00*3600) )){
+		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bcvalue[indices.PVId_Pw] = 2.e6/characteristicValues.P_c ;
 		}
-		else if ((time >= (2.00*3600) ) and (time < (3.50*3600)))
+		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
 		{
 			//std::cout << " gas_gen = " << time << std::endl;
 			
 			bcvalue[indices.PVId_Pw] = 0. ;
 		}
-		else if ((time >= (3.50*3600) ) and (time < (4.50*3600)))	
+		else if ((time >= (3.50*Xc_time) ) and (time < (4.50*Xc_time)))	
 		{
 			bcvalue[indices.PVId_Pw] = 5.e6/characteristicValues.P_c ;
 		}
-		else if (time >= (4.50*3600)  )	
+		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.PVId_Pw] = (5.e6 + 10.*(time- 450*3600))/characteristicValues.P_c ;
+			bcvalue[indices.PVId_Pw] = (5.e6 + 10.*(time- 4.50*Xc_time))/characteristicValues.P_c ;
 		}
 		auto S = 0.0055;
 		auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal);/*BrooksCParams[0] gives Pentry in Pa*/

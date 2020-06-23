@@ -148,7 +148,7 @@ public:
 		}
 		else if ( Swe <= a ){
 			double Pc_a /*Pa*/  = Pentry * pow( a, -eta );
-			double dPc_a /*Pa*/ = dPc_dSwe( a,Pentry,lambda ) ;
+			double dPc_a /*Pa*/ = dPc_dSwe( a,Pentry,lambda ) * characteristicValue.P_c;
 			Pc/*Pa*/ = Pc_a/*Pa*/ + dPc_a/*Pa*/ * ( Swe - a );
 		}
 		else {
@@ -204,7 +204,7 @@ public:
 //			exit(0);
 		}
 		
-		return dPc; /*Pa*/
+		return dPc/characteristicValue.P_c; /*ndim*/
 	}
 
 	/* Pc SCALING FACTORS */
