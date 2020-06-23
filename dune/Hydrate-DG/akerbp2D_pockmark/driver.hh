@@ -71,7 +71,7 @@ void driver(const GV &gv, // GridView
 	GFS_Y gfs_y(gv, fem_y);
 
 	//	COMPOSITE GFS
-	typedef Dune::PDELab::ISTL::VectorBackend<> VBE; //  block size -> numOfPVs
+	using VBE = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>; //  block size -> numOfPVs
 
 	// gfs for composite system Pw,Pc,Sg,Sh,T,XCH4,YH2O
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, Dune::PDELab::EntityBlockedOrderingTag,
@@ -164,17 +164,17 @@ void driver(const GV &gv, // GridView
 	// std::cout << " bct[indices.PVId_Pw ] = " <<  bc.type( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	// std::cout << " bcvalue[indices.PVId_Pw ] = " <<  bc.value( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::NIPG;
+	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
-	double alpha_g = 1.e0;
-	double alpha_w = 1.e0;
-	double alpha_s = 1.e0;
-	double alpha_T = 1.e0;
-	double alpha_x = 1.e0;
-	double alpha_y = 1.e0;
+	double alpha_g = 1.e1;
+	double alpha_w = 1.e1;
+	double alpha_s = 1.e1;
+	double alpha_T = 1.e1;
+	double alpha_x = 1.e1;
+	double alpha_y = 1.e1;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
@@ -205,18 +205,22 @@ void driver(const GV &gv, // GridView
 #ifdef PARALLEL
 
 	//make vector consistent NEW IN PARALLEL
-	Dune::PDELab::ISTL::ParallelHelper<GFS> phelper(gfs);
-	phelper.maskForeignDOFs(uold);
-	Dune::PDELab::AddDataHandle<GFS, U> adddh(gfs, uold);
-	if (gfs.gridView().comm().size() > 1)
-		gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
+	// Dune::PDELab::ISTL::ParallelHelper<GFS> phelper(gfs);
+	// phelper.maskForeignDOFs(uold);
+	// Dune::PDELab::AddDataHandle<GFS, U> adddh(gfs, uold);
+	// if (gfs.gridView().comm().size() > 1)
+	// 	gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
-	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	LS ls(gfs, cc, 1000, 2);
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
+	// LS ls(gfs, cc, 1000, 2);
 
-	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	// LS ls(gfs, 100, 1, true, true);
-
+	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
+	LS ls(gfs, 1000, 1, /* reuse */true, /* usesuperlu_ */true);
+	/* 
+		reuse_ : Set true, if the Matrix to be used is always identical (AMG aggregation is then only performed once).
+		usesuperlu_ :	Set false, to suppress the no SuperLU warning
+	*/
+	
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
 	// LS ls(gfs,5000,1,true,true);
 
@@ -246,11 +250,11 @@ void driver(const GV &gv, // GridView
     //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
 	pdesolver.setReassembleThreshold(0.0);
     pdesolver.setVerbosityLevel(2);
-    pdesolver.setReduction(1e-4);
-    pdesolver.setMinLinearReduction(1e-3);
-	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    pdesolver.setReduction(1e-6);
+    pdesolver.setMinLinearReduction(1e-5);
+	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)30));
     pdesolver.setForceIteration(true);
-	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
+	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-6)); 
 
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
 	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
@@ -310,7 +314,7 @@ void driver(const GV &gv, // GridView
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
 	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
 	pathName += fileName ;
-	//std::filesystem::create_directory(pathName);
+	
 	pathName += "/" ;
 	const std::string str = "";
 	//Dune::PDELab::FilenameHelper fn(pathName + fileName);
