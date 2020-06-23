@@ -169,12 +169,12 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
-	double alpha_g = 1.e1;
-	double alpha_w = 1.e1;
-	double alpha_s = 1.e2;
-	double alpha_T = 1.e1;
-	double alpha_x = 1.e1;
-	double alpha_y = 1.e1;
+	double alpha_g = 1.e0;
+	double alpha_w = 1.e0;
+	double alpha_s = 1.e0;
+	double alpha_T = 1.e0;
+	double alpha_x = 1.e0;
+	double alpha_y = 1.e0;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
