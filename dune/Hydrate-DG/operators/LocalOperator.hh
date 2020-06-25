@@ -2181,7 +2181,7 @@ public:
       auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
 
       //auto Kgradu_Pg_s = Kgradu_Pw_s + coeff_grad_Sg_s * Kgradu_Sg_s + (coeff_grad_Sh_s + coeff_grad_Sg_s) * Kgradu_Sh_s;
-      auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
+      auto grad_Pg_s = 0.0;//grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
       //auto grad_Pg_s = grad_Pw_s + grad_Pc_s ;
 
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
@@ -2203,8 +2203,8 @@ public:
       auto VLequil_s = property.mixture.EquilibriumMoleFractions( T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
       // auto YCH4_s = VLequil_s[Indices::compId_YCH4];
       // auto XH2O_s = 1. - XC_s - XCH4_s;// VLequil_s[Indices::compId_XH2O];
-      auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
-      auto XH2O_s =  property.mixture.XH2O(YH2O_s, T_s * Xc_T, Pg_s * Xc_P, XC_s);
+      // auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
+      // auto XH2O_s =  property.mixture.XH2O(YH2O_s, T_s * Xc_T, Pg_s * Xc_P, XC_s);
       
       auto rho_g_s = property.gas.Density(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) ;
       auto rho_w_s = property.water.Density(T_s * Xc_T, Pw_s * Xc_P, S_s);
@@ -2230,7 +2230,7 @@ public:
       auto coeff_grad_Sh_n = dPcSF1_dSh_n + dPc_dSwe_n * dSwe_dSh_s ;
 
       //auto Kgradu_Pg_s = Kgradu_Pw_s + coeff_grad_Sg_s * Kgradu_Sg_s + (coeff_grad_Sh_s + coeff_grad_Sg_s) * Kgradu_Sh_s;
-      auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
+      auto grad_Pg_n = 0.0;//grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
       //auto grad_Pg_n = grad_Pw_n + grad_Pc_n ;
 
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
@@ -2252,8 +2252,8 @@ public:
       auto VLequil_n = property.mixture.EquilibriumMoleFractions( T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
       // auto YCH4_n = 1. -YH2O_n;// VLequil_n[Indices::compId_YCH4];
       // auto XH2O_n = 1. - XC_n - XCH4_n;// VLequil_n[Indices::compId_XH2O];
-      auto YCH4_n =  property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
-      auto XH2O_n =  property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
+      // auto YCH4_n =  property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
+      // auto XH2O_n =  property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
       
       auto rho_g_n = property.gas.Density(T_n * Xc_T, Pg_n * Xc_P, zCH4_n) ;
       auto rho_w_n = property.water.Density(T_n * Xc_T, Pw_n * Xc_P, S_n);

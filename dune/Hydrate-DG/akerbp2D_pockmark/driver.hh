@@ -485,7 +485,7 @@ void driver(const GV &gv, // GridView
 		{
 			if (newton_iterations > maxAllowableIterations)
 			{
-				dt = std::max(dt*0.9 , dt_min);
+				dt = std::max(dt , dt_min);
 			}
 			else if (newton_iterations <= minAllowableIterations)
 			{

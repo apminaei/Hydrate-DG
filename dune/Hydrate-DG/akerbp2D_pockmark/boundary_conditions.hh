@@ -34,7 +34,7 @@ public :
 		//std::cout << " iplocal_s = " << iplocal << " ip_global_s = " << globalPos << std::endl;
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		double Xc_time = 3600. / characteristicValues.t_c;
+		double Xc_time = 600. / characteristicValues.t_c;
 		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
@@ -77,7 +77,7 @@ public :
 		    // References to inside and outside cells
 		const auto &cell_inside = intersection.inside();
 		//const auto &cell_outside = intersection.outside();
-		double Xc_time = 3600. / characteristicValues.t_c;
+		double Xc_time = 600. / characteristicValues.t_c;
 		
 
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
