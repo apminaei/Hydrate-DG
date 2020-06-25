@@ -573,7 +573,7 @@ public:
 
       auto j_H2O_g = rho_g * Sg * DH2O_g * gradu_YH2O;
       auto j_CH4_w = rho_w * Sw * DCH4_w * gradu_XCH4;
-      auto j_SALT_w = rho_w * Sw * DCH4_w * gradu_XC;
+      auto j_SALT_w = rho_w * Sw * DC_w * gradu_XC;
       auto j_H2O_w = -j_CH4_w -j_SALT_w;
       auto j_CH4_g = -j_H2O_g;
 
@@ -1348,7 +1348,7 @@ public:
 
       auto j_H2O_g_s = rho_g_s * Sg_s * DH2O_g_s * gradu_YH2O_s;
       auto j_CH4_w_s = rho_w_s * Sw_s * DCH4_w_s * gradu_XCH4_s;
-      auto j_SALT_w_s = rho_w_s * Sw_s * DCH4_w_s * gradu_XC_s;
+      auto j_SALT_w_s = rho_w_s * Sw_s * DC_w_s * gradu_XC_s;
       auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
       auto j_CH4_g_s = - j_H2O_g_s;
 
@@ -1371,7 +1371,7 @@ public:
 
       auto j_H2O_g_n = rho_g_n * Sg_n * DH2O_g_n * gradu_YH2O_n;
       auto j_CH4_w_n = rho_w_n * Sw_n * DCH4_w_n * gradu_XCH4_n;
-      auto j_SALT_w_n = rho_w_n * Sw_n * DCH4_w_n * gradu_XC_n;
+      auto j_SALT_w_n = rho_w_n * Sw_n * DC_w_n * gradu_XC_n;
       auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
       auto j_CH4_g_n = - j_H2O_g_n;
 
@@ -1451,12 +1451,12 @@ public:
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
       {
         r_s.accumulate(lfsv_XC_s, i,  0.5 *Xc_diff_m * term_nipg_c_x * rho_w_s 
-                                      * Sw_s * DCH4_w_s * gradpsi_XC_s[i] * n_F_local * factor);
+                                      * Sw_s * DC_w_s * gradpsi_XC_s[i] * n_F_local * factor);
       }
       for (size_type i = 0; i < lfsv_XC_n.size(); i++)
       {
         r_n.accumulate(lfsv_XC_n, i,  0.5 * Xc_diff_m * term_nipg_c_x * rho_w_n 
-                                      * Sw_n * DCH4_w_n * gradpsi_XC_n[i] * n_F_local * factor);
+                                      * Sw_n * DC_w_n * gradpsi_XC_n[i] * n_F_local * factor);
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
@@ -2310,7 +2310,7 @@ public:
 
       auto j_H2O_g_s = rho_g_s * Sg_s * DH2O_g_s * grad_YH2O_s;
       auto j_CH4_w_s = rho_w_s * Sw_s * DCH4_w_s * grad_XCH4_s;
-      auto j_SALT_w_s = rho_w_s * Sw_s * DCH4_w_s * grad_XC_s;
+      auto j_SALT_w_s = rho_w_s * Sw_s * DC_w_s * grad_XC_s;
       auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
       auto j_CH4_g_s = - j_H2O_g_s;
 
@@ -2333,7 +2333,7 @@ public:
 
       auto j_H2O_g_n = rho_g_n * Sg_n * DH2O_g_n * grad_YH2O_n;
       auto j_CH4_w_n = rho_w_n * Sw_n * DCH4_w_n * grad_XCH4_n;
-      auto j_SALT_w_n = rho_w_n * Sw_n * DCH4_w_n * grad_XC_n;
+      auto j_SALT_w_n = rho_w_n * Sw_n * DC_w_n * grad_XC_n;
       auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
       auto j_CH4_g_n = - j_H2O_g_n;
 
