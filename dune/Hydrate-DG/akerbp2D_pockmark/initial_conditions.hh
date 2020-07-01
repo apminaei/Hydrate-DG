@@ -53,7 +53,7 @@ public:
 			/******************************************************************************/
 			auto VLEqui = property.mixture.EquilibriumMoleFractions( T/*K*/, Pg/*Pa*/, XC,  z_CH4 );
 			double XCH4 = property.parameter.InitialXCH4(xglobal);
-			double YH2O = property.parameter.InitialYH2O(xglobal);//VLEqui[Indices::compId_YH2O];
+			double YH2O = VLEqui[Indices::compId_YH2O];
 
 			icvalue[Indices::PVId_Pw] = Pw ; //P_w + P_c ;
 			icvalue[Indices::PVId_Sg] = Sg ;

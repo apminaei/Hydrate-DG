@@ -9,6 +9,8 @@ private :
 	Indices indices;
 	CharacteristicValues characteristicValues;
 
+	double Xc_time = 100. * 3600. / characteristicValues.t_c;
+
 public :
 
 	// ! construct from gridview
@@ -34,7 +36,6 @@ public :
 		//std::cout << " iplocal_s = " << iplocal << " ip_global_s = " << globalPos << std::endl;
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		double Xc_time = 600. / characteristicValues.t_c;
 		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
@@ -77,7 +78,6 @@ public :
 		    // References to inside and outside cells
 		const auto &cell_inside = intersection.inside();
 		//const auto &cell_outside = intersection.outside();
-		double Xc_time = 600. / characteristicValues.t_c;
 		
 
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
@@ -101,14 +101,14 @@ public :
 		{
 			bcvalue[indices.PVId_Pw] = (5.e6 + 10.*(time- 4.50*Xc_time))/characteristicValues.P_c ;
 		}
-		auto S = 0.0055;
-		auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal);/*BrooksCParams[0] gives Pentry in Pa*/
+		//auto S = 0.0055;
+		//auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal);/*BrooksCParams[0] gives Pentry in Pa*/
 		auto Sg = property.parameter.InitialSg(globalPos);
 		auto Sh = property.parameter.InitialSh(globalPos);
 		auto Sw = 1. - Sg - Sh;
-		auto por = property.soil.SedimentPorosity(cell_inside, iplocal);
-		double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por)
-						* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+		// auto por = property.soil.SedimentPorosity(cell_inside, iplocal);
+		// double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por)
+		// 				* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
 		//auto Pg = property.parameter.InitialPw(globalPos) + Pc;
 		//auto zCH4 = property.eos.EvaluateCompressibilityFactor(bcvalue[indices.PVId_T ] * characteristicValues.T_c, Pg * characteristicValues.P_c);
 		//auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
@@ -133,6 +133,67 @@ public :
 
 		return bcvalue;
 	}
+
+	// BC regarding phase Velocities
+	template<typename I> 
+	std::vector< int >
+	velType( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
+			const Dune::FieldVector<double,dim-1>& xlocal,
+		  double time /*ndims*/,
+		  double dt /*ndims*/ ) const {
+		auto iplocal = intersection.geometryInInside().global(xlocal);
+		auto globalPos = intersection.inside().geometry().global(iplocal);
+
+		std::vector< int > bctype(Indices::numOfVelBCs, 0);
+		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
+			bctype[indices.BCId_water] = indices.BCId_dirichlet ;
+		}
+		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
+		{
+			bctype[indices.BCId_water] = indices.BCId_neumann ;
+		}
+		else if (time >= (3.50*Xc_time))	
+		{
+			bctype[indices.BCId_water] = indices.BCId_dirichlet ;
+		}
+		
+		return bctype;
+	}
+
+	template<typename I> 
+	std::vector< double >
+	velValue ( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
+			const Dune::FieldVector<double,dim-1>& xlocal,
+			double time/*s*/,
+			double dt/*s*/ ) const {
+		auto iplocal = intersection.geometryInInside().global(xlocal);
+		auto globalPos = intersection.inside().geometry().global(iplocal);
+		    // References to inside and outside cells
+		const auto &cell_inside = intersection.inside();
+		//const auto &cell_outside = intersection.outside();
+		
+
+		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
+		
+		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
+			bcvalue[indices.BCId_water] = 2.e6/characteristicValues.P_c ;
+		}
+		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
+		{
+			bcvalue[indices.BCId_water] = 0. ;
+		}
+		else if ((time >= (3.50*Xc_time) ) and (time < (4.50*Xc_time)))	
+		{
+			bcvalue[indices.BCId_water] = 5.e6/characteristicValues.P_c ;
+		}
+		else if (time >= (4.50*Xc_time)  )	
+		{
+			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time))/characteristicValues.P_c ;
+		}
+		return bcvalue;
+	}
+
+
 	// ! get a reference to the gridview
 	inline const GV& getGridView () { return gv ; }
 

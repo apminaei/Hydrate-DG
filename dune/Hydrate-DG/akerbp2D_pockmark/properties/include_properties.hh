@@ -55,14 +55,22 @@ public:
 	  hydraulicProperty(gv_,parameter),
 	  kinetics(gv_,parameter)
   	{}
-
+	
+	double dt_initial = ptree.get("time.dt_initial",(double)1.);
+	int time_interval = ptree.get("output.time_interval",(double)1);
 	/******************************************************************************/
 
   	void ReportStatistics( std::string file_name,
   						   double time /*s*/,
 						   double dt /*s*/,
 						   int total_newton_iterations,
-						   double clock_time_elapsed /*s*/ ) {
+						   double clock_time_elapsed /*s*/,  
+						   std::string method_g,
+								std::string method_w,
+								std::string method_T,
+								std::string method_x,
+								std::string method_y,
+								double alpha_g , double alpha_w, double alpha_s, double alpha_T, double alpha_x, double alpha_y) {
 
   		std::fstream result;
 
@@ -71,8 +79,12 @@ public:
   			result	<< "time [s]" << '\t'
   					<< "dt [s]"	<< '\t'
 					<< "total no. of newton iterations" << '\t'
-					<< "clock time [s]"
-  					<< std::endl;
+					<< "clock time [s]" << '\t'
+  					<< mesh.X_cells << "*" << mesh.Z_cells << '\t'  
+					<< "dt_initial="<< dt_initial << '\t' << "time_interval="<<time_interval << '\t'
+					<< "penalty coeff.  " << alpha_g << '\t' << alpha_w << '\t'<< alpha_s << '\t'<< alpha_T << '\t'<< alpha_x << '\t'<< alpha_y << '\t'
+					<< " S=1, N=0, I=-1,  " << method_g << '\t'<< method_w << '\t'<< method_T << '\t'<< method_x << '\t'<< method_y 
+					<< std::endl;
   			result.close();
   		}
 

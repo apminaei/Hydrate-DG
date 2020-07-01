@@ -164,11 +164,11 @@ void driver(const GV &gv, // GridView
 	// std::cout << " bct[indices.PVId_Pw ] = " <<  bc.type( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	// std::cout << " bcvalue[indices.PVId_Pw ] = " <<  bc.value( xtest, 9.e5, dt)[Indices::PVId_Pw] << std::endl;
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::NIPG;
+	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::SIPG;
+	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::NIPG;
 	double alpha_g = 1.e1;
 	double alpha_w = 1.e1;
 	double alpha_s = 1.e1;
@@ -211,18 +211,14 @@ void driver(const GV &gv, // GridView
 	// if (gfs.gridView().comm().size() > 1)
 	// 	gfs.gridView().communicate(adddh, Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication);
 
-	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works
-	// LS ls(gfs, cc, 1000, 2);
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works 485. seconds with 5 newton it. using 1 core (1000 lin. it) 
+	// LS ls(gfs, cc, 500, 2);
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	LS ls(gfs, 1000, 1, /* reuse */true, /* usesuperlu_ */true);
-	/* 
-		reuse_ : Set true, if the Matrix to be used is always identical (AMG aggregation is then only performed once).
-		usesuperlu_ :	Set false, to suppress the no SuperLU warning
-	*/
-	
-	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works
-	// LS ls(gfs,5000,1,true,true);
+	LS ls(gfs, 100, 1, true, true);
+
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works 410. seconds with 5 newton it. using 1 core (500 lin. it)
+	// LS ls(gfs,500,1,true,true);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
 	//LS ls(gfs, cc);
@@ -250,11 +246,11 @@ void driver(const GV &gv, // GridView
     //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
 	pdesolver.setReassembleThreshold(0.0);
     pdesolver.setVerbosityLevel(2);
-    pdesolver.setReduction(1e-6);
-    pdesolver.setMinLinearReduction(1e-5);
-	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)30));
-    pdesolver.setForceIteration(true);
-	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-6)); 
+    pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
+    pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
+	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    pdesolver.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
+	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
 
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
 	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
@@ -314,7 +310,9 @@ void driver(const GV &gv, // GridView
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
 	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
 	pathName += fileName ;
-	
+	//if(helper.rank()==0){
+		//std::filesystem::create_directory(pathName);
+	//}
 	pathName += "/" ;
 	const std::string str = "";
 	//Dune::PDELab::FilenameHelper fn(pathName + fileName);
@@ -340,6 +338,12 @@ void driver(const GV &gv, // GridView
 
 	vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 	vtkSequenceWriter.clear();
+
+	std::string dgmethod_g = std::__cxx11::to_string(method_g);
+	std::string dgmethod_w = std::__cxx11::to_string(method_w);
+	std::string dgmethod_T = std::__cxx11::to_string(method_T);
+	std::string dgmethod_x = std::__cxx11::to_string(method_x);
+	std::string dgmethod_y = std::__cxx11::to_string(method_y);
 
 	//	INITIALIZE
 	unew = uold;
@@ -429,7 +433,9 @@ void driver(const GV &gv, // GridView
 										time*property.characteristicValue.t_c,
 										dt*property.characteristicValue.t_c,
 										newton_iterations,
-										clock_time_elapsed );
+										clock_time_elapsed,
+										dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
+										alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y );
 		}
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
@@ -485,7 +491,7 @@ void driver(const GV &gv, // GridView
 		{
 			if (newton_iterations > maxAllowableIterations)
 			{
-				dt = std::max(dt , dt_min);
+				dt = std::max(dt*0.9 , dt_min);
 			}
 			else if (newton_iterations <= minAllowableIterations)
 			{
