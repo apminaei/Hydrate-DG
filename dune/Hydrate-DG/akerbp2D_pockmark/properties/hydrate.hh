@@ -18,7 +18,7 @@ public:
 	double MolarMass() const
 	{
 		/* unit -> kg/mol */
-		return 119.5/1000;
+		return 122.24/1000;
 	}
 
 	double HydrationNumber() const

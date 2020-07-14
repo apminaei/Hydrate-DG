@@ -36,11 +36,11 @@ public :
 		//std::cout << " iplocal_s = " << iplocal << " ip_global_s = " << globalPos << std::endl;
       //exit(0);
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
+		//bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
-		bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
-		bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
+		//bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
+		//bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
@@ -103,18 +103,18 @@ public :
 		}
 		//auto S = 0.0055;
 		//auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal);/*BrooksCParams[0] gives Pentry in Pa*/
-		auto Sg = property.parameter.InitialSg(globalPos);
+		//auto Sg = property.parameter.InitialSg(globalPos);
 		auto Sh = property.parameter.InitialSh(globalPos);
-		auto Sw = 1. - Sg - Sh;
+		 //auto Sw = 1. - Sg - Sh;
 		// auto por = property.soil.SedimentPorosity(cell_inside, iplocal);
 		// double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por)
 		// 				* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
 		//auto Pg = property.parameter.InitialPw(globalPos) + Pc;
 		//auto zCH4 = property.eos.EvaluateCompressibilityFactor(bcvalue[indices.PVId_T ] * characteristicValues.T_c, Pg * characteristicValues.P_c);
 		//auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
-		bcvalue[indices.PVId_XCH4] = property.parameter.InitialXCH4(globalPos);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
-		bcvalue[indices.PVId_YH2O] = property.parameter.InitialYH2O(globalPos);//VLequil[Indices::compId_YH2O];
-		bcvalue[indices.PVId_Sg] = Sg ;
+		//bcvalue[indices.PVId_XCH4] = property.parameter.InitialXCH4(globalPos);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
+		//bcvalue[indices.PVId_YH2O] = property.parameter.InitialYH2O(globalPos);//VLequil[Indices::compId_YH2O];
+		//bcvalue[indices.PVId_Sg] = Sg ;
 		bcvalue[indices.PVId_Sh] = Sh ;
 		// if(property.mesh.isLeftBoundary(globalPos)){
 			
@@ -145,6 +145,7 @@ public :
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 
 		std::vector< int > bctype(Indices::numOfVelBCs, 0);
+		bctype[indices.BCId_heat] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.BCId_water] = indices.BCId_dirichlet ;
 		}
@@ -174,7 +175,7 @@ public :
 		
 
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
-		
+		bcvalue[indices.BCId_heat] = (4.+273.15)/ characteristicValues.T_c; ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bcvalue[indices.BCId_water] = 2.e6/characteristicValues.P_c ;
 		}

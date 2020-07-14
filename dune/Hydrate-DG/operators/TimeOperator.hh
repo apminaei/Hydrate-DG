@@ -1,19 +1,18 @@
 /*
  * TimeOperator.hh
  *
- *  Created on: Sep 22, 2016
- *      Author: shubhangi
+ *  
  */
 
 using namespace Dune::PDELab;
 
 template <class GV, typename Params>
-class TimeOperator
-	: public Dune::PDELab::NumericalJacobianApplyVolume<TimeOperator<GV, Params>>,
-	  public Dune::PDELab::NumericalJacobianVolume<TimeOperator<GV, Params>>,
-	  public Dune::PDELab::FullVolumePattern,
-	  public Dune::PDELab::LocalOperatorDefaultFlags,
-	  public Dune::PDELab::InstationaryLocalOperatorDefaultMethods<double>
+class TimeOperator:
+		// public Dune::PDELab::NumericalJacobianApplyVolume<TimeOperator<GV, Params>>,
+		// public Dune::PDELab::NumericalJacobianVolume<TimeOperator<GV, Params>>,
+		public Dune::PDELab::FullVolumePattern,
+		public Dune::PDELab::LocalOperatorDefaultFlags,
+		public Dune::PDELab::InstationaryLocalOperatorDefaultMethods<double>
 {
 private:
 	const GV &gv;
@@ -63,10 +62,6 @@ public:
 		const auto &lfsv_Pw = lfsv.template child<Indices::PVId_Pw>();
 		const auto &lfsu_Pw = lfsu.template child<Indices::PVId_Pw>();
 
-		//Capillary Pressure
-		// const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
-		// const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
-
 		//Water Saturation
 		const auto &lfsv_Sg = lfsv.template child<Indices::PVId_Sg>();
 		const auto &lfsu_Sg = lfsu.template child<Indices::PVId_Sg>();
@@ -118,11 +113,6 @@ public:
 			std::vector<RangeType> psi_Pw(lfsv_Pw.size());
 			lfsv_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pw);
 
-			// std::vector<RangeType> phi_Pc(lfsu_Pc.size());
-			// lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
-			// std::vector<RangeType> psi_Pc(lfsv_Pc.size());
-			// lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
-
 			std::vector<RangeType> phi_Sg(lfsu_Sg.size());
 			lfsu_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sg);
 			std::vector<RangeType> psi_Sg(lfsv_Sg.size());
@@ -169,11 +159,6 @@ public:
 			RF Sh = 0.0;
 			for (size_type i = 0; i < lfsu_Sh.size(); i++)
 				Sh += x(lfsu_Sh, i) * phi_Sh[i];
-
-			// evaluate Pc
-			// RF Pc = 0.0;
-			// for (size_type i = 0; i < lfsu_Pc.size(); i++)
-			// 	Pc += x(lfsu_Pc, i) * phi_Pc[i];
 
 			// evaluate T
 			RF T = 0.0;
@@ -222,14 +207,24 @@ public:
 			//  adding terms regarding components
 			auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
 			auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
+			// auto VLequil = property.mixture.EquilibriumMoleFractions( T * Xc_T, Pg * Xc_P, Sg, Sw, XC, zCH4);
+      		// auto YCH4 = VLequil[Indices::compId_YCH4];//
+      		// auto XH2O = VLequil[Indices::compId_XH2O];//
+			// if (Sg > 1.e-6)
+			//   YCH4 = 1. - YH2O;
+			// else
+			//   YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
+			// if (Sw > 1.e-6)
+			//   XH2O = 1. - XC - XCH4;
+			// else
+			//   XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			//  end of terms regarding components
-			//std::cout << " Sg = " << Sg << " Sh = time operator" << Sh << std::endl;
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. -  YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
+				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. - YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
@@ -237,7 +232,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. -  XC - XCH4) * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. -XC - XCH4) * Sw) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{
@@ -251,7 +246,8 @@ public:
 		} 	//End Quadrature Rule
 	}	// End of alpha volume
 	
-	// jacobian contribution of volume term
+	
+ 	// jacobian contribution of volume term
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename M>
 	void jacobian_volume(const EG &eg, const LFSU &lfsu, const X &x, const LFSV &lfsv, M& mat) const
 	{
@@ -260,11 +256,6 @@ public:
 		//Gas pressure
 		const auto &lfsv_Pw = lfsv.template child<Indices::PVId_Pw>();
 		const auto &lfsu_Pw = lfsu.template child<Indices::PVId_Pw>();
-
-		//Capillary Pressure
-		// const auto &lfsv_Pc = lfsv.template child<Indices::PVId_Pc>();
-		// const auto &lfsu_Pc = lfsu.template child<Indices::PVId_Pc>();
-
 		//Water Saturation
 		const auto &lfsv_Sg = lfsv.template child<Indices::PVId_Sg>();
 		const auto &lfsu_Sg = lfsu.template child<Indices::PVId_Sg>();
@@ -300,7 +291,7 @@ public:
 	  	const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
 		int cell_number = indexSet.index(cell);
-
+		
 		// Get geometry
 		auto geo = eg.geometry();
 
@@ -315,11 +306,6 @@ public:
 			lfsu_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pw);
 			std::vector<RangeType> psi_Pw(lfsv_Pw.size());
 			lfsv_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pw);
-
-			// std::vector<RangeType> phi_Pc(lfsu_Pc.size());
-			// lfsu_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pc);
-			// std::vector<RangeType> psi_Pc(lfsv_Pc.size());
-			// lfsv_Pc.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pc);
 
 			std::vector<RangeType> phi_Sg(lfsu_Sg.size());
 			lfsu_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sg);
@@ -368,11 +354,6 @@ public:
 			for (size_type i = 0; i < lfsu_Sh.size(); i++)
 				Sh += x(lfsu_Sh, i) * phi_Sh[i];
 
-			// evaluate Pc
-			// RF Pc = 0.0;
-			// for (size_type i = 0; i < lfsu_Pc.size(); i++)
-			// 	Pc += x(lfsu_Pc, i) * phi_Pc[i];
-
 			// evaluate T
 			RF T = 0.0;
 			for (size_type i = 0; i < lfsu_T.size(); i++)
@@ -403,7 +384,7 @@ public:
       		//auto Pc = suctionPressure * PcSF1;
 			RF Pg = Pw + suctionPressure * PcSF1;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
-
+			
 			//auto por = property.soil.SedimentPorosity(cell, ip_local);
 			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
@@ -420,8 +401,18 @@ public:
 			//  adding terms regarding components
 			auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
 			auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
+			// auto VLequil = property.mixture.EquilibriumMoleFractions( T * Xc_T, Pg * Xc_P, Sg, Sw, XC, zCH4);
+      		// auto YCH4 = VLequil[Indices::compId_YCH4];//
+      		// auto XH2O = VLequil[Indices::compId_XH2O];//
+			//   if (Sg > 1.e-6)
+			//   YCH4 = 1. - YH2O;
+			// else
+			//   YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
+			// if (Sw > 1.e-6)
+			//   XH2O = 1. - XC - XCH4;
+			// else
+			//   XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			//  end of terms regarding components
-			//std::cout << " Sg = " << Sg << " Sh = time operator" << Sh << std::endl;
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
@@ -509,13 +500,4 @@ public:
 		} 	//End Quadrature Rule
 	}	// End of jacobian volume
 
-	//! apply local jacobian of the volume term -> nonlinear variant
-	template<typename EG, typename LFSU, typename X, typename LFSV, typename R>
-	void jacobian_apply_volume (const EG& eg, const LFSU& lfsu,
-								const X& x, const X& z, const LFSV& lfsv,
-								R& r) const
-	{
-		alpha_volume(eg,lfsu,z,lfsv,r);
-	}
-	
 };

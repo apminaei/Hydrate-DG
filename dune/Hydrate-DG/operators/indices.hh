@@ -70,7 +70,7 @@ public:
 	static const unsigned int PP_zCH4	= 10;
 
 	/* BOUNDARY CONDITION */
-	static const unsigned int numOfVelBCs 	= 2; // V_g , V_w
+	static const unsigned int numOfVelBCs 	= 4; // V_g , V_w
 	static const unsigned int BCId_water	= 0;
 	static const unsigned int BCId_gas		= 1;
 	static const unsigned int BCId_salt 	= 2;

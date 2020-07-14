@@ -41,7 +41,7 @@ public:
 
 		// std::cout << " P_eq = " << P_eq << " T = " << T<< std::endl;
 		// exit(0);
-		return P_eq/characteristicValue.P_c; /*ndim*/
+		return 3.4e6/characteristicValue.P_c; /*ndim*/
 	}
 
 	//rate constant for hydrate dissociation;
@@ -105,7 +105,7 @@ public:
 					  * potential_P
 					  ;
 		}
-		else if(potential_P < 0. ){
+		else if(potential_P <= 0. ){
 			gas_gen =   FormationRateConstant_ingas( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
