@@ -191,7 +191,6 @@ public:
 			RF Pg = Pw + suctionPressure * PcSF1;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
-			//auto por = property.soil.SedimentPorosity(cell, ip_local);
 			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
 			auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
@@ -203,22 +202,6 @@ public:
 			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
-
-			//  adding terms regarding components
-			// auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			// auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
-			// auto VLequil = property.mixture.EquilibriumMoleFractions( T * Xc_T, Pg * Xc_P, Sg, Sw, XC, zCH4);
-      		// auto YCH4 = VLequil[Indices::compId_YCH4];//
-      		// auto XH2O = VLequil[Indices::compId_XH2O];//
-			// if (Sg > 1.e-6)
-			//   YCH4 = 1. - YH2O;
-			// else
-			//   YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			// if (Sw > 1.e-6)
-			//   XH2O = 1. - XC - XCH4;
-			// else
-			//   XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
-			//  end of terms regarding components
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
@@ -397,22 +380,6 @@ public:
 			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
-
-			//  adding terms regarding components
-			auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
-			// auto VLequil = property.mixture.EquilibriumMoleFractions( T * Xc_T, Pg * Xc_P, Sg, Sw, XC, zCH4);
-      		// auto YCH4 = VLequil[Indices::compId_YCH4];//
-      		// auto XH2O = VLequil[Indices::compId_XH2O];//
-			//   if (Sg > 1.e-6)
-			//   YCH4 = 1. - YH2O;
-			// else
-			//   YCH4 = property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			// if (Sw > 1.e-6)
-			//   XH2O = 1. - XC - XCH4;
-			// else
-			//   XH2O = property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
-			//  end of terms regarding components
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());

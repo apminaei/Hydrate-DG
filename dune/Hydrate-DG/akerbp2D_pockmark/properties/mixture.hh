@@ -18,23 +18,20 @@ public:
 		// NOTE: it is not necessary to check state dependence for fncs f_CH4 and f_H2O because the cases are already determined within classes CH4 and H2O.
 		double S = Xc * (salt.MolarMass()/methane.MolarMass());
 		double f_CH4 /*ndim*/ = z*(Pg/X_c.P_c)/methane.SolubilityCoefficient(T,S);
-		double f_H2O /*ndim*/ = water.SaturatedVaporPressure( T,S )/(Pg/X_c.P_c);
+		double f_H2O /*ndim*/ = (Pg/X_c.P_c)/water.SaturatedVaporPressure( T,S );
 
-		// Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
-		// Y_CH4 = 1.-Y_H2O;
-		// X_H2O = Y_H2O * f_H2O;
-		// X_CH4 = 1. - Xc - X_H2O;
-		double zP = 1./(1. - z * water.SaturatedVaporPressure( T,S )/ methane.SolubilityCoefficient(T,S) );
-		Y_CH4 = zP  * (1. - (1.-Xc) * water.SaturatedVaporPressure( T,S )/(Pg/X_c.P_c));
-		X_H2O = zP * (1. - Xc  -  f_CH4);
+		Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
+		Y_CH4 = 1.-Y_H2O;
+		X_H2O = Y_H2O * f_H2O;
+		X_CH4 = 1. - Xc - X_H2O;
+
+		// double zP = 1./(1. - z * water.SaturatedVaporPressure( T,S )/ methane.SolubilityCoefficient(T,S) );
+		// Y_CH4 = zP  * (1. - (1.-Xc) * water.SaturatedVaporPressure( T,S )/(Pg/X_c.P_c));
+		// X_H2O = zP * (1. - Xc  -  f_CH4);
 		
-		Y_H2O = f_H2O * X_H2O;
-		X_CH4 = Y_CH4 * f_CH4;
+		// Y_H2O =   X_H2O / f_H2O;
+		// X_CH4 = Y_CH4 * f_CH4;
 		
-			
-		
-		// X_CH4 = f_CH4*Y_CH4;// (z*water.SaturatedVaporPressure( T,S ))*(f_H2O+ Xc -1.)/(methane.SolubilityCoefficient(T,S)-(z*water.SaturatedVaporPressure( T,S )));
-		// X_H2O = f_H2O*Y_H2O;//1.-X_CH4-Xc;
 
 		std::vector<double> X(Indices::numOfComps,0.);
 		X[Indices::compId_XCH4] = X_CH4;
