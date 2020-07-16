@@ -246,9 +246,14 @@ public:
 
     // dimensions
     const int dim = EG::Entity::dimension;
-    const int order = std::max(lfsu_Pw.finiteElement().localBasis().order(),
+    const int order_p = std::max(lfsu_Pw.finiteElement().localBasis().order(),
                                lfsv_Pw.finiteElement().localBasis().order());/* If different degrees are used for different functions ? */
-
+    const int order_x = std::max(lfsu_XC.finiteElement().localBasis().order(),
+                               lfsv_XC.finiteElement().localBasis().order());
+    const int order_s = std::max(lfsu_Sg.finiteElement().localBasis().order(),
+                               lfsv_Sg.finiteElement().localBasis().order());
+    const int order_t = std::max(lfsu_T.finiteElement().localBasis().order(),
+                               lfsv_T.finiteElement().localBasis().order());
     // Reference to cell
 	  const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
@@ -297,20 +302,20 @@ public:
     for (const auto &ip : quadratureRule(geo, intorder))
     {
       // evaluate basis functions
-      auto &phi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsu_Pw.finiteElement().localBasis());
-      auto &psi_Pw = cache_Pw[order].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
-      auto &phi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
-      auto &psi_Sg = cache_Sg[order].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
-      auto &phi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
-      auto &psi_Sh = cache_Sh[order].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
-      auto &phi_T = cache_T[order].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
-      auto &psi_T = cache_T[order].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
-      auto &phi_XCH4 = cache_XCH4[order].evaluateFunction(ip.position(), lfsu_XCH4.finiteElement().localBasis());
-      auto &psi_XCH4 = cache_XCH4[order].evaluateFunction(ip.position(), lfsv_XCH4.finiteElement().localBasis());
-      auto &phi_YH2O = cache_YH2O[order].evaluateFunction(ip.position(), lfsu_YH2O.finiteElement().localBasis());
-      auto &psi_YH2O = cache_YH2O[order].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
-      auto &phi_XC = cache_XC[order].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
-      auto &psi_XC = cache_XC[order].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
+      auto &phi_Pw = cache_Pw[order_p].evaluateFunction(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &psi_Pw = cache_Pw[order_p].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &phi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &psi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
+      auto &phi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &psi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
+      auto &phi_T = cache_T[order_t].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
+      auto &psi_T = cache_T[order_t].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
+      auto &phi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsu_XCH4.finiteElement().localBasis());
+      auto &psi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsv_XCH4.finiteElement().localBasis());
+      auto &phi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsu_YH2O.finiteElement().localBasis());
+      auto &psi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &phi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &psi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       auto ip_global = geo.global(ip.position());
       auto ip_local = geo.local(ip_global);
@@ -363,20 +368,20 @@ public:
       RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
       // evaluate gradient of basis functions
-      auto &js_Pw = cache_Pw[order].evaluateJacobian(ip.position(), lfsu_Pw.finiteElement().localBasis());
-      auto &js_v_Pw = cache_Pw[order].evaluateJacobian(ip.position(), lfsv_Pw.finiteElement().localBasis());
-      auto &js_Sg = cache_Sg[order].evaluateJacobian(ip.position(), lfsu_Sg.finiteElement().localBasis());
-      auto &js_v_Sg = cache_Sg[order].evaluateJacobian(ip.position(), lfsv_Sg.finiteElement().localBasis());
-      auto &js_Sh = cache_Sh[order].evaluateJacobian(ip.position(), lfsu_Sh.finiteElement().localBasis());
-      auto &js_v_Sh = cache_Sh[order].evaluateJacobian(ip.position(), lfsv_Sh.finiteElement().localBasis());
-      auto &js_T = cache_T[order].evaluateJacobian(ip.position(), lfsu_T.finiteElement().localBasis());
-      auto &js_v_T = cache_T[order].evaluateJacobian(ip.position(), lfsv_T.finiteElement().localBasis());
-      auto &js_XCH4 = cache_XCH4[order].evaluateJacobian(ip.position(), lfsu_XCH4.finiteElement().localBasis());
-      auto &js_v_XCH4 = cache_XCH4[order].evaluateJacobian(ip.position(), lfsv_XCH4.finiteElement().localBasis());
-      auto &js_YH2O = cache_YH2O[order].evaluateJacobian(ip.position(), lfsu_YH2O.finiteElement().localBasis());
-      auto &js_v_YH2O = cache_YH2O[order].evaluateJacobian(ip.position(), lfsv_YH2O.finiteElement().localBasis());
-      auto &js_XC = cache_XC[order].evaluateJacobian(ip.position(), lfsu_XC.finiteElement().localBasis());
-      auto &js_v_XC = cache_XC[order].evaluateJacobian(ip.position(), lfsv_XC.finiteElement().localBasis());
+      auto &js_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &js_v_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &js_Sg = cache_Sg[order_s].evaluateJacobian(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &js_v_Sg = cache_Sg[order_s].evaluateJacobian(ip.position(), lfsv_Sg.finiteElement().localBasis());
+      auto &js_Sh = cache_Sh[order_s].evaluateJacobian(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &js_v_Sh = cache_Sh[order_s].evaluateJacobian(ip.position(), lfsv_Sh.finiteElement().localBasis());
+      auto &js_T = cache_T[order_t].evaluateJacobian(ip.position(), lfsu_T.finiteElement().localBasis());
+      auto &js_v_T = cache_T[order_t].evaluateJacobian(ip.position(), lfsv_T.finiteElement().localBasis());
+      auto &js_XCH4 = cache_XCH4[order_x].evaluateJacobian(ip.position(), lfsu_XCH4.finiteElement().localBasis());
+      auto &js_v_XCH4 = cache_XCH4[order_x].evaluateJacobian(ip.position(), lfsv_XCH4.finiteElement().localBasis());
+      auto &js_YH2O = cache_YH2O[order_x].evaluateJacobian(ip.position(), lfsu_YH2O.finiteElement().localBasis());
+      auto &js_v_YH2O = cache_YH2O[order_x].evaluateJacobian(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &js_XC = cache_XC[order_x].evaluateJacobian(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &js_v_XC = cache_XC[order_x].evaluateJacobian(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
       jac = geo.jacobianInverseTransposed(ip.position());
@@ -706,11 +711,20 @@ public:
     const int dim= IG::Entity::dimension;
     const int dimension = GV::dimension;
     //std::cout << "grid dimension " << dimension << "  element dim " << dim << std::endl;
-    const int order = std::max(
-        std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
-                 lfsu_Pw_n.finiteElement().localBasis().order()),
-        std::max(lfsv_XCH4_s.finiteElement().localBasis().order(),
-                 lfsv_XCH4_n.finiteElement().localBasis().order()));
+    // const int order = std::max(
+    //     std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
+    //              lfsu_Pw_n.finiteElement().localBasis().order()),
+    //     std::max(lfsv_XCH4_s.finiteElement().localBasis().order(),
+    //              lfsv_XCH4_n.finiteElement().localBasis().order()));
+    const int order_p = std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
+                                lfsv_Pw_s.finiteElement().localBasis().order());/* If different degrees are used for different functions ? */
+    const int order_x = std::max(lfsu_XC_s.finiteElement().localBasis().order(),
+                               lfsv_XC_s.finiteElement().localBasis().order());
+    const int order_s = std::max(lfsu_Sg_s.finiteElement().localBasis().order(),
+                               lfsv_Sg_s.finiteElement().localBasis().order());
+    const int order_t = std::max(lfsu_T_s.finiteElement().localBasis().order(),
+                               lfsv_T_s.finiteElement().localBasis().order());
+
 
     // References to inside and outside cells
     const auto &cell_inside = ig.inside();
@@ -755,9 +769,9 @@ public:
     //        }
 
     // get polynomial degree
-    auto order_s = lfsv_Pw_s.finiteElement().localBasis().order();
-    auto order_n = lfsv_Pw_n.finiteElement().localBasis().order();
-    auto degree = std::max(order_s, order_n);
+    auto order_i = lfsv_Pw_s.finiteElement().localBasis().order();
+    auto order_o = lfsv_Pw_n.finiteElement().localBasis().order();
+    auto degree = std::max(order_i, order_o);
 
     // penalty factor
     auto penalty_factor_g = (alpha_g / h_F) * harmonic_average * degree * (degree + dim - 1);
@@ -769,12 +783,12 @@ public:
 
 
     // evaluate basis functions at local cell centers to numerically calculate directional derivative on Dirichlet Boundary
-    // auto &phi_Pw_cell_center_s = cache_Pw[order].evaluateFunction(inside_cell_center_local, lfsu_Pw_s.finiteElement().localBasis());
-    // auto &phi_Sg_cell_center_s = cache_Sg[order].evaluateFunction(inside_cell_center_local, lfsu_Sg_s.finiteElement().localBasis());
-    // auto &phi_Sh_cell_center_s = cache_Sh[order].evaluateFunction(inside_cell_center_local, lfsu_Sh_s.finiteElement().localBasis());
-    // auto &phi_Pw_cell_center_n = cache_Pw[order].evaluateFunction(outside_cell_center_local, lfsu_Pw_n.finiteElement().localBasis());
-    // auto &phi_Sg_cell_center_n = cache_Sg[order].evaluateFunction(outside_cell_center_local, lfsu_Sg_n.finiteElement().localBasis());
-    // auto &phi_Sh_cell_center_n = cache_Sh[order].evaluateFunction(outside_cell_center_local, lfsu_Sh_n.finiteElement().localBasis());
+    // auto &phi_Pw_cell_center_s = cache_Pw[order_p].evaluateFunction(inside_cell_center_local, lfsu_Pw_s.finiteElement().localBasis());
+    // auto &phi_Sg_cell_center_s = cache_Sg[order_s].evaluateFunction(inside_cell_center_local, lfsu_Sg_s.finiteElement().localBasis());
+    // auto &phi_Sh_cell_center_s = cache_Sh[order_s].evaluateFunction(inside_cell_center_local, lfsu_Sh_s.finiteElement().localBasis());
+    // auto &phi_Pw_cell_center_n = cache_Pw[order_p].evaluateFunction(outside_cell_center_local, lfsu_Pw_n.finiteElement().localBasis());
+    // auto &phi_Sg_cell_center_n = cache_Sg[order_s].evaluateFunction(outside_cell_center_local, lfsu_Sg_n.finiteElement().localBasis());
+    // auto &phi_Sh_cell_center_n = cache_Sh[order_s].evaluateFunction(outside_cell_center_local, lfsu_Sh_n.finiteElement().localBasis());
 
     // // evaluate Pw at local cell centers
     // RF Pw_cell_center_s = 0.0;
@@ -891,35 +905,35 @@ public:
       //std::cout << "ip_global_s " << ip_global_s << "  local " << iplocal_s <<  "  ip position "<< ip.position() <<  std::endl;
       // evaluate basis functions
 
-      auto &phi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
-      auto &psi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
-      auto &phi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
-      auto &psi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
-      auto &phi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
-      auto &psi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &phi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
-      auto &psi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
-      auto &phi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
-      auto &psi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
-      auto &phi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
-      auto &psi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
-      auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
-      auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
+      auto &phi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &psi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &phi_Sg_s = cache_Sg[order_s].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &psi_Sg_s = cache_Sg[order_s].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &phi_Sh_s = cache_Sh[order_s].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &psi_Sh_s = cache_Sh[order_s].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
+      auto &phi_T_s = cache_T[order_t].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
+      auto &psi_T_s = cache_T[order_t].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
+      auto &phi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
+      auto &psi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
+      auto &phi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
+      auto &psi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &phi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &psi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
-      auto &phi_Pw_n = cache_Pw[order].evaluateFunction(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
-      auto &psi_Pw_n = cache_Pw[order].evaluateFunction(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
-      auto &phi_Sg_n = cache_Sg[order].evaluateFunction(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
-      auto &psi_Sg_n = cache_Sg[order].evaluateFunction(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
-      auto &phi_Sh_n = cache_Sh[order].evaluateFunction(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
-      auto &psi_Sh_n = cache_Sh[order].evaluateFunction(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
-      auto &phi_T_n = cache_T[order].evaluateFunction(iplocal_n, lfsu_T_n.finiteElement().localBasis());
-      auto &psi_T_n = cache_T[order].evaluateFunction(iplocal_n, lfsv_T_n.finiteElement().localBasis());
-      auto &phi_XCH4_n = cache_XCH4[order].evaluateFunction(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
-      auto &psi_XCH4_n = cache_XCH4[order].evaluateFunction(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
-      auto &phi_YH2O_n = cache_YH2O[order].evaluateFunction(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
-      auto &psi_YH2O_n = cache_YH2O[order].evaluateFunction(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
-      auto &phi_XC_n = cache_XC[order].evaluateFunction(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
-      auto &psi_XC_n = cache_XC[order].evaluateFunction(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
+      auto &phi_Pw_n = cache_Pw[order_p].evaluateFunction(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
+      auto &psi_Pw_n = cache_Pw[order_p].evaluateFunction(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
+      auto &phi_Sg_n = cache_Sg[order_s].evaluateFunction(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
+      auto &psi_Sg_n = cache_Sg[order_s].evaluateFunction(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
+      auto &phi_Sh_n = cache_Sh[order_s].evaluateFunction(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
+      auto &psi_Sh_n = cache_Sh[order_s].evaluateFunction(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
+      auto &phi_T_n = cache_T[order_t].evaluateFunction(iplocal_n, lfsu_T_n.finiteElement().localBasis());
+      auto &psi_T_n = cache_T[order_t].evaluateFunction(iplocal_n, lfsv_T_n.finiteElement().localBasis());
+      auto &phi_XCH4_n = cache_XCH4[order_x].evaluateFunction(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
+      auto &psi_XCH4_n = cache_XCH4[order_x].evaluateFunction(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
+      auto &phi_YH2O_n = cache_YH2O[order_x].evaluateFunction(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
+      auto &psi_YH2O_n = cache_YH2O[order_x].evaluateFunction(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
+      auto &phi_XC_n = cache_XC[order_x].evaluateFunction(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
+      auto &psi_XC_n = cache_XC[order_x].evaluateFunction(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
       
       
       // evaluate Pw
@@ -1012,35 +1026,35 @@ public:
       RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
 
       // evaluate gradient of basis functions
-      auto &js_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
-      auto &js_v_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
-      auto &js_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
-      auto &js_v_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
-      auto &js_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
-      auto &js_v_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &js_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
-      auto &js_v_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
-      auto &js_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
-      auto &js_v_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
-      auto &js_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
-      auto &js_v_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
-      auto &js_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
-      auto &js_v_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
+      auto &js_Pw_s = cache_Pw[order_p].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &js_v_Pw_s = cache_Pw[order_p].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &js_Sg_s = cache_Sg[order_s].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &js_v_Sg_s = cache_Sg[order_s].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &js_Sh_s = cache_Sh[order_s].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &js_v_Sh_s = cache_Sh[order_s].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
+      auto &js_T_s = cache_T[order_t].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
+      auto &js_v_T_s = cache_T[order_t].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
+      auto &js_XCH4_s = cache_XCH4[order_x].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
+      auto &js_v_XCH4_s = cache_XCH4[order_x].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
+      auto &js_YH2O_s = cache_YH2O[order_x].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
+      auto &js_v_YH2O_s = cache_YH2O[order_x].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &js_XC_s = cache_XC[order_x].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &js_v_XC_s = cache_XC[order_x].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
-      auto &js_Pw_n = cache_Pw[order].evaluateJacobian(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
-      auto &js_v_Pw_n = cache_Pw[order].evaluateJacobian(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
-      auto &js_Sg_n = cache_Sg[order].evaluateJacobian(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
-      auto &js_v_Sg_n = cache_Sg[order].evaluateJacobian(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
-      auto &js_Sh_n = cache_Sh[order].evaluateJacobian(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
-      auto &js_v_Sh_n = cache_Sh[order].evaluateJacobian(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
-      auto &js_T_n = cache_T[order].evaluateJacobian(iplocal_n, lfsu_T_n.finiteElement().localBasis());
-      auto &js_v_T_n = cache_T[order].evaluateJacobian(iplocal_n, lfsv_T_n.finiteElement().localBasis());
-      auto &js_XCH4_n = cache_XCH4[order].evaluateJacobian(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
-      auto &js_v_XCH4_n = cache_XCH4[order].evaluateJacobian(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
-      auto &js_YH2O_n = cache_YH2O[order].evaluateJacobian(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
-      auto &js_v_YH2O_n = cache_YH2O[order].evaluateJacobian(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
-      auto &js_XC_n = cache_XC[order].evaluateJacobian(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
-      auto &js_v_XC_n = cache_XC[order].evaluateJacobian(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
+      auto &js_Pw_n = cache_Pw[order_p].evaluateJacobian(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
+      auto &js_v_Pw_n = cache_Pw[order_p].evaluateJacobian(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
+      auto &js_Sg_n = cache_Sg[order_s].evaluateJacobian(iplocal_n, lfsu_Sg_n.finiteElement().localBasis());
+      auto &js_v_Sg_n = cache_Sg[order_s].evaluateJacobian(iplocal_n, lfsv_Sg_n.finiteElement().localBasis());
+      auto &js_Sh_n = cache_Sh[order_s].evaluateJacobian(iplocal_n, lfsu_Sh_n.finiteElement().localBasis());
+      auto &js_v_Sh_n = cache_Sh[order_s].evaluateJacobian(iplocal_n, lfsv_Sh_n.finiteElement().localBasis());
+      auto &js_T_n = cache_T[order_t].evaluateJacobian(iplocal_n, lfsu_T_n.finiteElement().localBasis());
+      auto &js_v_T_n = cache_T[order_t].evaluateJacobian(iplocal_n, lfsv_T_n.finiteElement().localBasis());
+      auto &js_XCH4_n = cache_XCH4[order_x].evaluateJacobian(iplocal_n, lfsu_XCH4_n.finiteElement().localBasis());
+      auto &js_v_XCH4_n = cache_XCH4[order_x].evaluateJacobian(iplocal_n, lfsv_XCH4_n.finiteElement().localBasis());
+      auto &js_YH2O_n = cache_YH2O[order_x].evaluateJacobian(iplocal_n, lfsu_YH2O_n.finiteElement().localBasis());
+      auto &js_v_YH2O_n = cache_YH2O[order_x].evaluateJacobian(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
+      auto &js_XC_n = cache_XC[order_x].evaluateJacobian(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
+      auto &js_v_XC_n = cache_XC[order_x].evaluateJacobian(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
@@ -1643,8 +1657,14 @@ public:
     // dimensions
     const int dimension = GV::dimension;
     const int dim = IG::Entity::dimension;
-    const int order = std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
-                               lfsv_Pw_s.finiteElement().localBasis().order());
+    const int order_p = std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
+                                lfsv_Pw_s.finiteElement().localBasis().order());/* If different degrees are used for different functions ? */
+    const int order_x = std::max(lfsu_XC_s.finiteElement().localBasis().order(),
+                               lfsv_XC_s.finiteElement().localBasis().order());
+    const int order_s = std::max(lfsu_Sg_s.finiteElement().localBasis().order(),
+                               lfsv_Sg_s.finiteElement().localBasis().order());
+    const int order_t = std::max(lfsu_T_s.finiteElement().localBasis().order(),
+                               lfsv_T_s.finiteElement().localBasis().order());
 
     // References to inside and outside cells
     const auto &cell_inside = ig.inside();
@@ -1688,13 +1708,13 @@ public:
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
     // evaluate basis functions at local cell centers to numerically calculate directional derivative on Dirichlet Boundary
-    // auto &phi_Pw_cell_center = cache_Pw[order].evaluateFunction(inside_cell_center_local, lfsu_Pw_s.finiteElement().localBasis());
-    // auto &phi_Sg_cell_center = cache_Sg[order].evaluateFunction(inside_cell_center_local, lfsu_Sg_s.finiteElement().localBasis());
-    // auto &phi_Sh_cell_center = cache_Sh[order].evaluateFunction(inside_cell_center_local, lfsu_Sh_s.finiteElement().localBasis());
-    // auto &phi_T_cell_center = cache_T[order].evaluateFunction(inside_cell_center_local, lfsu_T_s.finiteElement().localBasis());
-    // auto &phi_XCH4_cell_center = cache_XCH4[order].evaluateFunction(inside_cell_center_local, lfsu_XCH4_s.finiteElement().localBasis());
-    // auto &phi_YH2O_cell_center = cache_YH2O[order].evaluateFunction(inside_cell_center_local, lfsu_YH2O_s.finiteElement().localBasis());
-    // auto &phi_XC_cell_center = cache_XC[order].evaluateFunction(inside_cell_center_local, lfsu_XC_s.finiteElement().localBasis());
+    // auto &phi_Pw_cell_center = cache_Pw[order_p].evaluateFunction(inside_cell_center_local, lfsu_Pw_s.finiteElement().localBasis());
+    // auto &phi_Sg_cell_center = cache_Sg[order_s].evaluateFunction(inside_cell_center_local, lfsu_Sg_s.finiteElement().localBasis());
+    // auto &phi_Sh_cell_center = cache_Sh[order_s].evaluateFunction(inside_cell_center_local, lfsu_Sh_s.finiteElement().localBasis());
+    // auto &phi_T_cell_center = cache_T[order_t].evaluateFunction(inside_cell_center_local, lfsu_T_s.finiteElement().localBasis());
+    // auto &phi_XCH4_cell_center = cache_XCH4[order_x].evaluateFunction(inside_cell_center_local, lfsu_XCH4_s.finiteElement().localBasis());
+    // auto &phi_YH2O_cell_center = cache_YH2O[order_x].evaluateFunction(inside_cell_center_local, lfsu_YH2O_s.finiteElement().localBasis());
+    // auto &phi_XC_cell_center = cache_XC[order_x].evaluateFunction(inside_cell_center_local, lfsu_XC_s.finiteElement().localBasis());
       
       
     // // evaluate Pw at local cell centers
@@ -1805,22 +1825,22 @@ public:
       auto velvalue = bc.velValue(ig, ip.position(), (*time), (*dt) ) ;
 
       // evaluate basis functions at local quadrature points 
-      auto &psi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
-      auto &psi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
-      auto &psi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &psi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
-      auto &psi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
-      auto &psi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
-      auto &psi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
+      auto &psi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &psi_Sg_s = cache_Sg[order_s].evaluateFunction(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &psi_Sh_s = cache_Sh[order_s].evaluateFunction(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
+      auto &psi_T_s = cache_T[order_t].evaluateFunction(iplocal_s, lfsv_T_s.finiteElement().localBasis());
+      auto &psi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
+      auto &psi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &psi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
 
-      auto &phi_Pw_s = cache_Pw[order].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
-      auto &phi_Sg_s = cache_Sg[order].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
-      auto &phi_Sh_s = cache_Sh[order].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
-      auto &phi_T_s = cache_T[order].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
-      auto &phi_XCH4_s = cache_XCH4[order].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
-      auto &phi_YH2O_s = cache_YH2O[order].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
-      auto &phi_XC_s = cache_XC[order].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &phi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &phi_Sg_s = cache_Sg[order_s].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &phi_Sh_s = cache_Sh[order_s].evaluateFunction(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &phi_T_s = cache_T[order_t].evaluateFunction(iplocal_s, lfsu_T_s.finiteElement().localBasis());
+      auto &phi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
+      auto &phi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
+      auto &phi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       
       
 
@@ -1863,6 +1883,10 @@ public:
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i]; 
       RF Sh_n = Sh_s;
+      if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
+      {
+        Sh_n = bcvalue[Indices::PVId_Sh] ;
+      }
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1890,20 +1914,20 @@ public:
       
 
       // evaluate gradient of basis functions
-      auto &js_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
-      auto &js_v_Pw_s = cache_Pw[order].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
-      auto &js_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
-      auto &js_v_Sg_s = cache_Sg[order].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
-      auto &js_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
-      auto &js_v_Sh_s = cache_Sh[order].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
-      auto &js_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
-      auto &js_v_T_s = cache_T[order].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
-      auto &js_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
-      auto &js_v_XCH4_s = cache_XCH4[order].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
-      auto &js_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
-      auto &js_v_YH2O_s = cache_YH2O[order].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
-      auto &js_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
-      auto &js_v_XC_s = cache_XC[order].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
+      auto &js_Pw_s = cache_Pw[order_p].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
+      auto &js_v_Pw_s = cache_Pw[order_p].evaluateJacobian(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
+      auto &js_Sg_s = cache_Sg[order_s].evaluateJacobian(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
+      auto &js_v_Sg_s = cache_Sg[order_s].evaluateJacobian(iplocal_s, lfsv_Sg_s.finiteElement().localBasis());
+      auto &js_Sh_s = cache_Sh[order_s].evaluateJacobian(iplocal_s, lfsu_Sh_s.finiteElement().localBasis());
+      auto &js_v_Sh_s = cache_Sh[order_s].evaluateJacobian(iplocal_s, lfsv_Sh_s.finiteElement().localBasis());
+      auto &js_T_s = cache_T[order_t].evaluateJacobian(iplocal_s, lfsu_T_s.finiteElement().localBasis());
+      auto &js_v_T_s = cache_T[order_t].evaluateJacobian(iplocal_s, lfsv_T_s.finiteElement().localBasis());
+      auto &js_XCH4_s = cache_XCH4[order_x].evaluateJacobian(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
+      auto &js_v_XCH4_s = cache_XCH4[order_x].evaluateJacobian(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
+      auto &js_YH2O_s = cache_YH2O[order_x].evaluateJacobian(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
+      auto &js_v_YH2O_s = cache_YH2O[order_x].evaluateJacobian(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
+      auto &js_XC_s = cache_XC[order_x].evaluateJacobian(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
+      auto &js_v_XC_s = cache_XC[order_x].evaluateJacobian(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
       jac = geo_inside.jacobianInverseTransposed(iplocal_s);
@@ -2125,6 +2149,11 @@ public:
 
       //auto Kgradu_Pg_s = Kgradu_Pw_s + coeff_grad_Sg_s * Kgradu_Sg_s + (coeff_grad_Sh_s + coeff_grad_Sg_s) * Kgradu_Sh_s;
       auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
+      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
+      {
+        grad_Pg_n = velvalue[Indices::BCId_gas];
+      }
+      
       //auto grad_Pg_n = grad_Pw_n + grad_Pc_n ;
 
       //auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
@@ -2145,34 +2174,26 @@ public:
       //  end of terms regarding components
       auto VLequil_n = property.mixture.EquilibriumMoleFractions( T_n * Xc_T, Pg_n * Xc_P, Sg_n, Sw_n, XC_n, zCH4_n);
       
-      
-      // RF XCH4_n = property.parameter.InitialXCH4(ip_global_s);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
-		  // RF YH2O_n = property.parameter.InitialYH2O(ip_global_s);// bcvalue[Indices::PVId_YH2O];
-      
-      // if(Sg_s <= 0.){
-      //   grad_Sg_n = velvalue[Indices::BCId_gas];
-      //   //grad_XCH4_n = 0.0;//-grad_XC_n - Pg_n / property.methane.SolubilityCoefficient(T_n* Xc_T,S_n) * grad_YH2O_n - YH2O_n / property.methane.SolubilityCoefficient(T_n* Xc_T,S_n) * grad_Pg_n;
-      // }
-      // if(Sw_s <= 0.){
-      //   grad_Sh_n = -grad_Sg_n ;
-      // }
-      // if(Sw_s > 0. and Sg_s > 0.0){
-      //   YH2O_n = VLequil_n[Indices::compId_YH2O];
-      //   XCH4_n = VLequil_n[Indices::compId_XCH4];
-        
-      //   grad_YH2O_n = 0.0;//bcvalue[Indices::PVId_XCH4];
-      //   grad_XCH4_n = 0.0;
-      // }
       auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
       auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
-      // if (Sg_n > 1.e-6)
-      //   YCH4_n = 1. - YH2O_n;
-      // else
-      //   YCH4_n = property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
-      // if (Sw_n > 1.e-6)
-      //   XH2O_n = 1. - XC_n - XCH4_n;
-      // else
-      //   XH2O_n = property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
+      
+      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 1.e-8){ //active set.			
+				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
+			}else{
+				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
+        //YH2O_n = property.parameter.InitialYH2O(ip_global_s);
+        Sg_n = 0.0;
+			}
+      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 1.e-8 ){
+        XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
+      } else {
+        Sg_n = (1. - Sw_n - Sh_n) * (1. - Sh_n);// inactive set. Inactive => phase is absent => Sw=0, Sg>0
+        YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
+        //XCH4_n = property.parameter.InitialXCH4(ip_global_s);
+      }
+     
+			double tmp = 0.;		
+
       
       auto rho_g_n = property.gas.Density(T_n * Xc_T, Pg_n * Xc_P, zCH4_n) ;
       auto rho_w_n = property.water.Density(T_n * Xc_T, Pw_n * Xc_P, S_n);
@@ -2193,16 +2214,7 @@ public:
 
       // upwinding wrt gas-phase velocity
 			auto normalgravity = gravity * n_F_local;
-			// auto normalpotential_g = (Pg_n - Pg_cell_center)/distance
-			// 					   - ( 0.5*(rho_g_s + rho_g_n) ) * normalgravity ;
-			// double omegaup_g_s = 0.0, omegaup_g_n = 0.0;
 			
-			// //upwinding wrt water-phase velocity
-			// auto normalpotential_w = (Pw_n - Pw_cell_center)/distance
-			// 					   - ( 0.5*(rho_w_s + rho_w_n) ) * normalgravity ;
-			// double omegaup_w_s = 0.0, omegaup_w_n = 0.0;
-			      
-      
       auto normalvelocity_g_s = K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
       
       auto normalvelocity_w_s = K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
@@ -2292,50 +2304,38 @@ public:
       auto diffusiveflux_Heat_n = grad_T_n; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
 
 
-      auto convectiveflux_CH4 = 0.0;
-      auto diffusiveflux_CH4 =  0.0;
-      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet){
-        convectiveflux_CH4 = - ( convectiveflux_CH4_s + convectiveflux_CH4_n);
-        diffusiveflux_CH4 =  0.5 * diffusiveflux_CH4_s + 0.5 * diffusiveflux_CH4_n;
-      }else{
-        convectiveflux_CH4 = - ( convectiveflux_CH4_n);
-        diffusiveflux_CH4 =   0.5 * diffusiveflux_CH4_n;
-      }
+      auto convectiveflux_CH4 = - ( convectiveflux_CH4_s + convectiveflux_CH4_n);;
+      auto diffusiveflux_CH4 =  0.5 * diffusiveflux_CH4_s + 0.5 * diffusiveflux_CH4_n;
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
+      //   convectiveflux_CH4 = - ( convectiveflux_CH4_n);
+      //   diffusiveflux_CH4 =   0.5 * diffusiveflux_CH4_n;
+      // }
 
-      auto convectiveflux_H2O = 0.0;
-      auto diffusiveflux_H2O =  0.0;
-      if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet){
-        convectiveflux_H2O = - ( convectiveflux_H2O_s + convectiveflux_H2O_n);
-        diffusiveflux_H2O = 0.5 * diffusiveflux_H2O_s + 0.5 * diffusiveflux_H2O_n;
-      }else{
-        convectiveflux_H2O = - ( convectiveflux_H2O_n);
-        diffusiveflux_H2O =    0.5 * diffusiveflux_H2O_n;
-      }
+      auto convectiveflux_H2O = - ( convectiveflux_H2O_s + convectiveflux_H2O_n);
+      auto diffusiveflux_H2O = 0.5 * diffusiveflux_H2O_s + 0.5 * diffusiveflux_H2O_n;
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      //   convectiveflux_H2O = - ( convectiveflux_H2O_n);
+      //   diffusiveflux_H2O =    0.5 * diffusiveflux_H2O_n;
+      // }
 
-      auto convectiveflux_SALT = 0.0;
-      auto diffusiveflux_SALT =  0.0;
-      if (veltype[Indices::BCId_salt] == Indices::BCId_dirichlet){
-        convectiveflux_SALT = -(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
-        diffusiveflux_SALT = 0.5 * diffusiveflux_SALT_s + 0.5 * diffusiveflux_SALT_n;
-      }else{
-        convectiveflux_SALT = -( omegaup_w_n * convectiveflux_SALT_w_n);
-        diffusiveflux_SALT =  0.5 * diffusiveflux_SALT_n;
-      }
+      auto convectiveflux_SALT = -(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
+      auto diffusiveflux_SALT = 0.5 * diffusiveflux_SALT_s + 0.5 * diffusiveflux_SALT_n;
+      // if (veltype[Indices::BCId_salt] == Indices::BCId_neumann){
+      //   convectiveflux_SALT = -( omegaup_w_n * convectiveflux_SALT_w_n);
+      //   diffusiveflux_SALT =  0.5 * diffusiveflux_SALT_n;
+      // }
 
-      auto convectiveflux_Heat = 0.0;
-      auto diffusiveflux_Heat =  0.0;
-      if (veltype[Indices::BCId_heat] == Indices::BCId_dirichlet){
-        convectiveflux_Heat = - ( convectiveflux_Heat_s + convectiveflux_Heat_n);
-        diffusiveflux_Heat = - kth_eff * 0.5 * (diffusiveflux_Heat_s + diffusiveflux_Heat_n);
-      }else{
-        convectiveflux_Heat = - (  convectiveflux_Heat_n);
-        diffusiveflux_Heat =  - kth_eff * 0.5 * ( diffusiveflux_Heat_n);
-      }
+      auto convectiveflux_Heat = - ( convectiveflux_Heat_s + convectiveflux_Heat_n);
+      auto diffusiveflux_Heat = - kth_eff * 0.5 * (diffusiveflux_Heat_s + diffusiveflux_Heat_n);
+      // if (veltype[Indices::BCId_heat] == Indices::BCId_neumann){
+      //   convectiveflux_Heat = - (  convectiveflux_Heat_n);
+      //   diffusiveflux_Heat =  - kth_eff * 0.5 * ( diffusiveflux_Heat_n);
+      // }
 
       
 
       //  ACCCUMULATE RESIDUALS  //
-			double tmp=0.;
+			tmp=0.;
       
       
       // CH4-component-wise mass-balance
@@ -2400,20 +2400,47 @@ public:
       {
         r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
-      
-      // double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
-      // // standard IP term integral
+
+      //==============================================================================================
+      // tmp = 0.;
+      // if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 1.e-8 ){//active set.
+			// tmp += 1. - XCH4_n - XH2O_n - XC_n;//Active => phase is present => summation condition holds
+      // //   //	std::cout<< "alpha_vol XCH4: " << tmp << std::endl;
+			// }else{
+			// tmp += Sw_n; // inactive set. Inactive => phase is absent => Sw=0
+			// }
       // for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
       // {
-      //   r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
+			//  r.accumulate(lfsv_XCH4_s , i, +tmp * psi_XCH4_s[i]  *factor);
       // }
 
-      // double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
-      // // standard IP term integral
+			// // // NCP -> gas phase
+			// tmp = 0.;
+			// if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 1.e-8){ //active set.			
+			// 	tmp +=  1. - YCH4_n - YH2O_n ;//Active => phase is present => summation condition holds
+      //   //std::cout<< "alpha_vol YH2O: " << tmp << std::endl;
+			// }else{
+			// 	tmp += Sg_n;// inactive set. Inactive => phase is absent => Sg=0
+			// }
       // for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
       // {
-      //   r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
+			// r.accumulate(lfsv_YH2O_s , i, +tmp * psi_YH2O_s[i]  *factor);
       // }
+      //================================================================================================
+
+      double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
+      {
+        r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
+      }
+
+      double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
+      {
+        r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
+      }
 
       // ENERGY balance
       tmp = Xc_conv_h * convectiveflux_Heat + Xc_diff_h * diffusiveflux_Heat;

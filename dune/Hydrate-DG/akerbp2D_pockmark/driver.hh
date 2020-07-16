@@ -155,12 +155,12 @@ void driver(const GV &gv, // GridView
 	double alpha_w = 1.e1;
 	double alpha_s = 1.e1;
 	double alpha_T = 1.e1;
-	double alpha_x = 1.e3;
+	double alpha_x = 1.e1;
 	double alpha_y = 1.e1;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
 	//time *= (1./property.characteristicValue.t_c);
-	LOP lop(gv, property, &unew, gfs, &time, &dt, 6, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+	LOP lop(gv, property, &unew, gfs, &time, &dt, 4, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property);
@@ -190,7 +190,7 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, cc, 500, 2);
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	LS ls(gfs, 100, 1, true, true);
+	LS ls(gfs, 5000, 1, true, true);
 
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works 410. seconds with 5 newton it. using 1 core (500 lin. it)
 	// LS ls(gfs,500,1,true,true);

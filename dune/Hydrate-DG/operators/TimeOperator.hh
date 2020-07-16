@@ -205,8 +205,8 @@ public:
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			//  adding terms regarding components
-			auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
-			auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
+			// auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
+			// auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
 			// auto VLequil = property.mixture.EquilibriumMoleFractions( T * Xc_T, Pg * Xc_P, Sg, Sw, XC, zCH4);
       		// auto YCH4 = VLequil[Indices::compId_YCH4];//
       		// auto XH2O = VLequil[Indices::compId_XH2O];//
