@@ -227,7 +227,7 @@ public:
 		kHenry /*MPa*/ = exp( log(pvap) + A/Ts + B*pow((1 - Ts),0.355)/Ts + C*exp(1 - Ts)*pow(Ts,(-0.41)) );
 		kHenry *= 1.e6; /* [Pa] */
 		
-		return 1.343e11/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
+		return 1.343e9/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
 	}
 
 };

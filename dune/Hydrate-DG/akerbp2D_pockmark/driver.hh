@@ -192,6 +192,24 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	LS ls(gfs, 5000, 1, true, true);
 
+	/* 	
+		LINEAR SOLVER STATISTICS
+		
+		res.iterations = i;
+		res.reduction = def/def0;
+		res.conv_rate  = pow(res.reduction,1.0/i);
+		res.elapsed = watch.elapsed();
+	
+		// final print
+		if (_verbose>0)
+		{
+			std::cout << "=== rate=" << res.conv_rate
+					<< ", T=" << res.elapsed
+					<< ", TIT=" << res.elapsed/i
+					<< ", IT=" << i << std::endl;
+		}
+	*/
+
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works 410. seconds with 5 newton it. using 1 core (500 lin. it)
 	// LS ls(gfs,500,1,true,true);
 
@@ -351,6 +369,19 @@ void driver(const GV &gv, // GridView
 			osm.apply( time, dt, uold, unew );
 			
 			newton_iterations = osm.getPDESolver().result().iterations;
+
+			/*
+				std::cout << "  Newton iteration " << std::setw(2)(Sets the field width to be used on output operations) << this->res_.iterations
+                           << ".  New defect: "
+                           << std::setw(12) << std::setprecision(4) << std::scientific (Sets the floatfield format flag for the str stream to scientific)
+                           << this->res_.defect
+                           << ".  Reduction (this): "
+                           << std::setw(12) << std::setprecision(4) << std::scientific
+                           << this->res_.defect/this->prev_defect_
+                           << ".  Reduction (total): "
+                           << std::setw(12) << std::setprecision(4) << std::scientific
+                           << this->res_.reduction << std::endl;
+			*/
 
 			exceptionCaught = false;
 

@@ -83,7 +83,7 @@ public:
 
 // 		std::cout<< "A_s = " << A_s << std::endl ;
 
-		return 1.e5;
+		return A_s;
 	}
 
 	// rate of gas generation:
