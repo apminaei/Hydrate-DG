@@ -178,6 +178,8 @@ public:
 		double SF_por = PcSF2( porosity, porosity_0, beta );
 
 		Pc *=SF_Sh*SF_por; /*Pa*/
+		// std::cout << Pc << std::endl;
+		// exit(0);
 		return Pc/characteristicValue.P_c; /*nondim*/ // 
 	}
 

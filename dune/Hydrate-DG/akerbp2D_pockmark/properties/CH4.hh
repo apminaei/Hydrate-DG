@@ -226,8 +226,9 @@ public:
 		double C = 12.5220;
 		kHenry /*MPa*/ = exp( log(pvap) + A/Ts + B*pow((1 - Ts),0.355)/Ts + C*exp(1 - Ts)*pow(Ts,(-0.41)) );
 		kHenry *= 1.e6; /* [Pa] */
-		
-		return 1.343e9/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
+		// std::cout << kHenry << std::endl;
+		// exit(0);
+		return 3.333e9/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
 	}
 
 };

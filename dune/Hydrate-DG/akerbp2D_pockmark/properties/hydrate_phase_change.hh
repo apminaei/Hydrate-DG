@@ -31,7 +31,7 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;// /( salt.MolarMass()/water.MolarMass());
+		double A = 38.592 , 	B = 8533.8 	,	C = 4.4824 /( salt.MolarMass()/water.MolarMass());//16.32; 
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
 
 		// double P_eq = 1.0e6*exp(- 1.6892692e3 - 0.15162984*T + 5.60912482e4/T + 2.72067506E2*log(T)
@@ -95,7 +95,7 @@ public:
 		double Peq/*Pa*/ = EquilibriumPressure( T,S )*characteristicValue.P_c;
 
 		double potential_P = Peq/Pg - 1.  ;
-
+		
 		if(potential_P > 0. ){
 			gas_gen =   DissociationRateConstant( T )
 					  * methane.MolarMass()

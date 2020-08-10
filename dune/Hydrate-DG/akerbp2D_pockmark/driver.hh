@@ -33,7 +33,7 @@ void driver(const GV &gv, // GridView
 	Real dtstart = dt;
 	Real time_op = time;
 
-	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)12);
+	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 	double clock_time_elapsed = 0.;
 	const int degree_S = 1;
@@ -397,7 +397,8 @@ void driver(const GV &gv, // GridView
 
 				newton_iterations = 0;
 
-				dt *= 0.9;
+				dt *= 0.5;
+				dtLast = dt;
 					continue;
 			}
 			else
@@ -498,6 +499,11 @@ void driver(const GV &gv, // GridView
 			{
 				dt = std::min(dt * 1.2, dt_max);
 			}
+			if (dtFlag == -1)
+			{
+				dt = dtLast;//std::max(dt, dtLast);
+			}
+			dtFlag = 0;
 		}
 		else
 		{
@@ -508,23 +514,19 @@ void driver(const GV &gv, // GridView
 					  << " , opTime = "  << t_OP * opcount * property.characteristicValue.t_c ;
 			std::cout<< std::flush;
 		}
-		if (time + dt > t_OP * opcount )
+		dtLast = dt;
+		if (time + dt >= t_OP * opcount )
 		{
-			dtLast = dt;
+			
 			dt = t_OP * opcount - time;
 
 			if(helper.rank()==0){
 				std::cout<< " , because timeNext > opNext , dt set to : " << dt*property.characteristicValue.t_c << std::endl;
 				std::cout<< std::flush;
 			}
-			dtFlag = 0;
+			dtFlag = -1;
 		}
-		dtFlag += 1;
 
-		if (opcount > 1 and dtFlag == 2)
-		{
-			dt = std::max(dt, dtLast * 0.9);
-		}
 		if(helper.rank()==0){
 			std::cout<< " , dt  : " << dt*property.characteristicValue.t_c << std::endl;
 			std::cout<<" "<< std::endl;

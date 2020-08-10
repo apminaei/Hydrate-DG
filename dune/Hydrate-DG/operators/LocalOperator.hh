@@ -362,10 +362,10 @@ public:
       auto suctionPressure = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
       auto PcSF1 = property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
       
-      auto Pc = suctionPressure * PcSF1;
+      auto Pc = suctionPressure ;//* PcSF1;
       RF Pg = Pw + Pc;
       RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
-
+      
       // evaluate gradient of basis functions
       auto &js_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsu_Pw.finiteElement().localBasis());
       auto &js_v_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsv_Pw.finiteElement().localBasis());
@@ -566,8 +566,9 @@ public:
      
       for (size_type i = 0; i < lfsv_XC.size(); i++)
       {
-        r.accumulate(lfsv_XC, i, (Xc_conv_m * convectiveflux_SALT_w  
-                                  - Xc_diff_m * diffusiveflux_SALT ) * gradpsi_XC[i] * factor);
+        r.accumulate(lfsv_XC, i, ((Xc_conv_m * convectiveflux_SALT_w  
+                                  - Xc_diff_m * diffusiveflux_SALT ) * gradpsi_XC[i]
+                                  - Xc_source_m*q_s * psi_XC[i]) * factor);
       }
 
       for (size_type i = 0; i < lfsv_Pw.size(); i++)
@@ -582,15 +583,15 @@ public:
       }
       
       //Integrals regarding the NCP1
-			RF max1 = std::max(0., 1.e0*(Sg -1. + YCH4 + YH2O));
+			RF max1 = std::max(0., 1.e3*(Sg -1. + YCH4 + YH2O));
 			for (size_type i=0; i<lfsv_YH2O.size(); i++){
-				r.accumulate(lfsv_YH2O,i,( (1.e0*Sg - max1) * psi_YH2O[i]  *factor));
+				r.accumulate(lfsv_YH2O,i,( (1.e3*Sg - max1) * psi_YH2O[i]  *factor));
 			}
 
 			// Integrals regarding the NCP2
-			RF max2 = std::max(0., 1.e0*(Sw -1. + XC + XCH4 + XH2O ));
+			RF max2 = std::max(0., 1.e3*(Sw -1. + XC + XCH4 + XH2O ));
 			for (size_type i=0; i<lfsv_XCH4.size(); i++){
-				r.accumulate(lfsv_XCH4,i,((1.e0*Sw - max2) * psi_XCH4[i]  *factor));
+				r.accumulate(lfsv_XCH4,i,((1.e3*Sw - max2) * psi_XCH4[i]  *factor));
 			}
       
       
@@ -936,13 +937,13 @@ public:
       auto suctionPressure_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
       auto PcSF1_s = property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]);
 
-      auto Pc_s = suctionPressure_s * PcSF1_s;
+      auto Pc_s = suctionPressure_s ;//* PcSF1_s;
       RF Pg_s = Pw_s + Pc_s;
       
       auto suctionPressure_n = property.hydraulicProperty.CapillaryPressure(cell_outside, iplocal_n, Sw_n, Sh_n, por_n) ; /* ndim */
       auto PcSF1_n = property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]);
       
-      auto Pc_n = suctionPressure_n * PcSF1_n;
+      auto Pc_n = suctionPressure_n ;//* PcSF1_n;
       RF Pg_n = Pw_n + Pc_n;
 
       RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
@@ -1171,7 +1172,7 @@ public:
 
       auto H_M_w_s = property.gas.SolubilityCoefficient(T_s * Xc_T, S_s ); /* ndim */
       auto P_H_sat_s = property.water.SaturatedVaporPressure(T_s * Xc_T, S_s ); /* ndim */
-      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P); 
+      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s * Xc_T, Pg_s * Xc_P); 
       //  end of terms regarding components
       //auto VLequil_s = property.mixture.EquilibriumMoleFractions( T_s * Xc_T, Pg_s * Xc_P, Sg_s, Sw_s, XC_s, zCH4_s);
       // auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
@@ -1199,7 +1200,7 @@ public:
 
       auto H_M_w_n = property.gas.SolubilityCoefficient(T_n * Xc_T, S_n ); /* ndim */
       auto P_H_sat_n = property.water.SaturatedVaporPressure(T_n * Xc_T, S_n ); /* ndim */
-      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n * Xc_T, Pw_n * Xc_P); 
+      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P); 
       
       //auto VLequil_n = property.mixture.EquilibriumMoleFractions( T_n * Xc_T, Pg_n * Xc_P, Sg_n, Sw_n, XC_n, zCH4_n);
       // auto YCH4_n =  property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
@@ -1725,10 +1726,10 @@ public:
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i]; 
       RF Sh_n = Sh_s;
-      if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
-      {
-        Sh_n = bcvalue[Indices::PVId_Sh];
-      }
+      // if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
+      // {
+      //   Sh_n = bcvalue[Indices::PVId_Sh];
+      // }
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1736,10 +1737,10 @@ public:
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
 
       RF Sg_n = Sg_s * (1. - Sh_n);
-      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
-      {
-        Sg_n = velvalue[Indices::BCId_gas] * (1. - Sh_n);
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
+      // {
+      //   Sg_n = velvalue[Indices::BCId_gas] * (1. - Sh_n);
+      // }
 
       // evaluate XC
       RF XC_s = 0.0;
@@ -1888,18 +1889,18 @@ public:
       // evaluate normal flux of XCH4
       RF grad_XCH4_s = gradu_XCH4_s * n_F_local;
       RF grad_XCH4_n = grad_XCH4_s;
-      // if (bctype[Indices::PVId_XCH4] == Indices::BCId_neumann)
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann)
       // {
-      //   grad_XCH4_n = bcvalue[Indices::PVId_XCH4];
+      //   grad_XCH4_n = veltype[Indices::BCId_water];
       // }
       
 
       // evaluate normal flux of YH2O
       RF grad_YH2O_s = gradu_YH2O_s * n_F_local;
       RF grad_YH2O_n = grad_YH2O_s;
-      // if (bctype[Indices::PVId_YH2O] == Indices::BCId_neumann)
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
       // {
-      //   grad_YH2O_n = bcvalue[Indices::PVId_YH2O];
+      //   grad_YH2O_n = veltype[Indices::BCId_gas];
       // }
      
       // evaluate normal flux of XC
@@ -1919,13 +1920,13 @@ public:
       auto suctionPressure_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
       auto PcSF1_s = property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]);
       
-      auto Pc_s = suctionPressure_s * PcSF1_s;
+      auto Pc_s = suctionPressure_s ;//* PcSF1_s;
       RF Pg_s = Pw_s + Pc_s;
       auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s);
       auto suctionPressure_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
       auto PcSF1_n = property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams[1], BrooksCParams[4]);
       
-      auto Pc_n = suctionPressure_n * PcSF1_n;
+      auto Pc_n = suctionPressure_n ;//* PcSF1_n;
       //auto Pc_n = suctionPressure_n * PcSF1_n;
       RF Pg_n = Pw_n + Pc_n;
       RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
@@ -1963,7 +1964,7 @@ public:
       
       auto H_M_w_s = property.gas.SolubilityCoefficient(T_s * Xc_T, S_s );
       auto P_H_sat_s = property.water.SaturatedVaporPressure(T_s * Xc_T, S_s );
-      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s * Xc_T, Pw_s * Xc_P);
+      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s * Xc_T, Pg_s * Xc_P);
       //  end of terms regarding components
       auto VLequil_s = property.mixture.EquilibriumMoleFractions( T_s * Xc_T, Pg_s * Xc_P, Sg_s, Sw_s, XC_s, zCH4_s);
       auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
@@ -2015,21 +2016,21 @@ public:
       
       auto H_M_w_n = property.gas.SolubilityCoefficient(T_n * Xc_T, S_n );
       auto P_H_sat_n = property.water.SaturatedVaporPressure(T_n * Xc_T, S_n );
-      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n * Xc_T, Pw_n * Xc_P);
+      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P);
       //  end of terms regarding components
       auto VLequil_n = property.mixture.EquilibriumMoleFractions( T_n * Xc_T, Pg_n * Xc_P, Sg_n, Sw_n, XC_n, zCH4_n);
       
       auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
       auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
       
-      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 1.e-8){ //active set.			
+      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 1.e-6){ //active set.			
 				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
 			}else{
 				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
         //YH2O_n = property.parameter.InitialYH2O(ip_global_s);
         //Sg_n = 0.0;
 			}
-      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 1.e-8 ){
+      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 1.e-6 ){
         XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
       } else {
         //Sg_n = (1. - Sw_n - Sh_n) * (1. - Sh_n);// inactive set. Inactive => phase is absent => Sw=0, Sg>0
@@ -2089,6 +2090,7 @@ public:
         omegaup_g_s = 0.0;
         omegaup_g_n = 1.0;
       }
+      // upwinding wrt water-phase velocity
       RF omegaup_w_s, omegaup_w_n;
       if (normalflux_w>0.0)
       {
@@ -2100,6 +2102,7 @@ public:
         omegaup_w_s = 0.0;
         omegaup_w_n = 1.0;
       }
+
       RF omegaup_x_s, omegaup_x_n;
       if (normalflux_x>0.0)
       {
@@ -2122,7 +2125,6 @@ public:
         omegaup_T_s = 0.5;
         omegaup_T_n = 0.5;
       }
-      
       
       //   fluxes and diff. flux
       auto convectiveflux_CH4_g_s = rho_g_s * (1. - YH2O_s) * normalvelocity_g_s;
@@ -2175,36 +2177,37 @@ public:
       auto diffusiveflux_Heat_n = grad_T_n; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
 
       auto convectiveflux_CH4_g = omegaup_g_s * convectiveflux_CH4_g_s + omegaup_g_n * convectiveflux_CH4_g_n;
-      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
-        convectiveflux_CH4_g = 0.5 * ( rho_g_s * (1. - YH2O_s) + rho_g_n * (1. - YH2O_n)) * normalvelocity_g_n;
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
+      //   convectiveflux_CH4_g = 0.5 * ( rho_g_s * (1. - YH2O_s) + rho_g_n * (1. - YH2O_n)) * normalvelocity_g_n;
+      // }
       auto convectiveflux_CH4_w = omegaup_w_s * convectiveflux_CH4_w_s + omegaup_w_n * convectiveflux_CH4_w_n;
-      if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
-        convectiveflux_CH4_w = 0.5 * ( rho_w_s * (XCH4_s) + rho_w_n * (XCH4_n)) * normalvelocity_w_n;
-      }
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      //   convectiveflux_CH4_w = 0.5 * ( rho_w_s * (XCH4_s) + rho_w_n * (XCH4_n)) * normalvelocity_w_n;
+      // }
 
       auto convectiveflux_H2O_g = omegaup_g_s * convectiveflux_H2O_g_s + omegaup_g_n * convectiveflux_H2O_g_n;
-      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
-        convectiveflux_H2O_g = 0.5 * ( rho_g_s * (YH2O_s) + rho_g_n * (YH2O_n)) * normalvelocity_g_n;
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
+      //   convectiveflux_H2O_g = 0.5 * ( rho_g_s * (YH2O_s) + rho_g_n * (YH2O_n)) * normalvelocity_g_n;
+      // }
       auto convectiveflux_H2O_w = omegaup_w_s * convectiveflux_H2O_w_s + omegaup_w_n * convectiveflux_H2O_w_n;
-      if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
-        convectiveflux_H2O_w = 0.5 * ( rho_w_s * (1. - XC_s - XCH4_s) + rho_w_n * (1. - XC_n - XCH4_n)) * normalvelocity_w_n;
-      }
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      //   convectiveflux_H2O_w = 0.5 * ( rho_w_s * (1. - XC_s - XCH4_s) + rho_w_n * (1. - XC_n - XCH4_n)) * normalvelocity_w_n;
+      // }
 
       auto convectiveflux_SALT_w = omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n;
-      if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
-        convectiveflux_SALT_w = 0.5 * ( rho_w_s * ( XC_s ) + rho_w_n * (XC_n)) * normalvelocity_w_n;
-      }
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      //   convectiveflux_SALT_w = 0.5 * ( rho_w_s * ( XC_s ) + rho_w_n * (XC_n)) * normalvelocity_w_n;
+      // }
 
       auto convectiveflux_Heat_g = omegaup_g_s * convectiveflux_Heat_g_s + omegaup_g_n * convectiveflux_Heat_g_n;
-      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
-        convectiveflux_Heat_g = 0.5 * ( rho_g_s * Cp_g_s * (T_s - T_ref) + rho_g_n * Cp_g_n * (T_n - T_ref)) * normalvelocity_g_n;
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
+      //   convectiveflux_Heat_g = 0.5 * ( rho_g_s * Cp_g_s * (T_s - T_ref) + rho_g_n * Cp_g_n * (T_n - T_ref)) * normalvelocity_g_n;
+      // }
+
       auto convectiveflux_Heat_w = omegaup_w_s * convectiveflux_Heat_w_s + omegaup_w_n * convectiveflux_Heat_w_n;
-      if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
-        convectiveflux_Heat_w = 0.5 * ( rho_w_s * Cp_w_s * (T_s - T_ref) + rho_w_n * Cp_w_n * (T_n - T_ref)) * normalvelocity_w_n;
-      }
+      // if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      //   convectiveflux_Heat_w = 0.5 * ( rho_w_s * Cp_w_s * (T_s - T_ref) + rho_w_n * Cp_w_n * (T_n - T_ref)) * normalvelocity_w_n;
+      // }
 
 
       auto convectiveflux_CH4 = - ( convectiveflux_CH4_g + convectiveflux_CH4_w);
@@ -2232,7 +2235,7 @@ public:
       //  ACCCUMULATE RESIDUALS  //
 			tmp=0.;
       
-      
+      //if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet){
       // CH4-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
       double term_nipg_g = theta_g * (Sg_s - Sg_n);
@@ -2245,15 +2248,17 @@ public:
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r.accumulate(lfsv_Sg_s, i, - Xc_conv_m * term_nipg_g * K * (omegaup_g_s * krN_s * rho_g_s 
-                                        * (1. - YH2O_s) * (- coeff_grad_Sw_s)  ) * n_F_local * gradpsi_Sg_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
+                                        * (1. - YH2O_s) * (- coeff_grad_Sw_s) 
+                                        + omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n) ) * n_F_local * gradpsi_Sg_s[i] * factor); //
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
       }
+      //}
      
-      
+      //if (veltype[Indices::BCId_salt] == Indices::BCId_dirichlet){
       // SALT-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
       double term_nipg_c_x = theta_x * (XC_s  - XC_n );
@@ -2263,17 +2268,20 @@ public:
       {
         r.accumulate(lfsv_XC_s, i, tmp * psi_XC_s[i] * factor);
       }
+      
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
       {
-        r.accumulate(lfsv_XC_s, i,  Xc_diff_m * term_nipg_c_x * (omegaup_x_s * rho_w_s * Sw_s * DC_w_s )* gradpsi_XC_s[i] * n_F_local * factor);//+ omegaup_x_n * Sw_n * rho_w_n * DC_w_n
+        r.accumulate(lfsv_XC_s, i,  Xc_diff_m * term_nipg_c_x * (omegaup_x_s * rho_w_s * Sw_s * DC_w_s + omegaup_x_n * Sw_n * rho_w_n * DC_w_n )* gradpsi_XC_s[i] * n_F_local * factor);//
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
       {
         r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
       }
-      
+      //}
+
+      //if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet){
       // H2O-component-wise mass-balance
       tmp = Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
       double term_nipg_w = theta_w * (Pw_s - Pw_n);
@@ -2282,11 +2290,12 @@ public:
       {
         r.accumulate(lfsv_Pw_s, i, tmp * psi_Pw_s[i] * factor);
       }
+      
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r.accumulate(lfsv_Pw_s, i, -Xc_conv_m * term_nipg_w * K * (omegaup_w_s * krW_s * rho_w_s 
-                                     * (1. - XC_s - XCH4_s)  ) * n_F_local * gradpsi_Pw_s[i] * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n)
+        r.accumulate(lfsv_Pw_s, i, -Xc_conv_m * term_nipg_w * K * (omegaup_w_s * krW_s * rho_w_s * (1. - XC_s - XCH4_s) 
+                                     + omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n)) * n_F_local * gradpsi_Pw_s[i] * factor);//
         
         //r.accumulate(lfsv_Pw_s, i, -Xc_conv_m * term_nipg_w * K * ( krN_s * omegaup_g_s * rho_g_s * YH2O_s + krN_n * omegaup_g_n * rho_g_n * YH2O_n) * n_F_local * gradpsi_Pw_s[i] * factor);
         
@@ -2296,6 +2305,7 @@ public:
       {
         r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
+      //}
 
       //==============================================================================================
       // tmp = 0.;
@@ -2338,6 +2348,7 @@ public:
         r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
       }
 
+      //if (veltype[Indices::BCId_heat] == Indices::BCId_dirichlet){
       // ENERGY balance
       tmp = Xc_conv_h * convectiveflux_Heat + Xc_diff_h * diffusiveflux_Heat;
       double term_nipg_T = theta_T * (T_s - T_n);
@@ -2351,7 +2362,7 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
-        r.accumulate(lfsv_T_s, i, - Xc_diff_h * omegaup_T_s * term_nipg_T * kth_eff * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
+        r.accumulate(lfsv_T_s, i, - Xc_diff_h * term_nipg_T * kth_eff * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
       }
       
       // standard IP term integral
@@ -2359,6 +2370,7 @@ public:
       {
         r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
       }
+      //}
       
     } // end of quadrature rule
   } // end of alpha_boundary
