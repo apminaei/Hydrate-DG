@@ -39,7 +39,6 @@ public:
 			auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(element, xlocal);
 			double por = property.soil.SedimentPorosity(element, xlocal);
 			double Pc = property.hydraulicProperty.CapillaryPressure(element, xlocal, Sw, Sh, por)
-						* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4])
 						* property.characteristicValue.P_c; /*Pa*/
 			double Pw = property.parameter.InitialPw(xglobal);  /*Pa*/
 			double Pg = Pw+Pc;//  /*Pa*/

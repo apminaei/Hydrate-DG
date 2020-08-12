@@ -54,7 +54,7 @@ public:
 	//rate constant for hydrate reformation;
 	double FormationRateConstant_ingas (double T) const {
 
-		double kd_form = 1.e-13;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
+		double kd_form = 1.e-12;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
 		return kd_form;
 
 	}
