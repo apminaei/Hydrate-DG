@@ -191,7 +191,7 @@ public:
 			RF Pg = Pw + suctionPressure ;//* PcSF1;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
-			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
 			  
 			auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
