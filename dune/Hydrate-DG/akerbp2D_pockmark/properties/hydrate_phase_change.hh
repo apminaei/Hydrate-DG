@@ -31,30 +31,25 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 4.4824 /( salt.MolarMass()/water.MolarMass());//16.32; 
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//4.4824 /( salt.MolarMass()/water.MolarMass());//; 
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
-
-		// double P_eq = 1.0e6*exp(- 1.6892692e3 - 0.15162984*T + 5.60912482e4/T + 2.72067506E2*log(T)
-		// 						+ (S/1.80655e-3)*( 2.06621298e4 + 14.18127*T - 8.3417066e-3*T*T - 3.78757519E5/T - 4.01544417e3*log(T) )
-		// 						+ (S/1.80655e-3)*(S/1.80655e-3)*( 6.04018045e2 + 0.420253434*T - 2.501548e-4*T*T - 1.09745335E4/T - 1.17640966e2*log(T) ) );
-		
 
 		// std::cout << " P_eq = " << P_eq << " T = " << T<< std::endl;
 		// exit(0);
 		return 3.4e6/characteristicValue.P_c; /*ndim*/
 	}
 
-	//rate constant for hydrate dissociation;
+	//rate constant for hydrate dissociation; base 1.e-14 for t_end = 2.16e6
 	double DissociationRateConstant (double T) const {
 
-		double kd_diss = 1.e-13;//parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
+		double kd_diss = 2.e-13;//parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
 		return kd_diss;
 	}
 
-	//rate constant for hydrate reformation;
+	//rate constant for hydrate reformation; base 1.e-13 for t_end = 2.16e6
 	double FormationRateConstant_ingas (double T) const {
 
-		double kd_form = 1.e-12;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
+		double kd_form = 2.e-12;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
 		return kd_form;
 
 	}

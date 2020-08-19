@@ -228,7 +228,7 @@ public:
 		kHenry *= 1.e6; /* [Pa] */
 		// std::cout << kHenry << std::endl;
 		// exit(0);
-		return 3.333e9/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
+		return 3.1104e9/characteristicValue.P_c;//kHenry/characteristicValue.P_c; /*ndim*/
 	}
 
 };

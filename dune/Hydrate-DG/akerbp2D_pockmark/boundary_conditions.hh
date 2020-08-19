@@ -9,7 +9,7 @@ private :
 	Indices indices;
 	CharacteristicValues characteristicValues;
 
-	double Xc_time = 10. * 3600. / characteristicValues.t_c;
+	double Xc_time = 5. * 3600. / characteristicValues.t_c;
 
 public :
 

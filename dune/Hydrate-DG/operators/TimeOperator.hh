@@ -231,7 +231,7 @@ public:
 	}	// End of alpha volume
 	
 	
- 	// // jacobian contribution of volume term
+ 	// jacobian contribution of volume term
 	// template <typename EG, typename LFSU, typename X, typename LFSV, typename M>
 	// void jacobian_volume(const EG &eg, const LFSU &lfsu, const X &x, const LFSV &lfsv, M& mat) const
 	// {

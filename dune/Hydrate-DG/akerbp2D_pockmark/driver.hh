@@ -387,7 +387,7 @@ void driver(const GV &gv, // GridView
 
 		}catch ( Dune::Exception &e ) {
 			exceptionCaught = true;
-			if( (dt*property.characteristicValue.t_c) > 1e-8 ){
+			if( (dt) > (1e-8/property.characteristicValue.t_c) ){ //*property.characteristicValue.t_c
 
 				if(helper.rank()==0){
 					std::cout << "Catched Error, Dune reported error: " << e << std::endl;
@@ -434,8 +434,8 @@ void driver(const GV &gv, // GridView
 			statistics_file +="_statistics";
 			statistics_file += ".txt";
 			property.ReportStatistics( 	statistics_file,
-										time*property.characteristicValue.t_c,
-										dt*property.characteristicValue.t_c,
+										time/**property.characteristicValue.t_c*/,
+										dt/**property.characteristicValue.t_c*/,
 										newton_iterations,
 										clock_time_elapsed,
 										dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
@@ -486,7 +486,7 @@ void driver(const GV &gv, // GridView
 		time += dt;
 		if(helper.rank()==0){
 			std::cout<<" "<< std::endl;
-			std::cout<< " time = " << time*property.characteristicValue.t_c ;
+			std::cout<< " time = " << time/**property.characteristicValue.t_c*/ ;
 			std::cout<< std::flush;
 		}
 		if (adaptive_time_control)
@@ -510,8 +510,8 @@ void driver(const GV &gv, // GridView
 			dt = dtstart;
 		}
 		if(helper.rank()==0){
-			std::cout << " , time+dt = " << (time + dt)*property.characteristicValue.t_c
-					  << " , opTime = "  << t_OP * opcount * property.characteristicValue.t_c ;
+			std::cout << " , time+dt = " << (time + dt)/**property.characteristicValue.t_c*/
+					  << " , opTime = "  << t_OP * opcount /** property.characteristicValue.t_c*/ ;
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
@@ -521,14 +521,14 @@ void driver(const GV &gv, // GridView
 			dt = t_OP * opcount - time;
 
 			if(helper.rank()==0){
-				std::cout<< " , because timeNext > opNext , dt set to : " << dt*property.characteristicValue.t_c << std::endl;
+				std::cout<< " , because timeNext > opNext , dt set to : " << dt/**property.characteristicValue.t_c*/ << std::endl;
 				std::cout<< std::flush;
 			}
 			dtFlag = -1;
 		}
 
 		if(helper.rank()==0){
-			std::cout<< " , dt  : " << dt*property.characteristicValue.t_c << std::endl;
+			std::cout<< " , dt  : " << dt/**property.characteristicValue.t_c*/ << std::endl;
 			std::cout<<" "<< std::endl;
 			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
 			std::cout<< std::flush;
