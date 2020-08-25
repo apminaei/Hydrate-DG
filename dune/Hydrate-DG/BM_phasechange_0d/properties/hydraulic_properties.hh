@@ -64,18 +64,29 @@ public:
 						double Swr,
 						double Sgr ) const {
 
-
 		double Sw_max = 1. - Sh - Sgr;
 		double Swe = ( Sw - Swr )/( Sw_max - Swr );
-
-		if( Swe>1.){
-			Swe=1.;
-		}
-		if( Swe<0.){
-			Swe=0.;
-		}
-
 		return Swe;
+	}
+
+	double dPcSF1_dSh( double Sh ,double lambda,
+				  double m) const {
+		double dPcSF=0. ;
+		double eta = (lambda * m - 1.)/(lambda*m);
+		double a = 0.95;
+		if( Sh < a ){
+			dPcSF = eta * std::pow( 1.0-Sh , -eta-1.0 );
+		}
+		else if( Sh >= a ){
+			double dPcSF_a = eta * pow( 1.0 - a , -eta-1.0 );
+			double ddPcSF_a = eta * (eta+1.) * std::pow( 1.0 - a , -eta-2.0 );
+			dPcSF = dPcSF_a + ddPcSF_a * ( Sh - a );
+		}
+		else {
+			std::cout<< " ERROR in HydraulicProperties::dPcSF1:dSh( Sh ),   Sh = " << Sh << std::endl;
+			exit(0);
+		}
+		return dPcSF ;
 	}
 
 	double dSwe_dSw( double Sw,
@@ -101,27 +112,7 @@ public:
 		return dSwe;
 	}
 
-	double dPcSF1_dSh( double Sh ,double lambda,
-				  double m) const {
-		double dPcSF=0. ;
-		double eta = (lambda * m - 1.)/(lambda*m);
-		double a = 0.95;
-		if( Sh < a ){
-			dPcSF = eta * std::pow( 1.0-Sh , -eta-1.0 );
-		}
-		else if( Sh >= a ){
-			double dPcSF_a = eta * pow( 1.0 - a , -eta-1.0 );
-			double ddPcSF_a = eta * (eta+1.) * std::pow( 1.0 - a , -eta-2.0 );
-			dPcSF = dPcSF_a + ddPcSF_a * ( Sh - a );
-		}
-		else {
-			std::cout<< " ERROR in HydraulicProperties::dPcSF1:dSh( Sh ),   Sh = " << Sh << std::endl;
-			exit(0);
-		}
-		return dPcSF ;
-	}
-
-	/* SUCTION/CAPILLARY PRESSURE   NonDimensional*/
+	/* SUCTION/CAPILLARY PRESSURE */
 
 	double CapillaryPressure(  const typename GV::Traits::template Codim<0>::Entity& element,
   	   	   	 	 	 	 	   const Dune::FieldVector<double,dim>& xlocal ,
@@ -131,25 +122,32 @@ public:
 
 		auto BCParams = BrooksCoreyParameters(element,xlocal);
 
-		double Pentry/*Pa*/	= BCParams[id_Pentry];
-		double lambda 		= BCParams[id_lambda];
-		double Sgr 			= BCParams[id_Sgr];
-		double Swr 			= BCParams[id_Swr];
-		double m 			= BCParams[id_m];
-		double beta 		= BCParams[id_beta];
+		double Pentry 	= BCParams[id_Pentry];
+		double lambda 	= BCParams[id_lambda];
+		double Sgr 		= BCParams[id_Sgr];
+		double Swr 		= BCParams[id_Swr];
+		double m 		= BCParams[id_m];
+		double beta 	= BCParams[id_beta];
 
 		double eta = (1/lambda);
 		double Swe = EffectiveSw( Sw,Sh,Swr,Sgr );
-		double Pc = 0.; /*Pa*/
+		double Pc = 0.;
 		double a = 0.05 ;
+
+		if( Swe>1.){
+			Swe=1.;
+		}
+		if( Swe<0.){
+			Swe=0.;
+		}
 
 		if( Swe > a ){
 			Pc = Pentry * pow( Swe, -eta );
 		}
 		else if ( Swe <= a ){
-			double Pc_a /*Pa*/  = Pentry * pow( a, -eta );
-			double dPc_a /*Pa*/ = dPc_dSwe( a,Pentry,lambda ) * characteristicValue.P_c;
-			Pc/*Pa*/ = Pc_a/*Pa*/ + dPc_a/*Pa*/ * ( Swe - a );
+			double Pc_a = Pentry * pow( a, -eta );
+			double dPc_a = dPc_dSwe( a,Pentry,lambda ) ;
+			Pc = Pc_a + dPc_a * ( Swe - a );
 		}
 		else {
 			std::cout<< " ERROR in " << __FILE__
@@ -177,27 +175,26 @@ public:
 		double porosity_0 = soil.SedimentPorosity( element,xlocal );
 		double SF_por = PcSF2( porosity, porosity_0, beta );
 
-		Pc *=SF_Sh*SF_por; /*Pa*/
-		// std::cout << Pc << std::endl;
-		// exit(0);
-		return Pc/characteristicValue.P_c; /*nondim*/ // 
+		Pc *=SF_Sh*SF_por;
+
+		return Pc/characteristicValue.P_c;
 	}
 
 	double dPc_dSwe( double Swe,
-					 double Pentry, /*Pa*/
+					 double Pentry,
 					 double lambda ) const {
 
 		double eta = (1/lambda);
-		double dPc = 0.; /*Pa*/
+		double dPc = 0.;
 		double a = 0.05 ;
 
 		if( Swe > a ){
-			dPc/*Pa*/ = Pentry * (-1./lambda) * std::pow( Swe , -(1./lambda) - 1. );
+			dPc = Pentry * (-1./lambda) * std::pow( Swe , -(1./lambda) - 1. );
 		}
 		else if ( Swe <= a ){
 			double dPc_a  = Pentry * (-1./lambda) * std::pow( a , -(1./lambda) - 1. ) ;
 			double ddPc_a = Pentry * (-1./lambda) * (-1./lambda-1.) * std::pow( a , -(1./lambda) - 2. );
-			dPc/*Pa*/ = dPc_a + ddPc_a * ( Swe - a );
+			dPc = dPc_a + ddPc_a * ( Swe - a );
 		}
 		else {
 			std::cout<< " ERROR in HydraulicProperties::dPc_dSwe( Swe ) "
@@ -205,8 +202,8 @@ public:
 					 << "  , dPc  = " << dPc << std::endl;
 //			exit(0);
 		}
-		
-		return dPc/characteristicValue.P_c; /*ndim*/
+
+		return dPc;
 	}
 
 	/* Pc SCALING FACTORS */
@@ -216,7 +213,7 @@ public:
 				  double m) const {
 
 		double PcSF=0. ;
-		double eta = std::abs((lambda*m - 1.)/(lambda*m));
+		double eta = (lambda*m - 1.)/(lambda*m);
 		double a = 0.95;
 
 		if( Sh < a ){
@@ -374,6 +371,7 @@ public:
 		}
 		return KSF;
 	}
+
 
 
   //! get a reference to the grid view

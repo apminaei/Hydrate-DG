@@ -17,6 +17,7 @@ class TimeOperator:
 private:
 	const GV &gv;
 	const Params&	  property;
+
 	constexpr static double eps = 1.0e-6;
 	constexpr static double pi = atan(1.) * 4;
 	unsigned int intorder;
@@ -29,6 +30,8 @@ private:
 	double Xc_T;
 	double Xc_X;
 	double Xc_Y;
+	double T_ref;
+
 
 public:
 	// pattern assembly flags
@@ -51,6 +54,10 @@ public:
 		Xc_T = property.characteristicValue.T_c;
 		Xc_X = property.characteristicValue.x_c;
 		Xc_Y = property.characteristicValue.x_c;
+		T_ref = property.parameter.ReferenceTemperature()/Xc_T;
+#ifdef STATEINDEPENDENTPROPERTIES
+  		T_ref = property.parameter.RefT()/Xc_T;
+#endif
 	}
 	// volume integral depending on test and ansatz functions
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename R>
@@ -92,7 +99,7 @@ public:
 		using RangeType = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
 			Traits::LocalBasisType::Traits::RangeType;
 		using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
-		auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
+		
 		// Reference to cell
 	  	const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
@@ -270,7 +277,7 @@ public:
 	// 	using RangeType = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
 	// 		Traits::LocalBasisType::Traits::RangeType;
 	// 	using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
-	// 	auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
+	
 	// 	// Reference to cell
 	//   	const auto& cell = eg.entity();
 	// 	const IndexSet &indexSet = gv.indexSet();

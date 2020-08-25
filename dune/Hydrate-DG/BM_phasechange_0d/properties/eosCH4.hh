@@ -4,70 +4,41 @@
 
 */
 class BaseEoS{
-private:
-	constexpr static double eps = 1.e-6;
 public:
-
-	void printName(){
-		std::cout<<"EOS: Base (z=1) " << std::endl;
+	double EvaluateCompressibilityFactor( double T, double P )const{
+		return 0.7;
 	}
 
-	double EvaluateCompressibilityFactor( double T/*K*/, double P/*Pa*/ )const{
-
-		double compressibilityFactor = 0.8; // 0.7; 
-		return compressibilityFactor ;
-
-	}
 };
-
-
-class FrauenhoferFunction{
-private:
-	constexpr static double eps = 1.e-6;
-	constexpr static int iterMax = 10;
-	Methane methane;
-public:
-
-	void printName(){
-		std::cout<<"EOS: FRAUENHOFER COMSOL MODEL, empirical " << std::endl;
-	}
-
-	double EvaluateCompressibilityFactor( double T/*K*/, double P/*Pa*/ )const{
-
-		double C0 = 1.0003;
-		double C1 = 2.1173e-8;
-		double C2 = 5.0207e-16;
-		double C3 = 7.5669e-23;
-		double C4 = 1.3259e-30;
-
-		double compressibilityFactor = C0 - C1*P - C2*P*P + C3*P*P*P - C4*P*P*P*P;
-		return compressibilityFactor ;
-
-	}
-};
-
+template<typename PTree>
 class PengRobinson{
 private:
 	constexpr static double eps = 1.e-6;
 	constexpr static int iterMax = 10;
-	Methane methane;
+	const PTree& ptree;
+	Methane<PTree> methane;
 public:
+
+	PengRobinson (const PTree& ptree_  )
+	 : ptree(ptree_),
+	  methane(ptree_)
+  	{}
 
 	void printName(){
 		std::cout<<"EOS: PENG-ROBINSON " << std::endl;
 	}
 
-	std::vector<double> EvaluateEoSParams( double T/*K*/, double P/*Pa*/ )const{
+	std::vector<double> EvaluateEoSParams( double T, double P )const{
 
 		std::vector<double> PREoSParams(2);
 		for(int i =0; i<PREoSParams.size();i++){
 			PREoSParams[i] = 0.;
 		}
 
-		double omega 	= methane.AccentricityFactor();
-		double Tc/*K*/	= methane.CriticalTemperature();
-		double Pc/*Pa*/	= methane.CriticalPressure();
-		double R_u/*J.mol^-1.K^-1*/ = methane.Ru;
+		double omega = methane.AccentricityFactor();
+		double Tc	 = methane.CriticalTemperature();
+		double Pc 	 = methane.CriticalPressure();
+		double R_u 	 = methane.Ru;
 
 		double kappa = 0.;
 		if( omega <= 0.49 ){
@@ -89,7 +60,7 @@ public:
 
 	}
 
-	std::vector<double> PolynomialCoefficients( double T/*K*/, double P/*Pa*/ )const{
+	std::vector<double> PolynomialCoefficients( double T, double P )const{
 
 		std::vector<double> EoSParameters(2);
 		for(int i =0; i<EoSParameters.size();i++){
@@ -153,7 +124,7 @@ public:
 		return z_up;
 	}
 
-	double EvaluateCompressibilityFactor( double T/*K*/, double P/*Pa*/ )const{
+	double EvaluateCompressibilityFactor( double T, double P )const{
 
 		std::vector<double> Coeffs(4);
 		for(int i =0; i<Coeffs.size();i++){
@@ -161,7 +132,7 @@ public:
 		}
 		Coeffs = PolynomialCoefficients(T,P);
 		double compressibilityFactor = Method( Coeffs );
-		return std::max(compressibilityFactor,0.1) ;
+		return compressibilityFactor ;
 	}
 
 };

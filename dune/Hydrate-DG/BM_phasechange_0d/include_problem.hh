@@ -1,5 +1,5 @@
-#ifndef AKERBP2D_POCKMARK_INCLUDE_PROBLEM_HH_
-#define AKERBP2D_POCKMARK_INCLUDE_PROBLEM_HH_
+#ifndef BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
+#define BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
 
 #include "../extras/ParameterTraits.hh"
 #include "../extras/Evaluation.hh"
@@ -10,6 +10,7 @@
 // PROBLEM SPECIFICATION
 #include"characteristic_values.hh"
 #include"grids/grid.hh"
+#define STATEINDEPENDENTPROPERTIES
 #include"parameters.hh"
 #include"properties/include_properties.hh"
 #include"initial_conditions.hh"
@@ -25,4 +26,4 @@
 #include "../operators/TimeOperator.hh"
 #include "driver.hh"
 
-#endif /* AKERBP2D_POCKMARK_INCLUDE_PROBLEM_HH_ */
+#endif /* BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_ */

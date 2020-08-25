@@ -7,6 +7,8 @@
 
 #ifndef INCLUDESDUNE_HH_
 #define INCLUDESDUNE_HH_
+// (options: PVS, NCP, CGP)
+#define NCP
 #define YASP
 #define PARALLEL
 

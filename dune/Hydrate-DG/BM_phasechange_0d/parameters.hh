@@ -11,8 +11,6 @@ class Parameters
 {
 private:
 	const PTree& ptree;
-	MeshParameters<PTree> mesh;
-//	const double pi = boost::math::constants::pi<double>();
 	const double pi = 3.14159265358979323846;
 	const static int dim = MeshParameters<PTree>::dimension;
 	CharacteristicValues X_c;
@@ -34,6 +32,7 @@ private:
 	double time_initial_problem;
 	double kd_initial_problem;
 	double kf_initial_problem;
+	double t_END;
 	double kd;
 	double kf;
 	int numMaterials;
@@ -43,6 +42,7 @@ private:
 	double ref_salinity;
 	double ref_saltconcentration;
 	double ref_temperature;
+	double ref_pressure;
 
 	bool gravity_flag;
 	double g_magnitude;
@@ -51,8 +51,7 @@ public:
 
   //! constructor
   Parameters (const PTree& ptree_)
-  :ptree(ptree_),
-   mesh(ptree_)
+  :ptree(ptree_)
   {
 		Sg_t0 = ptree.get("initial.Sg",(double)0.0);
 		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
@@ -62,7 +61,7 @@ public:
 		YH2O_t0 = ptree.get("initial.YH2O",(double)0.0005);
 		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
 		XC_t0 = ptree.get("initial.XC",(double)5.5e-3);
-
+		t_END = ptree.get("time.time_end",(double)86400.);
 		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)2.e6);
 		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.0);
 		
@@ -85,15 +84,16 @@ public:
 		//reference state
 		ref_salinity = ptree.get("reference_state.salinity",(double)0.);
 		ref_saltconcentration = ref_salinity * (18.0/58.4); /*MolarMass_H2O/MolarMass_salt*/
-		ref_temperature = (273.15+ptree.get("reference_state.temperature",(double)0.))/X_c.T_c;
+		ref_temperature = (273.15+ptree.get("reference_state.temperature",(double)0.));/*K*/
+		ref_pressure = ptree.get("reference_state.pressure",(double)1.01e5);
 
 
 		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-12);/*mol/m².Pa.s*/
 		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-12);/*mol/m².Pa.s*/
 		time_initial_problem = ptree.get("initial_problem.time_end",(double)5.); /*years*/
 		time_initial_problem *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
-		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate",(double)1.e-12);/*mol/m².Pa.s*/
-		kd_initial_problem = ptree.get("initial_problem.hydrate_dissociation_rate",(double)1.e-12);/*mol/m².Pa.s*/
+		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
+		kd_initial_problem = ptree.get("initial_problem.hydrate_dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
 
 		//gravity
 		gravity_flag = ptree.get("gravity.flag",(bool)true);
@@ -129,8 +129,8 @@ public:
 	}
 
 	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
-		double T = T_t0;
-		return T; /* Celcius */
+		double T = T_t0 + ReferenceTemperature(); /*K*/
+		return T; /* K */
 	}
 	double InitialSh(Dune::FieldVector< double,dim > xglobal) const {
 		double Sh = Sh_t0;
@@ -169,16 +169,37 @@ public:
 	}
 
 	/**********************************************************************/
-	/* REFERENCE STATE */
+	/* REFERENCE STATE VALUES */
 	double ReferenceSalinity() const {
-		return ref_salinity; /*kg/kg*/
-	}
-	double ReferenceSaltConcentration() const {
-		return ref_saltconcentration;
+		return ref_salinity;
 	}
 	double ReferenceTemperature() const {
 		return ref_temperature; /*K*/
 	}
+	double ReferencePressure() const {
+		return ref_pressure; /*Pa*/
+	}
+	double HydrateDissociationRateConstant() const {
+		return kd_initial_problem * 2.16e6 / t_END;
+	}
+	double HydrateFormationRateConstant() const {
+		return kf_initial_problem * 2.16e6 / t_END;
+	}
+
+#ifdef STATEINDEPENDENTPROPERTIES
+	// (P,T,sal) reference state for CASE1
+	double RefP() const {
+		return 20.*ReferencePressure(); /*Pa*/
+	}
+
+	double RefT() const {
+		return ReferenceTemperature() + 8.0; /*K*/
+	}
+
+	double RefSal() const {
+		return 0.02; /*kg/kg*/;
+	}
+#endif
 
     /**********************************************************************/
 	Dune::FieldVector<double,dim>
@@ -202,33 +223,13 @@ public:
 		return gravity; /*N/kg*/
 	}
 
-	// //HYDRATE REACTION KINETIC CONSTANTS
-	// double HydrateDissociationRateConstant() const {
-	// 	double time_new = ((*time)+(*dt))*X_c.t_c; /*s*/
-	// 	if( time_new<time_initial_problem )
-	// 		return kd_initial_problem;
-	// 	else return kd;
-	// 	/*mol/m².Pa.s*/
-	// }
-	// double HydrateFormationRateConstant() const {
-	// 	double time_new = ((*time)+(*dt))*X_c.t_c; /*s*/
-	// 	if( time_new<time_initial_problem ){
-	// 		//std::cout<< "rho = " << kf_initial_problem << " T = " << time  << std::endl;
-	// 		return kf_initial_problem;
-	// 	}
-	// 	else{ 
-	// 		//std::cout<< "rho = " << kf << " T = " << time  << std::endl;
-	// 		return kf;
-	// 	}
-
-		
-			//exit(0);
-		/*mol/m².Pa.s*/
-	//}
-
-
+	
 	/**********************************************************************/
 
 };
+
+
+
+
 
 

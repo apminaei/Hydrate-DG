@@ -18,11 +18,8 @@
 //#include <filesystem>
 
 #include "dune/Hydrate-DG/IncludesDUNE.hh"
-#include "dune/Hydrate-DG/akerbp2D_pockmark/include_problem.hh"
-
-
-//#define ALUGRID		already defined in IncludeDUNE.hh
-//#define PARALLEL		already defined in IncludeDUNE.hh
+#include "dune/Hydrate-DG/BM_phasechange_0d/include_problem.hh"
+//TODO: Change problem name to: BM_phasechange_0d
 
 int main(int argc, char **argv)
 {
@@ -30,17 +27,6 @@ int main(int argc, char **argv)
 	{
 		// Maybe initialize MPI
 		 Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
-	    if(helper.size()==1){
-	    std::cout << "This is a test of project hydrate DG. " << std::endl;
-	    }
-	    if(Dune::MPIHelper::isFake){
-	      std::cout<< "This is a sequential program." << std::endl;
-	    }
-	    else {
-	    	if(helper.size()==1){
-	    		std::cout<<"I am rank "<<helper.rank()<<" of "<<helper.size()<<" processes!"<<std::endl;
-	    	}
-	    }
 
 		if (argc != 2)
 		{
@@ -51,11 +37,9 @@ int main(int argc, char **argv)
 			return 1;
 		}
 
-		int level = 1;
-
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/inputs/";
+	    std::string input_file = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 
@@ -68,36 +52,29 @@ int main(int argc, char **argv)
 		// MESH
 	    MeshParameters<Dune::ParameterTree> mesh(ptree);
 	    const int dim = mesh.dimension;
-
-		/*____________________________________________*/
-
-		
-		const double X = mesh.X_length;
-		//const double Y = mesh.Y_length;
-		const double Z = mesh.Z_length;
 		/*____________________________________________*/
 
 		
 		Dune::FieldVector<double, dim> L(0.0); // L represents the right top node of the rectangular/cuboidal domain
-		L[0] = X;
+		L[0] = mesh.X_length;
 		if (dim == 2)
 		{
-			L[1] = Z;
+			L[1] = mesh.Z_length;
 		}
-		// else if (dim == 3)
-		// {
-		// 	L[1] = Y;
-		// 	L[2] = Z;
-		// }
+		else if (dim == 3)
+		{
+			L[1] = mesh.Y_length;
+			L[2] = mesh.Z_length;
+		}
 		std::array<int, dim> N(Dune::filledArray<dim, int>(1));
-		N[0] = mesh.X_cells * level; //gridParams.gridScaleRatio;
+		N[0] = mesh.X_cells;
 		if (dim == 2)
-			N[1] = mesh.Z_cells * level;
-		// else if (dim == 3)
-		// {
-		// 	N[1] = parameters.Y_cells; // * level;
-		// 	N[2] = parameters.Z_cells; // * level;
-		// }
+			N[1] = mesh.Z_cells;
+		else if (dim == 3)
+		{
+			N[1] = mesh.Y_cells;
+			N[2] = mesh.Z_cells;
+		}
 #ifdef YASP
 		typedef Dune::YaspGrid<dim> Grid;
 		std::bitset<dim> periodic(false);
@@ -118,14 +95,12 @@ int main(int argc, char **argv)
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
 		elements[1] = N[1];
-
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-
 		typedef Grid::LeafGridView GV;
-
 		GV gv = grid->leafGridView();
 		grid->loadBalance();
+
 #else ALUGRID
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
@@ -133,27 +108,17 @@ int main(int argc, char **argv)
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
 		elements[1] = N[1];
-
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-		
-		
 		typedef Grid::LeafGridView GV;
 		GV gv = grid->leafGridView();
-
   		// Transfer partitioning from ParMETIS to our grid
   		grid->loadBalance();
-
 		
 #endif
-	// auto bxlambda = [&](const auto& x){ // Dirichlet for x-component of velocity
-	// 	if (x[0]>X-1.e-6 || x[1]>Z-1.e-6 || x[0]<1.e-6 || x[1]<1.e-6) return true;
-	// 	return false;
-    // };
-    // auto bx = Dune::PDELab::makeBoundaryConditionFromCallable(gv,bxlambda);
-		Dune::VTKWriter<GV> vtkWriter(gv);
-  		vtkWriter.write(std::string("gridviews"));
+
 		driver(gv, ptree, helper);
+
 	}
 	catch (Dune::Exception &e)
 	{

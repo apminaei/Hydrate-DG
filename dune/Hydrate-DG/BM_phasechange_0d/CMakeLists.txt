@@ -1,0 +1,11 @@
+#install headers
+install(FILES boundary_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+install(FILES characteristic_values.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+install(FILES initial_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+install(FILES driver.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+install(FILES include_problem.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+install(FILES parameters.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/BM_phasechange_0d)
+add_subdirectory("grids")
+add_subdirectory("inputs")
+add_subdirectory("outputs")
+add_subdirectory("properties")

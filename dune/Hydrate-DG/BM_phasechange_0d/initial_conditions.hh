@@ -25,7 +25,6 @@ public:
 			auto xglobal = element.geometry().global(xlocal);
 
 			auto prop_L = property.parameter.layer_properties();
-			auto Pentry = prop_L[0][2]; // Characteristic value for Pressure
 			std::vector< double > icvalue(Indices::numOfPVs,0.);
 
 			/******************************************************************************/
@@ -36,17 +35,19 @@ public:
 			
 			/******************************************************************************/
 			// PRESSURES
-			auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(element, xlocal);
+			//auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(element, xlocal);
 			double por = property.soil.SedimentPorosity(element, xlocal);
 			double Pc = property.hydraulicProperty.CapillaryPressure(element, xlocal, Sw, Sh, por)
 						* property.characteristicValue.P_c; /*Pa*/
 			double Pw = property.parameter.InitialPw(xglobal);  /*Pa*/
 			double Pg = Pw+Pc;//  /*Pa*/
 			//std::cout << " Pg = " << Pg << std::endl;
-			double T = property.parameter.InitialT(xglobal) + 273.15; /*K*/
+			double T = property.parameter.InitialT(xglobal); /*K*/
+			// std::cout << " T = " << T << std::endl;
+			// exit(0);
 			/******************************************************************************/
 			// MOLE FRACTIONS
-			double XC = property.parameter.InitialXC(xglobal);
+			double XC = 0.02 * (property.gas.MolarMass()/property.salt.MolarMass());
 			auto z_CH4 = property.eos.EvaluateCompressibilityFactor( T,Pg );
 		
 			/******************************************************************************/

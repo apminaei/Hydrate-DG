@@ -1,29 +1,30 @@
-template<typename GV, typename Parameters>
+template<typename GV, typename PTree>
 class HydratePhaseChangeKinetics
 {
 private:
-	  const GV& gv;
-	  const Parameters& parameter;
+		const GV& gv;
+		const PTree& ptree;
 
-	  const static int dim = GV::dimension;
+		const static int dim = GV::dimension;
 
-	  CharacteristicValues characteristicValue;
-	  Methane methane;
-	  Water water;
-	  Hydrate hydrate;
-	  Salt salt;
-	  Soil<GV,Parameters > soil;
-	  HydraulicProperties<GV,Parameters> hydraulicProperty;
+		CharacteristicValues characteristicValue;
+
+		Parameters<PTree> parameter;
+		Methane<PTree> methane;
+		Water<PTree> water;
+		Hydrate<PTree> hydrate;
 
 public:
 
   //! construct from grid view
   HydratePhaseChangeKinetics ( const GV& gv_ , 
-		  	  	  	  	  	   const Parameters& parameter_  )
+		  	  	  	  	  	   const PTree& ptree_  )
   : gv( gv_ ), 
-	parameter(parameter_),
-	soil(gv_,parameter_),
-	hydraulicProperty(gv_,parameter_)
+	ptree(ptree_),
+	parameter(ptree_),
+	water(ptree_),
+	methane(ptree_),
+	hydrate(ptree_)
   {}
 
 	// EQULIBRIUM CONDITIONS FOR HYDRATE:
@@ -31,25 +32,23 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//4.4824 /( salt.MolarMass()/water.MolarMass());//; 
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
 
-		// std::cout << " P_eq = " << P_eq << " T = " << T<< std::endl;
-		// exit(0);
-		return 3.4e6/characteristicValue.P_c; /*ndim*/
+		return P_eq;
 	}
 
 	//rate constant for hydrate dissociation; base 1.e-14 for t_end = 2.16e6
 	double DissociationRateConstant (double T) const {
 
-		double kd_diss = 2.e-13;//parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
+		double kd_diss = parameter.HydrateDissociationRateConstant(); //defined in mol/m².Pa.s
 		return kd_diss;
 	}
 
 	//rate constant for hydrate reformation; base 1.e-13 for t_end = 2.16e6
 	double FormationRateConstant_ingas (double T) const {
 
-		double kd_form = 2.e-12;//parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
+		double kd_form = parameter.HydrateFormationRateConstant(); //defined in mol/m².Pa.s
 		return kd_form;
 
 	}
@@ -82,15 +81,15 @@ public:
 	}
 
 	// rate of gas generation:
-	double GasGenerationRate ( double T/*K*/, double Pg/*Pa*/, double Sh,  double Sw, double XCH4,
-							   double zCH4, double S, double porosity, double permeability/*m^2*/ ) const {
+	double GasGenerationRate ( double T, double Pg, double Sh,  double Sw, double XCH4,
+							   double zCH4, double S, double porosity, double permeability ) const {
 
 		double gas_gen = 0.0;
 
-		double Peq/*Pa*/ = EquilibriumPressure( T,S )*characteristicValue.P_c;
+		double Peq = EquilibriumPressure( T,S );
 
 		double potential_P = Peq/Pg - 1.  ;
-		
+
 		if(potential_P > 0. ){
 			gas_gen =   DissociationRateConstant( T )
 					  * methane.MolarMass()
@@ -100,7 +99,7 @@ public:
 					  * potential_P
 					  ;
 		}
-		else if(potential_P <= 0. ){
+		else if(potential_P < 0. ){
 			gas_gen =   FormationRateConstant_ingas( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
@@ -109,31 +108,31 @@ public:
 					  * potential_P
 					  ;
 		}
-		
-	    return gas_gen; /*[kg/m³s]*/
+
+
+	    return gas_gen;
 	}
 
 	// rate of water generation:
-	double WaterGenerationRate ( double gasGenRate /*kg.m^-3.s^-1*/ ) const {
+	double WaterGenerationRate ( double gasGenRate ) const {
       double water_gen =  gasGenRate * hydrate.HydrationNumber() * ( water.MolarMass() / methane.MolarMass() ) ;
       return water_gen;	/*[kg/m³s]*/
 	}
 
 	// rate of hydrate dissociation:
-	double HydrateDissociationRate( double gasGenRate/*kg.m^-3.s^-1*/ ) const {
+	double HydrateDissociationRate( double gasGenRate ) const {
       double hyd_decomp= - gasGenRate * ( hydrate.MolarMass() / methane.MolarMass() ) ;
       return hyd_decomp;/*[kg/m³s]*/
 	}
 
 	// heat of hydrate dissociation:
-	double HeatOfDissociation( double gasGenRate/*kg.m^-3.s^-1*/, double T/*K*/ ) const {
+	double HeatOfDissociation( double gasGenRate, double T ) const {
       double Q_decomp/*[W/m³]*/= - ( gasGenRate / hydrate.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
 								 * 1.;
-		
-      return Q_decomp;/*[W/m³]*/
-	}
 
+      return Q_decomp;
+	}
   //! get a reference to the grid view
   inline const GV& getGridView () {return gv;}
 

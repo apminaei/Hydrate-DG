@@ -3,16 +3,20 @@
  *
  */
 
-#ifndef PROJ_HYDRATE_SIMPLEXDG_HH_
-#define PROJ_HYDRATE_SIMPLEXDG_HH_
+#ifndef HYDRATE_DG_HH_
+#define HYDRATE_DG_HH_
 
 template <class GV, class PTree>
 void driver(const GV &gv, // GridView
-			const PTree& ptree, Dune::MPIHelper& helper)
+			const PTree& ptree, //ParameterTree 
+			Dune::MPIHelper& helper //MPI-Helper 
+		   )
 {
 
 	//	INCLUDE EXTERNAL CLASSES
-	typedef Properties<GV,PTree> Properties;
+
+
+	typedef Properties<GV, PTree> Properties;
 
 	//	CHOOSE DOMAIN AND RANGE FIELD TYPE
 	typedef typename GV::Grid::ctype Coord;
@@ -23,24 +27,27 @@ void driver(const GV &gv, // GridView
 	
 	Properties property(gv,ptree);
 	/* Non-dimensionalize time prams */
-	dt = ptree.get("time.dt_initial",(double)1.)/ property.characteristicValue.t_c;
-	Real t_END = ptree.get("time.time_end",(double)86400.) / property.characteristicValue.t_c;
-	Real t_OP = ptree.get("output.time_interval",(double)1.) / property.characteristicValue.t_c;
-	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) / property.characteristicValue.t_c;
-	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) / property.characteristicValue.t_c;
+	auto Xc_t = property.characteristicValue.t_c;
+	dt = ptree.get("time.dt_initial",(double)1.)/ Xc_t;
+	Real t_END = ptree.get("time.time_end",(double)86400.) / Xc_t;
+	Real t_OP = ptree.get("output.time_interval",(double)1.) / Xc_t;
+	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) / Xc_t;
+	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) / Xc_t;
 	bool adaptive_time_control = ptree.get("adaptive_time_control.flag",(bool)true);
 	
 	Real dtstart = dt;
 	Real time_op = time;
+	Real clock_time_elapsed = 0.;
 
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
-	double clock_time_elapsed = 0.;
+
 	const int degree_S = 1;
 	const int degree_P = 1;
 	const int degree_T = 1;
 	const int degree_X = 1;
 	const int degree_Y = 1;
+
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
@@ -48,9 +55,9 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ConformingDirichletConstraints CON0;	// pure Neumann: no constraints
 #endif									
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;// 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
 	FEM_P fem_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_S;// basis function
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_S;
 	FEM_S fem_S;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	FEM_T fem_T;
@@ -70,24 +77,17 @@ void driver(const GV &gv, // GridView
 	GFS_Y gfs_y(gv, fem_y);
 
 	//	COMPOSITE GFS
-	using VBE = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>; //  block size -> numOfPVs
+	using VBE = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>;//  block size -> numOfPVs
 
-	// gfs for composite system Pw,Pc,Sg,Sh,T,XCH4,YH2O
-	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X>
-		GFS;
+	// gfs for composite system Pw,Sg,Sh,T,XCH4,YH2O,XC
+	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, 
+													 Dune::PDELab::EntityBlockedOrderingTag,
+													 GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X> 
+													 GFS;
 	GFS gfs(gfs_P,  gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
-
-	// typedef PowerGridFunctionSpace< GFS_P, Indices::numOfPVs, VBE, Dune::PDELab::LexicographicOrderingTag > GFS;
-	// GFS gfs(gfs_P);
 	
     typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
-    CC cc;                       
-	gfs.update(); // initializing the gfs
-    //Dune::PDELab::constraints( u_bctype, gfs, cc);  // to artificial boundaries
-    std::cout << "constrained dofs = " << cc.size() << " of " << gfs.globalSize() << std::endl;
-
-	
+    CC cc;
 
 	//	SUB-SPACES FOR ACCESSING PRIMARY VARIABLES
 	using PathPw = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>>;
@@ -115,9 +115,7 @@ void driver(const GV &gv, // GridView
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
 	U uold(gfs, 0.0);
-	
 	U unew(gfs, 0.0);
-
 
 	//	MAKE FUNCTION FOR INITIAL VALUES   Which must be nondim 
 	typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
@@ -139,10 +137,8 @@ void driver(const GV &gv, // GridView
 												Sh_InitialType,
 												T_InitialType,
 												XCH4_InitialType,
-												YH2O_InitialType, XC_InitialType>
-		InitialType;
+												YH2O_InitialType, XC_InitialType> InitialType;
 	InitialType initial(Pw_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
-
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
@@ -157,10 +153,10 @@ void driver(const GV &gv, // GridView
 	double alpha_T = 1.e1;
 	double alpha_x = 1.e1;
 	double alpha_y = 1.e1;
+	double intorder=4;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
-	//time *= (1./property.characteristicValue.t_c);
-	LOP lop(gv, property, &unew, gfs, &time, &dt, 4, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property);
@@ -186,20 +182,17 @@ void driver(const GV &gv, // GridView
 	// SELECT A LINEAR SOLVER BACKEND
 #ifdef PARALLEL
 
-	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;// works 485. seconds with 5 newton it. using 1 core (1000 lin. it) 
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
 	// LS ls(gfs, cc, 500, 2);
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	LS ls(gfs, 5000, 1, true, true);
-
-	/* 	
+	LS ls(gfs, 500, 1, true, true);
+	/* 	NOTES:
 		LINEAR SOLVER STATISTICS
-		
 		res.iterations = i;
 		res.reduction = def/def0;
 		res.conv_rate  = pow(res.reduction,1.0/i);
 		res.elapsed = watch.elapsed();
-	
 		// final print
 		if (_verbose>0)
 		{
@@ -210,7 +203,7 @@ void driver(const GV &gv, // GridView
 		}
 	*/
 
-	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS; //works 410. seconds with 5 newton it. using 1 core (500 lin. it)
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS;
 	// LS ls(gfs,500,1,true,true);
 
 	//typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
@@ -221,7 +214,9 @@ void driver(const GV &gv, // GridView
 	// if (gfs.gridView().comm().rank() == 0)
 	// 	verbose = 1;
 	// LS ls(gfs, 100, verbose);
+
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
+
 #else
 	// typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;
 	// LS ls(1000, true);
@@ -234,7 +229,7 @@ void driver(const GV &gv, // GridView
     //    SELECT SOLVER FOR NON-LINEAR PROBLEM
     using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
     PDESOLVER pdesolver( igo, ls );
-    //     select control parameters for non-linear PDE-solver
+    // select control parameters for non-linear PDE-solver
 	pdesolver.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
     //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
 	pdesolver.setReassembleThreshold(0.0);
@@ -245,16 +240,14 @@ void driver(const GV &gv, // GridView
     pdesolver.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
 	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
 
+	//TODO: CHECK NEW NEWTON PARAMS
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
 	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
 	// PDESOLVER pdesolver(igo, ls);
-	
 	// 	select control parameters for non-linear PDE-solver
 	//typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
-	
 	//typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
 	//lineSearchStrategy linesearchstrategy(pdesolver);
-	
 	//pdesolver.setParameters(ptree.sub("newton"));
 	// pdesolver.setVerbosityLevel(2);
 	// pdesolver.setReduction(1e-3);
@@ -299,7 +292,7 @@ void driver(const GV &gv, // GridView
 
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
-	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/akerbp2D_pockmark/outputs/";
+	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/outputs/";
 	pathName += fileName ;
 	//if(helper.rank()==0){
 		//std::filesystem::create_directory(pathName);
@@ -335,6 +328,16 @@ void driver(const GV &gv, // GridView
 	std::string dgmethod_x = std::__cxx11::to_string(method_x);
 	std::string dgmethod_y = std::__cxx11::to_string(method_y);
 
+	if(helper.rank()==0){
+		std::string parameters_file = pathName;
+		parameters_file +=fileName;
+		parameters_file +="_parameters";
+		parameters_file += ".txt";
+		property.ReportParameters( 	parameters_file,
+									dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
+									alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y );
+	}
+
 	//	INITIALIZE
 	unew = uold;
 	int opcount = 1;
@@ -347,7 +350,7 @@ void driver(const GV &gv, // GridView
 	int newton_iterations = 0;
 	
 	//	BEGIN TIME LOOP
-	while ( time < (t_END - 1e-8/property.characteristicValue.t_c))
+	while ( time < (t_END - 1e-8/Xc_t))
 	{
 		if( exceptionCaught==false ){
 				dt = std::max(dt,dt_min);
@@ -387,7 +390,7 @@ void driver(const GV &gv, // GridView
 
 		}catch ( Dune::Exception &e ) {
 			exceptionCaught = true;
-			if( (dt) > (1e-8/property.characteristicValue.t_c) ){ //*property.characteristicValue.t_c
+			if( (dt) > (1e-8/Xc_t) ){
 
 				if(helper.rank()==0){
 					std::cout << "Catched Error, Dune reported error: " << e << std::endl;
@@ -424,7 +427,6 @@ void driver(const GV &gv, // GridView
 		/* At each time step: **Statistics**
 		 * t_new,
 		 * dt,
-		 * fixed point iterations,
 		 * newton iterations per fixed point iteration,
 		 * total newton iterations
 		 */
@@ -434,12 +436,10 @@ void driver(const GV &gv, // GridView
 			statistics_file +="_statistics";
 			statistics_file += ".txt";
 			property.ReportStatistics( 	statistics_file,
-										time/**property.characteristicValue.t_c*/,
-										dt/**property.characteristicValue.t_c*/,
+										time*Xc_t,
+										dt*Xc_t,
 										newton_iterations,
-										clock_time_elapsed,
-										dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
-										alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y );
+										clock_time_elapsed );
 		}
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
@@ -457,7 +457,6 @@ void driver(const GV &gv, // GridView
 			 *********************************************************************************************/
 		if ((time + dt > (t_OP * opcount - 1.e-4)) and (time + dt < t_OP * opcount + 1.e-4))
 		{
-			//vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
 			// primary variables
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
@@ -486,7 +485,7 @@ void driver(const GV &gv, // GridView
 		time += dt;
 		if(helper.rank()==0){
 			std::cout<<" "<< std::endl;
-			std::cout<< " time = " << time/**property.characteristicValue.t_c*/ ;
+			std::cout<< " time = " << time*Xc_t ;
 			std::cout<< std::flush;
 		}
 		if (adaptive_time_control)
@@ -510,8 +509,8 @@ void driver(const GV &gv, // GridView
 			dt = dtstart;
 		}
 		if(helper.rank()==0){
-			std::cout << " , time+dt = " << (time + dt)/**property.characteristicValue.t_c*/
-					  << " , opTime = "  << t_OP * opcount /** property.characteristicValue.t_c*/ ;
+			std::cout << " , time+dt = " << (time + dt)*Xc_t
+					  << " , opTime = "  << t_OP * opcount * Xc_t ;
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
@@ -521,14 +520,14 @@ void driver(const GV &gv, // GridView
 			dt = t_OP * opcount - time;
 
 			if(helper.rank()==0){
-				std::cout<< " , because timeNext > opNext , dt set to : " << dt/**property.characteristicValue.t_c*/ << std::endl;
+				std::cout<< " , because timeNext > opNext , dt set to : " << dt*Xc_t << std::endl;
 				std::cout<< std::flush;
 			}
 			dtFlag = -1;
 		}
 
 		if(helper.rank()==0){
-			std::cout<< " , dt  : " << dt/**property.characteristicValue.t_c*/ << std::endl;
+			std::cout<< " , dt  : " << dt*Xc_t << std::endl;
 			std::cout<<" "<< std::endl;
 			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
 			std::cout<< std::flush;
@@ -536,4 +535,4 @@ void driver(const GV &gv, // GridView
 	}
 };
 
-#endif /* PROJ_HYDRATE_SIMPLEXDG_HH_ */
+#endif /* HYDRATE_DG_HH_ */

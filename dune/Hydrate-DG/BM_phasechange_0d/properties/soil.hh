@@ -29,11 +29,6 @@ public:
 
 		por = prop_L[0][0];
 
-		// if( parameter.mesh.isLens(x) ){
-		// 	por = prop_L[1][0];
-		// }
-		
-
 		return por;
 	}
 
@@ -49,11 +44,6 @@ public:
 		double K = 0.; /*m^2*/
 
 		K = prop_L[0][1];
-
-		// if( parameter.mesh.isLens(x) ){
-		// 	K = prop_L[1][1];
-		// }
-		
 
 		return K/characteristicValue.permeability_c; /*ndim*/
 	}
@@ -76,24 +66,6 @@ public:
 		return PermeabilityTensor; /*ndim*/
 	}
 
-	// vector coefficient
-	Dune::FieldMatrix<double,dim,dim>
-	SedimentPermeabilityTensorInverse
-	(const typename GV::Traits::template Codim<0>::Entity& element,
-	 const Dune::FieldVector<double,dim>& xlocal) const {
-
-		double K_xx = SedimentPermeability(element,xlocal);
-		double K_yy = K_xx;
-		Dune::FieldMatrix<double,dim, dim> PermeabilityTensorIn;
-		
-		PermeabilityTensorIn[0][0] = K_yy ;
-		PermeabilityTensorIn[0][1] = 0. ;
-		PermeabilityTensorIn[1][0] = 0. ;
-		PermeabilityTensorIn[1][1] = K_xx ;
-		auto det = PermeabilityTensorIn[0][0]*PermeabilityTensorIn[1][1]-PermeabilityTensorIn[0][1]*PermeabilityTensorIn[1][0];
-		
-		return 1./det*PermeabilityTensorIn; /*ndim*/
-	}
 
 	double SoilGrainRadius
 	(const typename GV::Traits::template Codim<0>::Entity& element,
@@ -103,38 +75,39 @@ public:
 
 		// Bear et at, 1972
 		double por  = SedimentPorosity( element,xlocal );
-		double perm = SedimentPermeability( element,xlocal )*characteristicValue.permeability_c;
+		double perm = SedimentPermeability( element,xlocal );
 		double rp = sqrt( 45.0 * perm * pow( 1- por , 2.0 )/pow( por,3.0) );
-		return rp/characteristicValue.x_c; /*ndim*/
+		return rp;
 	}
 
 	double Density() const {
 		/* unit -> kg/m^3 */
 		double rho = 2600.0;
-		return rho/characteristicValue.density_c; /*ndim*/
+		return rho/characteristicValue.density_c;
 	}
 
 	double ThermalConductivity() const {
 		/* unit -> W/mK */
 		double kth = 3.0;
-		return kth/characteristicValue.thermalconductivity_c; /*ndim*/
+		return kth/characteristicValue.thermalconductivity_c;
 	}
 
 	double Cp() const {
 		/* unit -> J/kg.K */
 		double Cp = 1000.0;
-		return Cp/characteristicValue.specificheat_c; /*ndim*/
+		return Cp/characteristicValue.specificheat_c;
 	}
 
 	double Cv() const {
 		/* unit -> W/kg.K */
-		double Cv = Cp(); /*ndim*/
-		return Cv;/*ndim*/
+		double Cv = Cp();
+		return Cv/characteristicValue.specificheat_c;
 	}
 
 	double Tortuosity( double porosity ) const {
-		return porosity * porosity ;/*ndim*/
+		return porosity * porosity ;
 	}
+
 
   //! get a reference to the grid view
   inline const GV& getGridView () {return gv;}
