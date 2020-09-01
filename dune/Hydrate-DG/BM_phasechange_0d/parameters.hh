@@ -4,8 +4,6 @@
  * 
  */
 
-
-
 template<typename PTree>
 class Parameters
 {
@@ -61,7 +59,7 @@ public:
 		YH2O_t0 = ptree.get("initial.YH2O",(double)0.0005);
 		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
 		XC_t0 = ptree.get("initial.XC",(double)5.5e-3);
-		t_END = ptree.get("time.time_end",(double)86400.);
+		t_END = ptree.get("time.time_end",(double)2.16e6);
 		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)2.e6);
 		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.0);
 		
@@ -88,8 +86,8 @@ public:
 		ref_pressure = ptree.get("reference_state.pressure",(double)1.01e5);
 
 
-		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-12);/*mol/m².Pa.s*/
-		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-12);/*mol/m².Pa.s*/
+		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
+		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
 		time_initial_problem = ptree.get("initial_problem.time_end",(double)5.); /*years*/
 		time_initial_problem *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
 		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
@@ -119,7 +117,7 @@ public:
 	}
 
 	double InitialPw(Dune::FieldVector< double,dim > xglobal) const {
-		double Pw = Pw_t0;
+		double Pw = 20.0 * ReferencePressure();
 		return Pw; /* Pa */
 	}
 
@@ -180,10 +178,13 @@ public:
 		return ref_pressure; /*Pa*/
 	}
 	double HydrateDissociationRateConstant() const {
-		return kd_initial_problem * 2.16e6 / t_END;
+		return kd * 2.16e6 / t_END;
 	}
 	double HydrateFormationRateConstant() const {
-		return kf_initial_problem * 2.16e6 / t_END;
+		return kf * 2.16e6 / t_END;
+	}
+	double time_end() const {
+		return t_END;
 	}
 
 #ifdef STATEINDEPENDENTPROPERTIES

@@ -45,15 +45,6 @@ public:
 		BCParams[id_m]   	= prop_L[0][6] ;
 		BCParams[id_beta]   = prop_L[0][7] ;
 
-		// if( parameter.mesh.isLens(x) ){
-		// 	BCParams[id_Pentry] = prop_L[1][2] ; /*Pa*/
-		// 	BCParams[id_lambda] = prop_L[1][3] ;
-		// 	BCParams[id_Swr]    = prop_L[1][4] ;
-		// 	BCParams[id_Sgr]    = prop_L[1][5] ;
-		// 	BCParams[id_m]   	= prop_L[0][6] ;
-		// 	BCParams[id_beta]   = prop_L[1][7] ;
-		// }
-
 		return BCParams;
 	}
 
@@ -66,11 +57,16 @@ public:
 
 		double Sw_max = 1. - Sh - Sgr;
 		double Swe = ( Sw - Swr )/( Sw_max - Swr );
+		if( Swe>1.){
+			Swe=1.;
+		}
+		if( Swe<0.){
+			Swe=0.;
+		}
 		return Swe;
 	}
 
-	double dPcSF1_dSh( double Sh ,double lambda,
-				  double m) const {
+	double dPcSF1_dSh( double Sh ,double lambda, double m) const{
 		double dPcSF=0. ;
 		double eta = (lambda * m - 1.)/(lambda*m);
 		double a = 0.95;
@@ -113,7 +109,6 @@ public:
 	}
 
 	/* SUCTION/CAPILLARY PRESSURE */
-
 	double CapillaryPressure(  const typename GV::Traits::template Codim<0>::Entity& element,
   	   	   	 	 	 	 	   const Dune::FieldVector<double,dim>& xlocal ,
 							   double Sw,

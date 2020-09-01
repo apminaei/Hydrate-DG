@@ -8,8 +8,8 @@ private :
 	const static int dim = GV::dimension;
 	Indices indices;
 	CharacteristicValues characteristicValues;
-
-	double Xc_time = 1. * 3600. / characteristicValues.t_c;
+	double time_fraction = property.parameter.time_end() / 2.16e6; 
+	double Xc_time = 100. * 3600. * time_fraction / characteristicValues.t_c;
 
 public :
 
@@ -33,14 +33,10 @@ public :
 		  double dt /*ndims*/ ) const {
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
-		//std::cout << " iplocal_s = " << iplocal << " ip_global_s = " << globalPos << std::endl;
-      //exit(0);
+		
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		//bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
-		//bctype[indices.PVId_XCH4] = indices.BCId_dirichlet ;
-		//bctype[indices.PVId_YH2O ] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
@@ -52,16 +48,6 @@ public :
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
 		}
-		// if(property.mesh.isLeftBoundary(globalPos)){
-		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		// }
-		
-		// if( property.mesh.isBottomBoundary(globalPos) ){
-			
-		// 	bctype[indices.PVId_Sg] = indices.BCId_dirichlet ;
-		// 	bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
-		// }
 		
 		return bctype;
 	}
@@ -75,17 +61,15 @@ public :
 			double dt/*s*/ ) const {
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
-		    // References to inside and outside cells
-		const auto &cell_inside = intersection.inside();
-		//const auto &cell_outside = intersection.outside();
 		
-
+		// References to inside and outside cells
+		const auto &cell_inside = intersection.inside();
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
 		
-		bcvalue[indices.PVId_T ] = (4.+273.15)/ characteristicValues.T_c;//ProblemICValues(globalPos)[indices.PVId_T];//indices.BCId_neumann ;
+		bcvalue[indices.PVId_T ] = property.parameter.InitialT(globalPos) / characteristicValues.T_c;
 		
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
-			bcvalue[indices.PVId_Pw] = 2.e6/characteristicValues.P_c ;
+			bcvalue[indices.PVId_Pw] = property.parameter.InitialPw(globalPos)/characteristicValues.P_c ;
 		}
 		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
 		{
@@ -99,38 +83,17 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.PVId_Pw] = (5.e6 + 10.*(time- 4.50*Xc_time))/characteristicValues.P_c ;
+			bcvalue[indices.PVId_Pw] = (5.e6 + 10.* (time- 4.50*Xc_time) / time_fraction)/characteristicValues.P_c ;
 		}
-		//auto S = 0.0055;
-		//auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal);/*BrooksCParams[0] gives Pentry in Pa*/
+		
 		//auto Sg = property.parameter.InitialSg(globalPos);
 		auto Sh = property.parameter.InitialSh(globalPos);
-		 //auto Sw = 1. - Sg - Sh;
+		//auto Sw = 1. - Sg - Sh;
 		// auto por = property.soil.SedimentPorosity(cell_inside, iplocal);
-		// double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por)
-		// 				* property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+		// double Pc = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal, Sw, Sh, por);
 		//auto Pg = property.parameter.InitialPw(globalPos) + Pc;
-		//auto zCH4 = property.eos.EvaluateCompressibilityFactor(bcvalue[indices.PVId_T ] * characteristicValues.T_c, Pg * characteristicValues.P_c);
-		//auto VLequil = property.mixture.EquilibriumMoleFractions( bcvalue[indices.PVId_T ]* characteristicValues.T_c, Pg * characteristicValues.P_c, S, zCH4);
-		//bcvalue[indices.PVId_XCH4] = property.parameter.InitialXCH4(globalPos);//VLequil[Indices::compId_XCH4];//indices.BCId_neumann ;
-		//bcvalue[indices.PVId_YH2O] = property.parameter.InitialYH2O(globalPos);//VLequil[Indices::compId_YH2O];
 		//bcvalue[indices.PVId_Sg] = Sg ;
 		bcvalue[indices.PVId_Sh] = Sh ;
-		// if(property.mesh.isLeftBoundary(globalPos)){
-			
-		// 	bcvalue[indices.PVId_Sg] = Sg ;
-			
-		// 	bcvalue[indices.PVId_Sh] = Sh ;
-			
-		// }
-		
-		// if( property.mesh.isBottomBoundary(globalPos) ){
-			
-		// 	bcvalue[indices.PVId_Sg] = Sg ;
-		// 	bcvalue[indices.PVId_Sh] = Sh ;
-		// }
-		
-
 		return bcvalue;
 	}
 
@@ -175,9 +138,9 @@ public :
 		
 
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
-		bcvalue[indices.BCId_heat] = (4.+273.15)/ characteristicValues.T_c; ;
+		bcvalue[indices.BCId_heat] = property.parameter.InitialT(globalPos)/ characteristicValues.T_c; ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
-			bcvalue[indices.BCId_water] = 2.e6/characteristicValues.P_c ;
+			bcvalue[indices.BCId_water] = property.parameter.InitialPw(globalPos)/characteristicValues.P_c ;
 		}
 		else if ((time >= (2.00*Xc_time) ) and (time < (3.50*Xc_time)))
 		{
@@ -189,82 +152,14 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time))/characteristicValues.P_c ;
+			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time) / time_fraction )/characteristicValues.P_c ;
 		}
 		return bcvalue;
 	}
 
-
 	// ! get a reference to the gridview
 	inline const GV& getGridView () { return gv ; }
-
 };
-
-// template<typename GV>
-// class BCTypeParam0 : public Dune::PDELab::DirichletConstraintsParameters
-// {
-// private:
-// 	const GV& gv ;
-// 	//const Properties& property;
-// 	const static int dim = GV::dimension;
-// public:
-
-
-//   //! construct from grid view
-//   BCTypeParam0( const GV& gv_)
-// 	: gv ( gv_ )
-//   {
-//   }
-
-//   template<typename I>
-//   bool isDirichlet(const I & intersection,
-//                    const Dune::FieldVector<typename I::ctype, dim-1> & coord) const
-//   {
-//     Dune::FieldVector<typename I::ctype, dim>
-//     x = intersection.geometry().global( coord );
-
-//     //if( x[0] > 1. - 1.e-6 /*right*/ or x[1] < 0. + 1.e-6 /*bottom*/)
-//         //return true; /*dirichlet*/
-//     //else
-//         //return false; /*left, top, bottom -> neumann*/
-//  std::cout<< "boundary = " << x[0]  << ", " << x[1] << std::endl;
-// 	return true;
-//   }
-
-// };
-// template<typename GV>
-// class BCTypeParam1 : public Dune::PDELab::DirichletConstraintsParameters
-// {
-// private:
-// 	const GV& gv ;
-// 	//const Properties& property;
-// 	const static int dim = GV::dimension;
-// public:
-
-
-//   //! construct from grid view
-//   BCTypeParam1(  const GV& gv_)
-// 	: gv ( gv_ )
-//   {
-//   }
-
-//   template<typename I>
-//   bool isDirichlet(const I & intersection,
-//                    const Dune::FieldVector<typename I::ctype, dim-1> & coord
-//                    ) const
-//   {
-//     Dune::FieldVector<typename I::ctype, dim>
-//     x = intersection.geometry().global( coord );
-
-//     if( x[0] > 1. - 1.e-6 /*right*/ or x[1] < 0. + 1.e-6 )
-//         return true; /*dirichlet*/
-//     else
-//         return false; /*left, top, bottom -> neumann*/
-
-//   }
-
-// };
-
 
 
 	

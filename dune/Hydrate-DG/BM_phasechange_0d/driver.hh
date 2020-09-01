@@ -28,11 +28,13 @@ void driver(const GV &gv, // GridView
 	Properties property(gv,ptree);
 	/* Non-dimensionalize time prams */
 	auto Xc_t = property.characteristicValue.t_c;
-	dt = ptree.get("time.dt_initial",(double)1.)/ Xc_t;
-	Real t_END = ptree.get("time.time_end",(double)86400.) / Xc_t;
-	Real t_OP = ptree.get("output.time_interval",(double)1.) / Xc_t;
-	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) / Xc_t;
-	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) / Xc_t;
+	Real t_END = property.parameter.time_end();// ptree.get("time.time_end",(double)86400.) / Xc_t;
+	double time_fraction = t_END / 2.16e6;
+	dt = ptree.get("time.dt_initial",(double)1.) *  time_fraction / Xc_t;
+	Real t_OP = ptree.get("output.time_interval",(double)1.) * time_fraction / Xc_t;
+	Real dt_min = ptree.get("adaptive_time_control.dt_min",(double)0.001) * time_fraction / Xc_t;
+	Real dt_max = ptree.get("adaptive_time_control.dt_max",(double)1.) * time_fraction / Xc_t;
+	t_END *= (1./Xc_t);
 	bool adaptive_time_control = ptree.get("adaptive_time_control.flag",(bool)true);
 	
 	Real dtstart = dt;
@@ -327,7 +329,8 @@ void driver(const GV &gv, // GridView
 	std::string dgmethod_T = std::__cxx11::to_string(method_T);
 	std::string dgmethod_x = std::__cxx11::to_string(method_x);
 	std::string dgmethod_y = std::__cxx11::to_string(method_y);
-
+	double dissCoeff = property.parameter.HydrateDissociationRateConstant();
+	double formCoeff = property.parameter.HydrateFormationRateConstant();
 	if(helper.rank()==0){
 		std::string parameters_file = pathName;
 		parameters_file +=fileName;
@@ -335,7 +338,7 @@ void driver(const GV &gv, // GridView
 		parameters_file += ".txt";
 		property.ReportParameters( 	parameters_file,
 									dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
-									alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y );
+									alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y, dissCoeff, formCoeff);
 	}
 
 	//	INITIALIZE

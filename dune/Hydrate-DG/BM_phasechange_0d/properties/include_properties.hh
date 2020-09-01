@@ -29,12 +29,10 @@ public:
   	MeshParameters<PTree> mesh;
   	Parameters<PTree> parameter;
   	Methane<PTree> gas;
-#ifdef FRAUENHOFER_MODEL
-  	FrauenhoferFunction eos;
+#ifdef STATEINDEPENDENTPROPERTIES
+  	BaseEoS eos;
 #elif defined(PENG_ROBINSON_EOS)
   	PengRobinson eos;
-#else
-  	BaseEoS eos;
 #endif
   	Water<PTree> water;
   	Salt salt;
@@ -101,14 +99,22 @@ public:
 							std::string method_T,
 							std::string method_x,
 							std::string method_y,
-							double alpha_g , double alpha_w, double alpha_s, double alpha_T, double alpha_x, double alpha_y) {
+							double alpha_g , 
+							double alpha_w, 
+							double alpha_s, 
+							double alpha_T, 
+							double alpha_x, 
+							double alpha_y,
+							double dissCoeff,
+							double formCoeff) {
 
   		std::fstream result;
 
   		
   			result.open(file_name, std::fstream::out | std::fstream::trunc);
-  			result	<< "penalty coeff.  " << alpha_g << '\t' << alpha_w << '\t'<< alpha_s << '\t'<< alpha_T << '\t'<< alpha_x << '\t'<< alpha_y << '\t'
-					<< " S=1, N=0, I=-1,  " << method_g << '\t'<< method_w << '\t'<< method_T << '\t'<< method_x << '\t'<< method_y 
+  			result	<< "penalty coeff.  " << alpha_g << '\t' << alpha_w << '\t'<< alpha_s << '\t'<< alpha_T << '\t'<< alpha_x << '\t'<< alpha_y << '\n'
+					<< " S=1, N=0, I=-1,  " << method_g << '\t'<< method_w << '\t'<< method_T << '\t'<< method_x << '\t'<< method_y << '\n'
+					<<  " dissCoeff " << dissCoeff << '\t' << " formCoeff " << formCoeff 
 					<< std::endl;
   			result.close();
   		

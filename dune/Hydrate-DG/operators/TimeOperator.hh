@@ -55,9 +55,9 @@ public:
 		Xc_X = property.characteristicValue.x_c;
 		Xc_Y = property.characteristicValue.x_c;
 		T_ref = property.parameter.ReferenceTemperature()/Xc_T;
-#ifdef STATEINDEPENDENTPROPERTIES
-  		T_ref = property.parameter.RefT()/Xc_T;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+//   		T_ref = property.parameter.RefT()/Xc_T;
+// #endif
 	}
 	// volume integral depending on test and ansatz functions
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename R>
@@ -191,11 +191,9 @@ public:
 			// evaluate Pw
 			auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
       		auto por = property.soil.SedimentPorosity(cell, ip_local);
-      		auto suctionPressure = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
-      		auto PcSF1 = property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+      		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
       
-      		//auto Pc = suctionPressure * PcSF1;
-			RF Pg = Pw + suctionPressure ;//* PcSF1;
+			RF Pg = Pw + Pc ;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
 			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
@@ -368,17 +366,14 @@ public:
 	// 		RF Sw = 1. - Sg - Sh;
 	// 		// evaluate Pw
 	// 		auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
-    //   		auto por = property.soil.SedimentPorosity(cell, ip_local);
-    //   		auto suctionPressure = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
-    //   		auto PcSF1 = property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
-      
-    //   		//auto Pc = suctionPressure ;//* PcSF1;
-	// 		RF Pg = Pw + suctionPressure ;//* PcSF1;
+    //   	auto por = property.soil.SedimentPorosity(cell, ip_local);
+    //   	auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
+	// 		RF Pg = Pw + Pc;
 	// 		RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 			
 	// 		//auto por = property.soil.SedimentPorosity(cell, ip_local);
 	// 		double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
-    //   		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
+    //   	auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
 	// 		auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
 	// 		auto rho_w = property.water.Density(T * Xc_T, Pw * Xc_P, S);
 	// 		auto rho_h = property.hydrate.Density() ;

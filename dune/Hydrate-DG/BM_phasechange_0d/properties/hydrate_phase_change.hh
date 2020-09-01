@@ -108,8 +108,6 @@ public:
 					  * potential_P
 					  ;
 		}
-
-
 	    return gas_gen;
 	}
 
