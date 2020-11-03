@@ -1,2 +1,0 @@
-time [s]	dt [s]	total no. of newton iterations	clock time [s]	30*30	
-0	3.14496e+07	2	3095.78
