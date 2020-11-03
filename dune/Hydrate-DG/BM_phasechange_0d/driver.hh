@@ -149,12 +149,12 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::NIPG;
-	double alpha_g = 1.e1;
-	double alpha_w = 1.e1;
-	double alpha_s = 1.e1;
-	double alpha_T = 1.e1;
-	double alpha_x = 1.e1;
-	double alpha_y = 1.e1;
+	double alpha_g = 1.e0;
+	double alpha_w = 1.e0;
+	double alpha_s = 1.e0; 
+	double alpha_T = 1.e0;
+	double alpha_x = 1.e0;
+	double alpha_y = 1.e0;
 	double intorder=4;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
@@ -163,7 +163,7 @@ void driver(const GV &gv, // GridView
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property);
 
-	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
+	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE; 
 	MBE mbe(100);
 
 	typedef Dune::PDELab::GridOperator<GFS, GFS, LOP, MBE, Real, Real, Real, CC, CC> GOLOP;
@@ -517,7 +517,7 @@ void driver(const GV &gv, // GridView
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-		if (time + dt >= t_OP * opcount )
+		if (time + dt > t_OP * opcount )
 		{
 			
 			dt = t_OP * opcount - time;

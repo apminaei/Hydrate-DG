@@ -100,8 +100,8 @@ public:
 
 	double Cv() const {
 		/* unit -> W/kg.K */
-		double Cv = Cp();
-		return Cv/characteristicValue.specificheat_c;
+		double Cv = Cp();/*ndim*/
+		return Cv;
 	}
 
 	double Tortuosity( double porosity ) const {

@@ -55,10 +55,10 @@ public:
 			double XCH4 = property.parameter.InitialXCH4(xglobal); //VLEqui[Indices::compId_XCH4];//
 			double YH2O = VLEqui[Indices::compId_YH2O];// change 0.0
 
-			icvalue[Indices::PVId_Pw] = Pw ; //P_w + P_c ;
+			icvalue[Indices::PVId_Pw] = Pw/property.characteristicValue.P_c ; //P_w + P_c ;
 			icvalue[Indices::PVId_Sg] = Sg ;
 			icvalue[Indices::PVId_Sh] = Sh ;
-			icvalue[Indices::PVId_T ] = T  ;
+			icvalue[Indices::PVId_T ] = T / property.characteristicValue.T_c ;
 			icvalue[Indices::PVId_XCH4] = XCH4 ;
 			icvalue[Indices::PVId_YH2O ] = YH2O  ;
 			icvalue[Indices::PVId_C] = XC ;

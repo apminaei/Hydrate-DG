@@ -196,9 +196,9 @@ public:
     Xc_T = property.characteristicValue.T_c;
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;
-// #ifdef STATEINDEPENDENTPROPERTIES
-//   		T_ref = property.parameter.RefT()/Xc_T;
-// #endif
+#ifdef STATEINDEPENDENTPROPERTIES
+  		T_ref = property.parameter.RefT()/Xc_T;
+#endif
   }
 
   // volume integral depending on test and ansatz functions
@@ -582,15 +582,15 @@ public:
       }
       
       //Integrals regarding the NCP1
-			RF max1 = std::max(0., 1.e0*(Sg -1. + YCH4 + YH2O));
+			RF max1 = std::max(0., (Sg -1. + YCH4 + YH2O));
 			for (size_type i=0; i<lfsv_YH2O.size(); i++){
-				r.accumulate(lfsv_YH2O,i,( (1.e0*Sg - max1) * psi_YH2O[i]  *factor));
+				r.accumulate(lfsv_YH2O,i,( (Sg - max1) * psi_YH2O[i]  *factor));
 			}
 
 			// Integrals regarding the NCP2
-			RF max2 = std::max(0., 1.e0*(Sw -1. + XC + XCH4 + XH2O ));
+			RF max2 = std::max(0., (Sw -1. + XC + XCH4 + XH2O ));
 			for (size_type i=0; i<lfsv_XCH4.size(); i++){
-				r.accumulate(lfsv_XCH4,i,((1.e0*Sw - max2) * psi_XCH4[i]  *factor));
+				r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
 			}
       
       
@@ -1638,11 +1638,11 @@ public:
       BC bc( gv,property ) ;
       
       // evaluate boundary condition types for {Pw,Sg} or {Fw,Fg} 
-			auto bctype = bc.type(ig, ip.position(), (*time), (*dt)) ;
-      auto veltype = bc.velType(ig, ip.position(), (*time), (*dt)) ;
+			auto bctype = bc.type(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t) ;
+      auto veltype = bc.velType(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t) ;
 			// evaluate boundary condition values for {Pw,Sg} or {Fw,Fg} 
-			auto bcvalue = bc.value(ig, ip.position(), (*time), (*dt) ) ;
-      auto velvalue = bc.velValue(ig, ip.position(), (*time), (*dt) ) ;
+			auto bcvalue = bc.value(ig, ip.position(), (*time)*Xc_t, (*dt) *Xc_t) ;
+      auto velvalue = bc.velValue(ig, ip.position(), (*time)*Xc_t, (*dt) *Xc_t) ;
 
       // evaluate basis functions at local quadrature points 
       auto &psi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
@@ -1687,10 +1687,6 @@ public:
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i]; 
       RF Sh_n = Sh_s;
-      // if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
-      // {
-      //   Sh_n = bcvalue[Indices::PVId_Sh];
-      // }
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1831,10 +1827,6 @@ public:
       // evaluate normal flux of Sg
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
-      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
-      // {
-      //   grad_Sg_n = velvalue[Indices::BCId_gas];
-      // }
       
       // evaluate normal flux of T
       RF grad_T_s = gradu_T_s * n_F_local;

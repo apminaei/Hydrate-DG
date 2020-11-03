@@ -9,7 +9,7 @@ private :
 	Indices indices;
 	CharacteristicValues characteristicValues;
 	double time_fraction = property.parameter.time_end() / 2.16e6; 
-	double Xc_time = 100. * 3600. * time_fraction / characteristicValues.t_c;
+	double Xc_time = 100. * 3600. ;//* time_fraction ;/// characteristicValues.t_c;
 
 public :
 
@@ -29,13 +29,13 @@ public :
 	std::vector< int >
 	type( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
 			const Dune::FieldVector<double,dim-1>& xlocal,
-		  double time /*ndims*/,
-		  double dt /*ndims*/ ) const {
+		  double time /*s*/,
+		  double dt /*s*/ ) const {
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 		
 		std::vector< int > bctype(Indices::numOfPVs, 0);
-		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		// bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
@@ -83,7 +83,7 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.PVId_Pw] = (5.e6 + 10.* (time- 4.50*Xc_time) / time_fraction)/characteristicValues.P_c ;
+			bcvalue[indices.PVId_Pw] = (5.e6 + 10.* (time- 4.50*Xc_time))/characteristicValues.P_c ;
 		}
 		
 		//auto Sg = property.parameter.InitialSg(globalPos);
@@ -102,8 +102,8 @@ public :
 	std::vector< int >
 	velType( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
 			const Dune::FieldVector<double,dim-1>& xlocal,
-		  double time /*ndims*/,
-		  double dt /*ndims*/ ) const {
+		  double time /*s*/,
+		  double dt /*s*/ ) const {
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 
@@ -152,7 +152,7 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time) / time_fraction )/characteristicValues.P_c ;
+			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time)  )/characteristicValues.P_c ;
 		}
 		return bcvalue;
 	}
