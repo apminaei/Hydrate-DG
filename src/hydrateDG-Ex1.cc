@@ -19,7 +19,7 @@
 
 #include "dune/Hydrate-DG/IncludesDUNE.hh"
 #include "dune/Hydrate-DG/BM_phasechange_0d/include_problem.hh"
-//TODO: Change problem name to: BM_phasechange_0d
+//TODO: Change problem name to: BM-phasechange-0d
 
 int main(int argc, char **argv)
 {
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-
+		std::string PATH = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
 	    std::string input_file = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/inputs/";
@@ -86,22 +86,37 @@ int main(int argc, char **argv)
 		typedef Grid::LeafGridView GV;
 		const GV &gv = grid->leafGridView();
 		grid->loadBalance();
-#elif UG
-
+#elif defined(UG)
 		typedef Dune::UGGrid<dim> Grid;
+
+		// typedef std::vector<int> GmshIndexMap;
+		// GmshIndexMap boundary_index_map;
+		// GmshIndexMap element_index_map;
+		// Grid grid_type;
+		// const std::string grid_file_name = ptree.get("grid.ug.name",(std::string)"sample.ini");
+		// auto grid_file = PATH;
+		// grid_file += "grids/";
+		// grid_file += grid_file_name;
+		// Dune::GmshReader<Grid> gmshreader;
+		// std::shared_ptr<Grid> grid(gmshreader.read(grid_file,boundary_index_map, element_index_map,true,true));
+
+
+		
 		//Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
-		elements[1] = N[1];
+		elements[1] = N[1]; 
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
+
 		typedef Grid::LeafGridView GV;
 		GV gv = grid->leafGridView();
 		grid->loadBalance();
 
-#else ALUGRID
+#elif defined(ALUGRID) 
+		
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
@@ -118,6 +133,7 @@ int main(int argc, char **argv)
 #endif
 
 		driver(gv, ptree, helper);
+		// driver_Sh(gv, ptree, helper);
 
 	}
 	catch (Dune::Exception &e)
