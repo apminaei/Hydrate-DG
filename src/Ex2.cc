@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <cstdlib>
 #include <stdlib.h>
 #include <time.h>
 #include <exception>
@@ -17,8 +18,8 @@
 #include <stdio.h>
 //#include <filesystem>
 
-#include "dune/Hydrate-DG/IncludesDUNE.hh"
-#include "dune/Hydrate-DG/BM_phasechange_0d/include_problem.hh"
+#include "../dune/Hydrate-DG/IncludesDUNE.hh"
+#include "../dune/Hydrate-DG/Ex2/include_problem.hh"
 //TODO: Change problem name to: BM-phasechange-0d
 
 int main(int argc, char **argv)
@@ -32,14 +33,14 @@ int main(int argc, char **argv)
 		{
 			if (helper.rank() == 0)
 			{
-				std::cout << "usage: ./hydrateDG-Ex1 <input_file.ini> " << std::endl;
+				std::cout << "usage: ./hydrateDG-Ex2 <input_file.ini> " << std::endl;
 			}
 			return 1;
 		}
-		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/";
+		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/inputs/";
+	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 
@@ -52,6 +53,9 @@ int main(int argc, char **argv)
 		// MESH
 	    MeshParameters<Dune::ParameterTree> mesh(ptree);
 	    const int dim = mesh.dimension;
+
+		// std::cout << mesh.Z_GHSZ_bottom << std::endl;
+		// exit(0);
 		/*____________________________________________*/
 
 		
@@ -87,52 +91,51 @@ int main(int argc, char **argv)
 		const GV &gv = grid->leafGridView();
 		grid->loadBalance();
 #elif defined(UG)
+
 		typedef Dune::UGGrid<dim> Grid;
-
-		// typedef std::vector<int> GmshIndexMap;
-		// GmshIndexMap boundary_index_map;
-		// GmshIndexMap element_index_map;
-		// Grid grid_type;
-		// const std::string grid_file_name = ptree.get("grid.ug.name",(std::string)"sample.ini");
-		// auto grid_file = PATH;
-		// grid_file += "grids/";
-		// grid_file += grid_file_name;
-		// Dune::GmshReader<Grid> gmshreader;
-		// std::shared_ptr<Grid> grid(gmshreader.read(grid_file,boundary_index_map, element_index_map,true,true));
-
-
-		
 		//Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
-		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
-		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
-		std::array<unsigned int, dim> elements;
-		elements[0] = N[0];
-		elements[1] = N[1]; 
-		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-
-		typedef Grid::LeafGridView GV;
-		GV gv = grid->leafGridView();
-		grid->loadBalance();
-
-#elif defined(ALUGRID) 
-		
-		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
 		elements[1] = N[1];
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
+		typedef Grid::LeafGridView GV;
+		GV gv = grid->leafGridView();
+		grid->loadBalance();
+
+#elif defined(ALUGRID)
+		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
+		// auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, -L[1]}};
+		// auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+		// std::array<unsigned int, dim> elements;
+		// elements[0] = N[0];
+		// elements[1] = N[1];
+		// //std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+
+		std::string filename = ptree.get("grid.alugrid.name",
+                                         (std::string)"grid.msh");
+		auto grid_file = PATH;
+		grid_file += "grids/";
+		grid_file += filename;
+        Dune::GridFactory<Grid> factory;
+        Dune::GmshReader<Grid>::read(factory,grid_file,true,false);
+        std::shared_ptr<Grid> grid(factory.createGrid());
+		 
+
 		typedef Grid::LeafGridView GV;
 		GV gv = grid->leafGridView();
   		// Transfer partitioning from ParMETIS to our grid
   		grid->loadBalance();
 		
 #endif
-
-		// driver(gv, ptree, helper);
+		grid->globalRefine(1);
+		// Dune::VTKWriter<GV> vtkWriter(gv);
+  		// vtkWriter.write(std::string("gridviews"));
+		//exit(0);
+		//driver(gv, ptree, helper);
 		driver_Sh(gv, ptree, helper);
 
 	}

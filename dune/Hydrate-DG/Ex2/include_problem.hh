@@ -1,16 +1,17 @@
-#ifndef BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
-#define BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
+#ifndef EX2_INCLUDE_PROBLEM_HH_
+#define EX2_INCLUDE_PROBLEM_HH_
+
 
 #include "../extras/ParameterTraits.hh"
 #include "../extras/Evaluation.hh"
 
 #include "../operators/indices.hh"
 
+#define STATEINDEPENDENTPROPERTIES
 /*******************************************/
 // PROBLEM SPECIFICATION
 #include"characteristic_values.hh"
 #include"grids/grid.hh"
-#define STATEINDEPENDENTPROPERTIES
 #include"parameters.hh"
 #include"properties/include_properties.hh"
 #include"initial_conditions.hh"

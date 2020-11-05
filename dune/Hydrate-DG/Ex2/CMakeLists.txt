@@ -1,0 +1,12 @@
+#install headers
+install(FILES boundary_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES characteristic_values.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES initial_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES driver.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES driver_Sh.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES include_problem.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES parameters.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+add_subdirectory("grids")
+add_subdirectory("inputs")
+add_subdirectory("outputs")
+add_subdirectory("properties")
