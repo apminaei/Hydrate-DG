@@ -344,9 +344,6 @@ public:
       for (int i = 0; i < lfsu_T.size(); i++)
         gradu_T.axpy(x(lfsu_T, i), gradphi_T[i]);
 
-      // std::cout << gradu_Pw << "   -- " << qp_x << "  " << qp_y <<  std::endl;
-      // std::cout << "ip.position() = " << ip.position()  << "   Pw_y = " << Pw_y<< std::endl;
-
       // exit(0);
       // compute gradient of Pw
       gradu_Pw[0] = (Pw_x - Pw) / delta_x[0] ;
@@ -413,7 +410,7 @@ public:
       
       auto krW = property.hydraulicProperty.krw(cell, ip_local, Sw, Sh) / (property.water.DynamicViscosity(T * Xc_T, Pw * Xc_P, S) );
       auto krN = property.hydraulicProperty.krg(cell, ip_local, Sw, Sh) / (property.gas.DynamicViscosity(T * Xc_T, Pg * Xc_P));
-      //auto P_eq = property.kinetics.EquilibriumPressure(T * Xc_T, S)/Xc_P;
+      
       
       // compute source terms
 			auto q_g  = property.kinetics.GasGenerationRate( T*Xc_T,
@@ -472,12 +469,6 @@ public:
     DGF_XCH4 dgf_XCH4(gfs_XCH4, unew);
     DGF_YH2O dgf_YH2O(gfs_YH2O, unew);
     DGF_XC dgf_XC(gfs_XC, unew);
-    // // define types
-    // using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
-    //     Traits::LocalBasisType::Traits::RangeFieldType;
-    // typedef typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
-    //     Traits::LocalBasisType::Traits::JacobianType JacobianType;
-    // using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
     const int dim = EG::Entity::dimension;

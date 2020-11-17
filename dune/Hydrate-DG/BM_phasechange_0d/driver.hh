@@ -247,14 +247,14 @@ void driver(const GV &gv, // GridView
 	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
 	// PDESOLVER pdesolver(igo, ls);
 	// 	select control parameters for non-linear PDE-solver
-	//typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
-	//typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
-	//lineSearchStrategy linesearchstrategy(pdesolver);
-	//pdesolver.setParameters(ptree.sub("newton"));
+	// 	typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
+	// typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
+	// lineSearchStrategy linesearchstrategy(pdesolver);
+	// pdesolver.setParameters(ptree.sub("newton"));
 	// pdesolver.setVerbosityLevel(2);
-	// pdesolver.setReduction(1e-3);
-	// pdesolver.setMinLinearReduction(1e-6);
-	// pdesolver.setAbsoluteLimit(1e-6);
+	// pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
+	// pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
+	// pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
 	
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 
@@ -294,7 +294,8 @@ void driver(const GV &gv, // GridView
 
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
-	std::string pathName = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/outputs/";
+	std::string pathName = ptree.get("output.path_name",(std::string)"test");
+	pathName += "outputs/";
 	pathName += fileName ;
 	//if(helper.rank()==0){
 		//std::filesystem::create_directory(pathName);

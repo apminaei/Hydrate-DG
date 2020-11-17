@@ -1,0 +1,148 @@
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=4 sw=2 sts=2:
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <math.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <string>
+#include <cstdlib>
+#include <stdlib.h>
+#include <time.h>
+#include <exception>
+#include <chrono>
+#include <stdio.h>
+//#include <filesystem>
+
+#include "../dune/Hydrate-DG/IncludesDUNE.hh"
+#include "../dune/Hydrate-DG/FGP/include_problem.hh"
+//TODO: Change problem name to: BM-phasechange-0d
+
+int main(int argc, char **argv)
+{
+	try
+	{
+		// Maybe initialize MPI
+		 Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+
+		if (argc != 2)
+		{
+			if (helper.rank() == 0)
+			{
+				std::cout << "usage: ./hydrateDG-FGP <input_file.ini> " << std::endl;
+			}
+			return 1;
+		}
+		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/";
+		char input[80];
+	    sscanf(argv[1],"%39s", input);
+	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/inputs/";
+	    input_file += input;
+	    std::cout<< "input file: " << input_file << std::endl ;
+
+	    Dune::ParameterTree ptree;
+	    Dune::ParameterTreeParser ptreeparser;
+	    ptreeparser.readINITree(input_file,ptree);
+	    ptreeparser.readOptions(argc,argv,ptree);
+
+		/**************************************************************************************************/
+		// MESH
+	    MeshParameters<Dune::ParameterTree> mesh(ptree);
+	    const int dim = mesh.dimension;
+
+		// std::cout << mesh.Z_GHSZ_bottom << std::endl;
+		// exit(0);
+		/*____________________________________________*/
+
+		
+		Dune::FieldVector<double, dim> L(0.0); // L represents the right top node of the rectangular/cuboidal domain
+		L[0] = mesh.X_length;
+		if (dim == 2)
+		{
+			L[1] = mesh.Z_length;
+		}
+		else if (dim == 3)
+		{
+			L[1] = mesh.Y_length;
+			L[2] = mesh.Z_length;
+		}
+		std::array<int, dim> N(Dune::filledArray<dim, int>(1));
+		N[0] = mesh.X_cells;
+		if (dim == 2)
+			N[1] = mesh.Z_cells;
+		else if (dim == 3)
+		{
+			N[1] = mesh.Y_cells;
+			N[2] = mesh.Z_cells;
+		}
+#ifdef YASP
+		typedef Dune::YaspGrid<dim> Grid;
+		std::bitset<dim> periodic(false);
+
+		int overlap = 1;
+		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
+		grid->refineOptions(false); // keep overlap in cells
+
+		typedef Grid::LeafGridView GV;
+		const GV &gv = grid->leafGridView();
+		grid->loadBalance();
+#elif defined(UG)
+
+		typedef Dune::UGGrid<dim> Grid;
+		//Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
+		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
+		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
+		std::array<unsigned int, dim> elements;
+		elements[0] = N[0];
+		elements[1] = N[1];
+		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
+		typedef Grid::LeafGridView GV;
+		GV gv = grid->leafGridView();
+		grid->loadBalance();
+
+#elif defined(ALUGRID)
+		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
+		// auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, -L[1]}};
+		// auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+		// std::array<unsigned int, dim> elements;
+		// elements[0] = N[0];
+		// elements[1] = N[1];
+		// //std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+
+		std::string filename = ptree.get("grid.alugrid.name",
+                                         (std::string)"grid.msh");
+		auto grid_file = PATH;
+		grid_file += "grids/";
+		grid_file += filename;
+        Dune::GridFactory<Grid> factory;
+        Dune::GmshReader<Grid>::read(factory,grid_file,true,false);
+        std::shared_ptr<Grid> grid(factory.createGrid());
+		 
+
+		typedef Grid::LeafGridView GV;
+		GV gv = grid->leafGridView();
+  		// Transfer partitioning from ParMETIS to our grid
+  		grid->loadBalance();
+		
+#endif
+		Dune::VTKWriter<GV> vtkWriter(gv);
+  		vtkWriter.write(std::string("gridviews"));
+		//exit(0);
+		driver(gv, ptree, helper);
+
+	}
+	catch (Dune::Exception &e)
+	{
+		std::cerr << "Dune reported error: " << e << std::endl;
+	}
+	catch (...)
+	{
+		std::cerr << "Unknown exception thrown!" << std::endl;
+	}
+}

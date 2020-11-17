@@ -757,10 +757,11 @@ void driver_Sh(const GV &gv, // GridView
 			DGF_Sh dgf_sh(gfs_sh, unew_sh);
 			
 			
-
-			// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
-			// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
-			std::cout << "========== Sh DONE!" <<  " ======== " << std::endl;
+			if(helper.rank()==0){
+				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+				std::cout << "========== Sh DONE!" <<  " ======== " << std::endl;
+			}
 
 
 			osm_t.apply( time, dt, uold_t, unew_t );
@@ -770,10 +771,12 @@ void driver_Sh(const GV &gv, // GridView
 			// time = current_time;
 			// dt = current_dt; 
 			DGF_T dgf_t(gfs_t, unew_t);
-			// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
-			// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
-
-			std::cout << "========== T DONE!" <<  " ======== " << std::endl;
+			
+			if(helper.rank()==0){
+				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+				std::cout << "========== T DONE!" <<  " ======== " << std::endl;
+			}
 			
 			osm.apply( time, dt, uold, unew );
 			newton_iterations = osm.getPDESolver().result().iterations;
@@ -786,24 +789,24 @@ void driver_Sh(const GV &gv, // GridView
 			DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
 			DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
 			DGF_XC dgf_xc(subgfs_XC, unew);
-			std::cout << "========== Pw DONE!" <<  " ======== " << std::endl;
+
+			if(helper.rank()==0){
+				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+				std::cout << "========== 3 Comps DONE!" <<  " ======== " << std::endl;
+			}
 			// osm_xc.apply( time, dt, uold_xc, unew_xc );
 			// newton_iterations = osm_xc.getPDESolver().result().iterations;
 			// uold_xc = unew_xc;
 			// time = current_time;
 			// dt = current_dt; 
 
-			// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
-			// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
-
-			// std::cout << "========== XC DONE!" <<  " ======== " << std::endl;			
+			if(helper.rank()==0){
+				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+				std::cout << "========== XC DONE!" <<  " ======== " << std::endl;
+			}	
 			
-			
-
-			
-			
-			
-
 			/*
 				std::cout << "  Newton iteration " << std::setw(2)(Sets the field width to be used on output operations) << this->res_.iterations
                            << ".  New defect: "

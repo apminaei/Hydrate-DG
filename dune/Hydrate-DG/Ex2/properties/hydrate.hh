@@ -1,15 +1,16 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template<typename PTree>
+template<typename GV, typename PTree>
 class Hydrate {
 
 private:
 	CharacteristicValues characteristicValue;
 	const PTree& ptree;
+	const GV& gv;
 	Parameters<PTree> parameter;
 public:
 
-	Hydrate (const PTree& ptree_  )
-	 : ptree(ptree_),
+	Hydrate (const GV& gv_, const PTree& ptree_  )
+	 : ptree(ptree_), gv(gv_),
 	 parameter(ptree_)
   	{}
 

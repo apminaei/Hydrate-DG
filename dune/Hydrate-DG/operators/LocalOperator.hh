@@ -756,6 +756,9 @@ public:
     auto penalty_factor_x = (alpha_x / h_F) * harmonic_average * degree * (degree + dim - 1);
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
+    // std::cout << geo_inside.volume() << "  " <<  geo_outside.volume()<< "  " << geo.volume() << "  "<< penalty_factor_g << std::endl;
+    // exit(0);
+
     // Initialize vectors outside for loop
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_s(lfsu_Pw_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw_s(lfsv_Pw_s.size());
@@ -1677,9 +1680,9 @@ public:
       for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
         Pw_s += x(lfsu_Pw_s, i) * phi_Pw_s[i];
       RF Pw_n = Pw_s;
-      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet)
       {
-        Pw_n = bcvalue[Indices::PVId_Pw] ;
+        Pw_n = velvalue[Indices::BCId_water] ;
       }
 
       // evaluate T
@@ -1688,9 +1691,9 @@ public:
         T_s += x(lfsu_T_s, i) * phi_T_s[i];
         
       RF T_n = T_s;
-      if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_heat] == Indices::BCId_dirichlet)
       {
-        T_n = bcvalue[Indices::PVId_T] ;
+        T_n = velvalue[Indices::BCId_heat] ;
       }
 
       // evaluate Sh
@@ -1705,7 +1708,10 @@ public:
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
 
       RF Sg_n = Sg_s ;//* (1. - Sh_n);
-      
+      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
+      {
+        Sg_n = velvalue[Indices::BCId_gas] ;
+      }
 
       RF Sw_s = 1. - Sg_s - Sh_s;
       RF Sw_n = 1. - Sg_n - Sh_n;
@@ -1753,6 +1759,24 @@ public:
       auto T_s_dim = T_s * Xc_T;
       auto T_n_dim = T_n * Xc_T;
 
+
+      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
+      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
+      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
+      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
+      
+      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 0.){ //active set.			
+				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
+			}else{
+				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
+      }
+      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 0. ){
+        XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
+      } else {
+        YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
+        Sh_n = 1. - Sg_n;
+      }
+
       auto gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
       auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
       * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
@@ -1775,7 +1799,6 @@ public:
       auto DH2O_g_s = tau_s * por_s * property.mixture.DiffCoeffH2OInGas(T_s_dim, Pg_s_dim);
       auto DCH4_w_s = tau_s * por_s * property.mixture.DiffCoeffCH4InLiquid(T_s_dim, Pw_s_dim);
       auto DC_w_s = tau_s * por_s * property.salt.DiffCoeff(T_s_dim, Pw_s_dim);
-      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
       auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
       auto XH2O_s =  property.mixture.XH2O(YH2O_s, T_s_dim, Pg_s_dim, XC_s);
       
@@ -1810,7 +1833,6 @@ public:
       auto DH2O_g_n = tau_n * por_n * property.mixture.DiffCoeffH2OInGas(T_n_dim, Pg_n_dim);
       auto DCH4_w_n = tau_n * por_n * property.mixture.DiffCoeffCH4InLiquid(T_n_dim, Pw_n_dim);
       auto DC_w_n = tau_n * por_n * property.salt.DiffCoeff(T_n_dim, Pw_n_dim);
-      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
 
       auto rho_g_n = property.gas.Density(T_n_dim, Pg_n_dim, zCH4_n) ;
       auto rho_w_n = property.water.Density(T_n_dim, Pw_n_dim, S_n);
@@ -1936,7 +1958,7 @@ public:
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
 
-      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
+      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
       {
         //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
         grad_Sg_n = 0.0;
@@ -1980,19 +2002,7 @@ public:
         }
       }
 
-      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
-      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
       
-      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 0.){ //active set.			
-				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
-			}else{
-				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
-			}
-      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 0. ){
-        XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
-      } else {
-        YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
-      }
      
 			double tmp = 0.;		
       auto normalvelocity_g_s = K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
@@ -2228,12 +2238,12 @@ public:
         r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
 
-      // double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
-      // // standard IP term integral
-      // for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
-      // {
-      //   r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
-      // }
+      double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
+      // standard IP term integral
+      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+      {
+        r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
+      }
 
       double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
       // standard IP term integral

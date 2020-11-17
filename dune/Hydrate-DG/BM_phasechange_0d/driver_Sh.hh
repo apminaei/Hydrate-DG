@@ -206,12 +206,12 @@ void driver_Sh(const GV &gv, // GridView
 	double method_T = 1.;
 	double method_x = 1.;
 	double method_y = 1.;
-	double alpha_g = 1.e0;
-	double alpha_w = 1.e0;
-	double alpha_s = 1.e0;
-	double alpha_T = 1.e0;
-	double alpha_x = 1.e0;
-	double alpha_y = 1.e0;
+	double alpha_g = 1.e1;
+	double alpha_w = 1.e1;
+	double alpha_s = 1.e1;
+	double alpha_T = 1.e1;
+	double alpha_x = 1.e1;
+	double alpha_y = 1.e1;
 	double intorder=4;
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
@@ -255,7 +255,7 @@ void driver_Sh(const GV &gv, // GridView
 			&time, &dt, intorder, method_g, method_w, method_x, method_y, alpha_g, alpha_w, alpha_x, alpha_y);
 
 	typedef TimeOperator_Sh<GV, Properties, U, GFS, U_T, GFS_T, FEM_Sh> TOP_Sh; // spatial part
-	TOP_Sh top_sh(gv, property, uold, gfs, uold_t, gfs_t, intorder);
+	TOP_Sh top_sh(gv, property, unew, gfs, unew_t, gfs_t, intorder);
 
 	// typedef TimeOperator_Sg<GV, Properties, U_Sh, GFS_Sh, U_Pw, GFS_Pw, U_Sg, GFS_Sg, U_T, GFS_T,
     //       					U_XCH4, GFS_XCH4, U_YH2O, GFS_YH2O, U_XC, GFS_XC, FEM_Sg> TOP_Sg; // spatial part
@@ -270,7 +270,7 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_xc, gfs_xc, intorder);
 
 	typedef TimeOperator_T<GV, Properties, U_Sh, GFS_Sh, U, GFS, FEM_T> TOP_T; // spatial part
-	TOP_T top_t(gv, property, uold_sh, gfs_sh, uold, gfs, 
+	TOP_T top_t(gv, property, unew_sh, gfs_sh, unew, gfs, 
                      intorder);
 
 	// typedef TimeOperator_XC<GV, Properties, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_XC> TOP_XC; // spatial part
@@ -283,7 +283,7 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_xc, gfs_xc, intorder);
 
 	typedef TimeOperator_2comps<GV, Properties, U_Sh, GFS_Sh, U_T, GFS_T, FEM_YH2O> TOP; // spatial part
-	TOP top(gv, property, uold_sh, gfs_sh, uold_t, gfs_t, intorder);
+	TOP top(gv, property, unew_sh, gfs_sh, unew_t, gfs_t, intorder);
 
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
@@ -622,23 +622,6 @@ void driver_Sh(const GV &gv, // GridView
 	DGF_YH2O dgf_yh2o(subgfs_YH2O, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XC, U> DGF_XC;
 	DGF_XC dgf_xc(subgfs_XC, uold);
-	//Dune::FieldVector<double, 1> y=0.;
-
-	// for ( const auto & e : elements ( gv )) {
-		
-	// 	  auto geo = e.geometry();
-	// 	  auto geo_ref = referenceElement(geo);
-	// 	  for ( int i = 0; i < geo_ref.size(1); i++) {
-	// 		//idxSet.subIndex (e , i , c ); // index of subentity
-	// 		auto geo_ref_pos = geo.corner(i);
-	// 		//x = geo.global(geo_ref_pos);
-	// 		dgf_pw.evaluate(e, geo_ref_pos, y);
-	// 		std::cout << "   --" << 
-	// 		geo_ref_pos << "     " << y << "   ";
-	// 	  }
-	// 	  std::cout << " "<<std::endl;
-	// }
-
 
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
@@ -734,10 +717,6 @@ void driver_Sh(const GV &gv, // GridView
 			// time = current_time;
 			// dt = current_dt; 
 			
-			DGF_Sh dgf_sh(gfs_sh, unew_sh);
-			
-			
-
 			// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 			// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
 			std::cout << "========== Sh DONE!" <<  " ======== " << std::endl;
@@ -749,7 +728,6 @@ void driver_Sh(const GV &gv, // GridView
 			uold_t = unew_t;
 			// time = current_time;
 			// dt = current_dt; 
-			DGF_T dgf_t(gfs_t, unew_t);
 			// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 			// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
 
@@ -761,11 +739,6 @@ void driver_Sh(const GV &gv, // GridView
 			uold = unew;
 			// time = current_time;
 			// dt = current_dt; 
-			DGF_Pw dgf_pw(subgfs_Pw, unew);
-			DGF_Sg dgf_sg(subgfs_Sg, unew);
-			DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
-			DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
-			DGF_XC dgf_xc(subgfs_XC, unew);
 			std::cout << "========== Pw DONE!" <<  " ======== " << std::endl;
 			// osm_xc.apply( time, dt, uold_xc, unew_xc );
 			// newton_iterations = osm_xc.getPDESolver().result().iterations;
@@ -778,12 +751,6 @@ void driver_Sh(const GV &gv, // GridView
 
 			// std::cout << "========== XC DONE!" <<  " ======== " << std::endl;			
 			
-			
-
-			
-			
-			
-
 			/*
 				std::cout << "  Newton iteration " << std::setw(2)(Sets the field width to be used on output operations) << this->res_.iterations
                            << ".  New defect: "

@@ -132,8 +132,8 @@ int main(int argc, char **argv)
 		
 #endif
 
-		// driver(gv, ptree, helper);
-		driver_Sh(gv, ptree, helper);
+		driver(gv, ptree, helper);
+		// driver_Sh(gv, ptree, helper);
 
 	}
 	catch (Dune::Exception &e)

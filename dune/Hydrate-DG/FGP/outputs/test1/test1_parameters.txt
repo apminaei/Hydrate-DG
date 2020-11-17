@@ -1,0 +1,3 @@
+penalty coeff.  10	10	10	10	10	10
+ S=1, N=0, I=-1,  1	1	0	0	0
+ dissCoeff 0	 formCoeff 1e-16
