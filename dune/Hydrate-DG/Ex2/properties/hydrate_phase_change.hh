@@ -12,7 +12,7 @@ private:
 		Parameters<PTree> parameter;
 		Methane<PTree> methane;
 		Water<PTree> water;
-		Hydrate<PTree> hydrate;
+		Hydrate<GV, PTree> hydrate;
 
 public:
 
@@ -24,7 +24,7 @@ public:
 	parameter(ptree_),
 	water(ptree_),
 	methane(ptree_),
-	hydrate(ptree_)
+	hydrate(gv_, ptree_)
   {}
 
 	// EQULIBRIUM CONDITIONS FOR HYDRATE:

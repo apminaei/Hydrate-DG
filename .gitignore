@@ -1,4 +1,5 @@
 dune/Hydrate-DG/BM_phasechange_0d/outputs/*
 dune/Hydrate-DG/Ex2/outputs/*
+dune/Hydrate-DG/FGP/outputs/*
 build/*
 .vscode/*

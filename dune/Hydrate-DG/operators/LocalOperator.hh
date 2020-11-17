@@ -756,6 +756,9 @@ public:
     auto penalty_factor_x = (alpha_x / h_F) * harmonic_average * degree * (degree + dim - 1);
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
+    // std::cout << geo_inside.volume() << "  " <<  geo_outside.volume()<< "  " << geo.volume() << "  "<< penalty_factor_g << std::endl;
+    // exit(0);
+
     // Initialize vectors outside for loop
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_s(lfsu_Pw_s.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw_s(lfsv_Pw_s.size());
@@ -1679,9 +1682,9 @@ public:
       for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
         Pw_s += x(lfsu_Pw_s, i) * phi_Pw_s[i];
       RF Pw_n = Pw_s;
-      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet)
       {
-        Pw_n = bcvalue[Indices::PVId_Pw] ;
+        Pw_n = velvalue[Indices::BCId_water] ;
       }
 
       // evaluate T
@@ -1690,9 +1693,9 @@ public:
         T_s += x(lfsu_T_s, i) * phi_T_s[i];
         
       RF T_n = T_s;
-      if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_heat] == Indices::BCId_dirichlet)
       {
-        T_n = bcvalue[Indices::PVId_T] ;
+        T_n = velvalue[Indices::BCId_heat] ;
       }
 
       // evaluate Sh
@@ -1707,7 +1710,10 @@ public:
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
 
       RF Sg_n = Sg_s ;//* (1. - Sh_n);
-      
+      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
+      {
+        Sg_n = velvalue[Indices::BCId_gas] ;
+      }
 
       RF Sw_s = 1. - Sg_s - Sh_s;
       RF Sw_n = 1. - Sg_n - Sh_n;
@@ -1764,8 +1770,7 @@ public:
 				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
 			}else{
 				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
-        //Sg_n = 0.0;
-			}
+      }
       if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 0. ){
         XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
       } else {
@@ -1954,7 +1959,7 @@ public:
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
 
-      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
+      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
       {
         //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
         grad_Sg_n = 0.0;
@@ -1998,6 +2003,8 @@ public:
         }
       }
 
+      
+     
 			double tmp = 0.;		
       auto normalvelocity_g_s = K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
       

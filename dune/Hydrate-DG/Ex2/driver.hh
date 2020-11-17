@@ -33,7 +33,7 @@ void driver(const GV &gv, // GridView
 	/*in input file dt, dt_initprob, t_END, t_END_initprob, dt_min, dt_max, t_OP are specified in kilo-annum*/
 	//INITIAL PROBLEM time and dt
 	auto Xc_t = property.characteristicValue.t_c;
-	auto t_year_sec = 364.*24.*60.*60.;
+	auto t_day_sec = 364.*24.*60.*60.;
 	// double dt_initprob  = ptree.get("initial_problem.dt_initial",(double)0.0001);
 	// dt_initprob *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
 	// dt_initprob *= 1./Xc_t; /*ndim*/
@@ -42,23 +42,23 @@ void driver(const GV &gv, // GridView
 	// t_END_initprob 	 *= 1./Xc_t; /*ndim*/
 	//MAIN PROBLEM time and dt
 	dt  = ptree.get("time.dt_initial",(double)0.001);
-	dt *= t_year_sec; /*convert to seconds*/
+	dt *= t_day_sec; /*convert to seconds*/
 	dt *= 1./Xc_t; /*ndim*/
 	double t_END  = ptree.get("time.time_end",(double)300);
-	t_END *= t_year_sec; /*convert to seconds*/
+	t_END *= t_day_sec; /*convert to seconds*/
 	t_END *= 1./Xc_t; /*ndim*/
 	//t_END += t_END_initprob; //Total simulation time
 	// output time interval
 	double t_OP   = ptree.get("output.time_interval",(double)1000);
-	t_OP *= t_year_sec; /*convert to seconds*/
+	t_OP *= t_day_sec; /*convert to seconds*/
 	t_OP *= 1./Xc_t; /*ndim*/
 	//adaptive time control
 	bool adaptive_time_control = ptree.get("adaptive_time_control.flag",(bool)true);
 	double dt_min = ptree.get("adaptive_time_control.dt_min",(double)1.e-6);
-	dt_min *= t_year_sec; /*convert to seconds*/
+	dt_min *= t_day_sec; /*convert to seconds*/
 	dt_min *= 1./Xc_t; /*ndim*/
 	double dt_max = ptree.get("adaptive_time_control.dt_max",(double)10.);
-	dt_max *= t_year_sec; /*convert to seconds*/
+	dt_max *= t_day_sec; /*convert to seconds*/
 	dt_max *= 1./Xc_t; /*ndim*/
 
 
@@ -73,7 +73,7 @@ void driver(const GV &gv, // GridView
 
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
-	int max_linear_iteration = ptree.get("newton.max_linear_iteration",(int)1000);
+	int max_linear_iteration = ptree.get("newton.max_linear_iteration",(int)10);
 	const int degree_S = 1;
 	const int degree_P = 1;
 	const int degree_T = 1;
@@ -179,19 +179,19 @@ void driver(const GV &gv, // GridView
 	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
 	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::NIPG;
-	double alpha_g = 1.e3;
-	double alpha_w = 1.e3;
-	double alpha_s = 1.e3;
-	double alpha_T = 1.e3;
-	double alpha_x = 1.e3;
-	double alpha_y = 1.e3;
+	double alpha_g = 1.e0;
+	double alpha_w = 1.e0;
+	double alpha_s = 1.e0;
+	double alpha_T = 1.e0;
+	double alpha_x = 1.e0;
+	double alpha_y = 1.e0;
 	double intorder=4;
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;
 
-	typedef LocalOperator<GV, Properties, BoundaryConditions, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
-	LOP lop(gv, property, bc, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
+	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property);
@@ -217,8 +217,8 @@ void driver(const GV &gv, // GridView
 	// SELECT A LINEAR SOLVER BACKEND
 #ifdef PARALLEL
 
-	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
-	// LS ls(gfs, cc, 100, 2);
+	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
+	LS ls(gfs, cc, 100, 2);
 
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	// LS ls(gfs, max_linear_iteration, 1, true, true);
@@ -244,11 +244,15 @@ void driver(const GV &gv, // GridView
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
 	// LS ls(gfs, cc);
 
-	typedef Dune::PDELab::ISTLBackend_CG_AMG_SSOR<IGO> LS; // should be checked
-	int verbose = 0;
-	if (gfs.gridView().comm().rank() == 0)
-		verbose = 1;
-	LS ls(gfs, 100, verbose);
+	// typedef Dune::PDELab::ISTLBackend_CG_AMG_SSOR<IGO> LS; // should be checked
+	// int verbose = 0;
+	// if (gfs.gridView().comm().rank() == 0)
+	// 	verbose = 1;
+	// LS ls(gfs, 100, verbose);
+	// auto param = ls.parameters();
+	// //param.setMaxLevel(3); // max number of coarsening levels
+	// param.setCoarsenTarget(100000); // max DoF at coarsest level
+	// ls.setParameters(param);
 
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 
@@ -328,6 +332,7 @@ void driver(const GV &gv, // GridView
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
 	std::string pathName = ptree.get("output.path_name",(std::string)"test");
+	pathName += "outputs/";
 	pathName += fileName ;
 	//if(helper.rank()==0){
 		//std::filesystem::create_directory(pathName);

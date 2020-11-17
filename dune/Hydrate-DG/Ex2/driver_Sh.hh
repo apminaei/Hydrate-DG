@@ -757,7 +757,10 @@ void driver_Sh(const GV &gv, // GridView
 			DGF_Sh dgf_sh(gfs_sh, unew_sh);
 			
 			
+<<<<<<< HEAD
 
+=======
+>>>>>>> d924bd23f14f958b13b26b1f0e624e40ef147a34
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
@@ -790,7 +793,6 @@ void driver_Sh(const GV &gv, // GridView
 			DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
 			DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
 			DGF_XC dgf_xc(subgfs_XC, unew);
-			
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
@@ -806,7 +808,7 @@ void driver_Sh(const GV &gv, // GridView
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
 				std::cout << "========== XC DONE!" <<  " ======== " << std::endl;
-			}			
+			}	
 			
 			/*
 				std::cout << "  Newton iteration " << std::setw(2)(Sets the field width to be used on output operations) << this->res_.iterations

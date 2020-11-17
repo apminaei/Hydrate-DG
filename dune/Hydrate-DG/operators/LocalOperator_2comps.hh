@@ -1497,9 +1497,9 @@ public:
       for (int i = 0; i < lfsu_Pw_s.size(); i++)
         Pw_s += x(lfsu_Pw_s, i) * phi_Pw_s[i];
       RF Pw_n = Pw_s;
-      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet)
       {
-        Pw_n = bcvalue[Indices::PVId_Pw] ;
+        Pw_n = velvalue[Indices::BCId_water] ;
       }
 
       // evaluate T
@@ -1531,7 +1531,7 @@ public:
       for (int i = 0; i < lfsu_Sg_s.size(); i++)
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
       RF Sg_n = Sg_s ;//* (1. - Sh_n);
-      if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
       {
         Sg_n = bcvalue[Indices::PVId_Sg] ;
       }
@@ -1546,9 +1546,9 @@ public:
         XC_s += x(lfsu_XC_s, i) * phi_XC_s[i];
       
       RF XC_n = XC_s ;
-      if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
+      if (veltype[Indices::BCId_salt] == Indices::BCId_dirichlet)
       {
-        XC_n = bcvalue[Indices::PVId_C] ;
+        XC_n = velvalue[Indices::BCId_salt] ;
       }
 
       // evaluate XCH4
@@ -1721,7 +1721,7 @@ public:
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
       
-      if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
+      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
       {
         //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
         grad_Sg_n = 0.0;
@@ -1753,7 +1753,7 @@ public:
       auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
 
       auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
-      // if (veltype[Indices::PVId_gas] == Indices::BCId_neumann)
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
       // {
       //   grad_Pg_n = 0.0;
       //   if (krN_n > 0.){

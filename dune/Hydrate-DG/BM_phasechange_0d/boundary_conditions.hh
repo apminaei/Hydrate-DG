@@ -34,7 +34,7 @@ public :
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 		
-		std::vector< int > bctype(Indices::numOfPVs, 0);
+		std::vector< int > bctype(Indices::numOfPVs, -1);
 		// bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){

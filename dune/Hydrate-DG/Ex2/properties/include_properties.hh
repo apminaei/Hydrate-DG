@@ -38,7 +38,7 @@ public:
   	Water<PTree> water;
   	Salt salt;
   	Mixture<PTree> mixture;
-  	Hydrate<PTree> hydrate;
+  	Hydrate<GV, PTree> hydrate;
   	Soil<GV,Parameters<PTree>> soil;
   	HydraulicProperties<GV,Parameters<PTree>> hydraulicProperty;
   	HydratePhaseChangeKinetics<GV,PTree> kinetics;
@@ -53,7 +53,7 @@ public:
 	  gas(ptree_),
 	  water(ptree_),
 	  mixture(ptree_),
-	  hydrate(ptree_),
+	  hydrate(gv_,ptree_),
 	  soil(gv_,parameter),
 	  hydraulicProperty(gv_,parameter),
 	  kinetics(gv_,ptree_)

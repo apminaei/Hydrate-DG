@@ -131,12 +131,12 @@ int main(int argc, char **argv)
   		grid->loadBalance();
 		
 #endif
-		//grid->globalRefine(1);
+		 grid->globalRefine(1);
 		// Dune::VTKWriter<GV> vtkWriter(gv);
   		// vtkWriter.write(std::string("gridviews"));
 		//exit(0);
-		//driver(gv, ptree, helper);
-		driver_Sh(gv, ptree, helper);
+		driver(gv, ptree, helper);
+		// driver_Sh(gv, ptree, helper);
 
 	}
 	catch (Dune::Exception &e)
