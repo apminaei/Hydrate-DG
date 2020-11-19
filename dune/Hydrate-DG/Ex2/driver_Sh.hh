@@ -226,12 +226,12 @@ void driver_Sh(const GV &gv, // GridView
 	double method_T = 1.;
 	double method_x = 1.;
 	double method_y = 1.;
-	double alpha_g = 1.e3;
-	double alpha_w = 1.e3;
-	double alpha_s = 1.e3;
-	double alpha_T = 1.e3;
-	double alpha_x = 1.e3;
-	double alpha_y = 1.e3;
+	double alpha_g = 1.e0;
+	double alpha_w = 1.e0;
+	double alpha_s = 1.e0;
+	double alpha_T = 1.e0;
+	double alpha_x = 1.e0;
+	double alpha_y = 1.e0;
 	double intorder=4;
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
@@ -662,7 +662,8 @@ void driver_Sh(const GV &gv, // GridView
 
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
-	std::string pathName = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/Ex2/outputs/";//ptree.get("output.path_name",(std::string)"test");
+	std::string pathName = ptree.get("output.path_name",(std::string)"test");
+	pathName += "outputs/" ; 
 	pathName += fileName ;
 	//if(helper.rank()==0){
 		//std::filesystem::create_directory(pathName);
@@ -757,10 +758,6 @@ void driver_Sh(const GV &gv, // GridView
 			DGF_Sh dgf_sh(gfs_sh, unew_sh);
 			
 			
-<<<<<<< HEAD
-
-=======
->>>>>>> d924bd23f14f958b13b26b1f0e624e40ef147a34
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;

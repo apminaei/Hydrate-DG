@@ -328,7 +328,7 @@ public:
       for (int i = 0; i < lfsu_Pw.size(); i++){
         Pw += x(lfsu_Pw, i) * phi_Pw[i];
       }
-      //exit(0);
+      
       // evaluate Sg
       RF Sg = 0.0;
       for (int i = 0; i < lfsu_Sg.size(); i++){
@@ -507,11 +507,7 @@ public:
       
       auto krW = property.hydraulicProperty.krw(cell, ip_local, Sw, Sh) / (property.water.DynamicViscosity(T * Xc_T, Pw * Xc_P, S) );
       auto krN = property.hydraulicProperty.krg(cell, ip_local, Sw, Sh) / (property.gas.DynamicViscosity(T * Xc_T, Pg * Xc_P));
-      // auto P_eq = property.kinetics.EquilibriumPressure(T * Xc_T, S)/Xc_P;
-      // if (Pg < (P_eq+1.e-6) and Pg > (P_eq-1.e-6)){
-      //   std::cout << ip_global << "  " << P_eq << "  "<<  Sh << "   "<< T << "  "<< Sg << "   "<< S << "  "<< Sg   <<std::endl;
-      // }
-		
+      
       // compute source terms
 			auto q_g  = property.kinetics.GasGenerationRate( T*Xc_T,
 														    Pg*Xc_P,
@@ -1563,6 +1559,119 @@ public:
         YH2O_s += x(lfsu_YH2O_s, i) * phi_YH2O_s[i];
       RF YH2O_n = YH2O_s;
 
+      // evaluate Pg
+      auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
+      auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
+      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
+      
+      RF Pg_s = Pw_s + Pc_s;
+      auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s);
+      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
+      
+      RF Pg_n = Pw_n + Pc_n;
+      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
+      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
+
+      auto Pw_s_dim = Pw_s * Xc_P;
+      auto Pw_n_dim = Pw_n * Xc_P;
+      auto Pg_s_dim = Pg_s * Xc_P;
+      auto Pg_n_dim = Pg_n * Xc_P;
+      auto T_s_dim = T_s * Xc_T;
+      auto T_n_dim = T_n * Xc_T;
+
+
+      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
+      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
+      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
+      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
+      
+      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 0.){ //active set.			
+				YH2O_n = 1. - YCH4_n ;//Active => phase is present => summation condition holds
+			}else{
+				XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
+      }
+      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 0. ){
+        XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
+      } else {
+        YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
+        Sg_n = 1. - Sh_n;
+      }
+
+      auto gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
+      auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
+      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
+      
+      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s, BrooksCParams[2], BrooksCParams[3]);
+      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
+      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, BrooksCParams[2], BrooksCParams[3]);
+      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
+
+      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, BrooksCParams[2], BrooksCParams[3]);
+      auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
+
+      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
+      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
+      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.gas.DynamicViscosity(T_s_dim, Pg_s_dim) );
+      
+      //  adding terms regarding components
+      auto tau_s = property.soil.Tortuosity(por_s);
+      auto DH2O_g_s = tau_s * por_s * property.mixture.DiffCoeffH2OInGas(T_s_dim, Pg_s_dim);
+      auto DCH4_w_s = tau_s * por_s * property.mixture.DiffCoeffCH4InLiquid(T_s_dim, Pw_s_dim);
+      auto DC_w_s = tau_s * por_s * property.salt.DiffCoeff(T_s_dim, Pw_s_dim);
+      auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
+      auto XH2O_s =  property.mixture.XH2O(YH2O_s, T_s_dim, Pg_s_dim, XC_s);
+      
+      auto rho_g_s = property.gas.Density(T_s_dim, Pg_s_dim, zCH4_s) ;
+      auto rho_w_s = property.water.Density(T_s_dim, Pw_s_dim, S_s);
+      
+      auto Cp_g_s = property.gas.Cp(T_s_dim, Pg_s_dim, zCH4_s);
+      auto Cp_w_s = property.water.Cp(T_s_dim, Pw_s_dim, S_s);
+      auto kth_g_s = property.gas.ThermalConductivity(T_s_dim, Pg_s_dim) ;
+      auto kth_w_s = property.water.ThermalConductivity(T_s_dim, Pw_s_dim, S_s);
+      auto kth_h_s = property.hydrate.ThermalConductivity(T_s_dim, Peff_s * Xc_P);
+      auto kth_s_s = property.soil.ThermalConductivity() ;
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * (Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
+      auto h_g_s =  Cp_g_s * (T_s-T_ref) ;
+      auto h_w_s =  Cp_w_s * (T_s-T_ref) ;
+      
+
+      auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n, BrooksCParams[2], BrooksCParams[3]);
+      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);/* ndim */
+      auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_n, Sh_n, BrooksCParams[2], BrooksCParams[3]);
+      auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_s ;
+
+      auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, BrooksCParams[2], BrooksCParams[3]);
+      auto coeff_grad_Sh_n = dPcSF1_dSh_n + dPc_dSwe_n * dSwe_dSh_s ;
+
+      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
+      auto krW_n = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n_dim, Pw_n_dim, S_n));
+      auto krN_n = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.gas.DynamicViscosity(T_n_dim, Pg_n_dim) );
+      
+      auto tau_n = property.soil.Tortuosity(por_n);
+      auto DH2O_g_n = tau_n * por_n * property.mixture.DiffCoeffH2OInGas(T_n_dim, Pg_n_dim);
+      auto DCH4_w_n = tau_n * por_n * property.mixture.DiffCoeffCH4InLiquid(T_n_dim, Pw_n_dim);
+      auto DC_w_n = tau_n * por_n * property.salt.DiffCoeff(T_n_dim, Pw_n_dim);
+
+      auto rho_g_n = property.gas.Density(T_n_dim, Pg_n_dim, zCH4_n) ;
+      auto rho_w_n = property.water.Density(T_n_dim, Pw_n_dim, S_n);
+      
+      auto Cp_g_n = property.gas.Cp(T_n_dim, Pg_n_dim, zCH4_n);
+      auto Cp_w_n = property.water.Cp(T_n_dim, Pw_n_dim, S_n);
+      auto kth_g_n = property.gas.ThermalConductivity(T_n_dim, Pg_n_dim) ;
+      auto kth_w_n = property.water.ThermalConductivity(T_n_dim, Pw_n_dim, S_n);
+      auto kth_h_n = property.hydrate.ThermalConductivity(T_n_dim, Peff_n * Xc_P);
+      auto kth_s_n = property.soil.ThermalConductivity() ;
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
+      auto h_g_n =  Cp_g_n * (T_n-T_ref) ;
+      auto h_w_n =  Cp_w_n * (T_n-T_ref) ;
+
+      omega_s = 0.5;
+      omega_n = 0.5;
+
+			auto normalgravity = gravity * n_F_local;
 
       // evaluate gradient of basis functions
       auto &js_Pw_s = cache_Pw[order_p].evaluateJacobian(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
@@ -1633,86 +1742,15 @@ public:
       for (int i = 0; i < lfsu_XC_s.size(); i++)
         gradu_XC_s.axpy(x(lfsu_XC_s, i), gradphi_XC_s[i]);
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
-      auto normalgravity = gravity * n_F_local;
-      auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
-      auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
-      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
       
-      RF Pg_s = Pw_s + Pc_s;
-      auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s);
-      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
-      
-      RF Pg_n = Pw_n + Pc_n;
-      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
-
-      
-      
-      auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
-      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
-      
-      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s,0.0,0.0);
-      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
-      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0.0, 0.0);
-      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
-
-      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
-      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0.0, 0.0);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
-
-      auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n,0.0,0.0);
-      auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams[0], BrooksCParams[1]);/* ndim */
-      auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_n, Sh_n, 0.0, 0.0);
-      auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_s ;
-
-      auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams[1], BrooksCParams[4]);
-      auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0.0, 0.0);
-      auto coeff_grad_Sh_n = dPcSF1_dSh_n + dPc_dSwe_n * dSwe_dSh_s ;
-
-      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s * Xc_T, Pw_s * Xc_P, S_s));
-      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.gas.DynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) );
-      
-      //  adding terms regarding components
-      auto tau_s = property.soil.Tortuosity(por_s);
-      auto DH2O_g_s = tau_s * por_s * property.mixture.DiffCoeffH2OInGas(T_s * Xc_T, Pg_s * Xc_P);
-      auto DCH4_w_s = tau_s * por_s * property.mixture.DiffCoeffCH4InLiquid(T_s * Xc_T, Pw_s * Xc_P);
-      auto DC_w_s = tau_s * por_s * property.salt.DiffCoeff(T_s * Xc_T, Pw_s * Xc_P);
-      auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s * Xc_T, Pg_s * Xc_P);
-      auto YCH4_s =  property.mixture.YCH4(XCH4_s, T_s * Xc_T, Pg_s * Xc_P, XC_s, zCH4_s);
-      auto XH2O_s =  property.mixture.XH2O(YH2O_s, T_s * Xc_T, Pg_s * Xc_P, XC_s);
-      
-      auto rho_g_s = property.gas.Density(T_s * Xc_T, Pg_s * Xc_P, zCH4_s) ;
-      auto rho_w_s = property.water.Density(T_s * Xc_T, Pw_s * Xc_P, S_s);
-     
-
-      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
-      auto krW_n = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n * Xc_T, Pw_n * Xc_P, S_n));
-      auto krN_n = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.gas.DynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) );
-      
-      auto tau_n = property.soil.Tortuosity(por_n);
-      auto DH2O_g_n = tau_n * por_n * property.mixture.DiffCoeffH2OInGas(T_n * Xc_T, Pg_n * Xc_P);
-      auto DCH4_w_n = tau_n * por_n * property.mixture.DiffCoeffCH4InLiquid(T_n * Xc_T, Pw_n * Xc_P);
-      auto DC_w_n = tau_n * por_n * property.salt.DiffCoeff(T_n * Xc_T, Pw_n * Xc_P);
-      auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n * Xc_T, Pg_n * Xc_P);
-
-
-      
-      auto rho_g_n = property.gas.Density(T_n * Xc_T, Pg_n * Xc_P, zCH4_n) ;
-      auto rho_w_n = property.water.Density(T_n * Xc_T, Pw_n * Xc_P, S_n);
-
-      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n * Xc_T, Pg_n * Xc_P, XC_n, zCH4_n);
-      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n * Xc_T, Pg_n * Xc_P, XC_n);
 
 	    // evaluate normal flux of Pw i.e. grad_Pw.n
       RF grad_Pw_s = gradu_Pw_s * n_F_local;
       RF grad_Pw_n = grad_Pw_s;
-      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
+      if (veltype[Indices::BCId_water] == Indices::BCId_neumann)
       {
-        // grad_Pw_n = velvalue[Indices::BCId_water] ;
-        grad_Pw_n = (-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;// NOTE: put the correct coefficients K krw and Muw instead of 1.
+        grad_Pw_n = (-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;//velvalue[Indices::BCId_water];
       }
-      
       // evaluate normal flux of Sh
       RF grad_Sh_s = gradu_Sh_s * n_F_local;
       RF grad_Sh_n = grad_Sh_s;
@@ -1753,34 +1791,16 @@ public:
       auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
 
       auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
-      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
-      // {
-      //   grad_Pg_n = 0.0;
-      //   if (krN_n > 0.){
-      //   grad_Pg_n = (-1./(K*krN_n)) * velvalue[Indices::BCId_gas] + rho_g_n * normalgravity;//velvalue[Indices::BCId_gas];
-      //   }
-      // }
-      
-      
-      if( ( Sg_n - ( 1. - YCH4_n - YH2O_n ) ) > 0. ){ //active set.			
-				YH2O_n = 1. - YCH4_n ; // Active => phase is present => summation condition holds
-			}else{
-				XCH4_n = 1. - XH2O_n - XC_n; // inactive set. Inactive => phase is absent => Sg=0, Sw>0
-			}
-      if( ( Sw_n - ( 1. - XCH4_n - XH2O_n - XC_n ) ) > 0. ){
-        XCH4_n = 1. - XH2O_n - XC_n  ; // Active => phase is present => summation condition holds
-      } else {
-        YH2O_n = 1. - YCH4_n ; // inactive set. Inactive => phase is absent => Sw=0, Sg>0
+      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
+      {
+        grad_Pg_n = 0.0;
+        if (krN_n > 0.){
+        grad_Pg_n = (-1./(K*krN_n)) * velvalue[Indices::BCId_gas] + rho_g_n * normalgravity;//velvalue[Indices::BCId_gas];
+        }
       }
-     
+           
 			double tmp = 0.;		
 
-
-      omega_s = 0.5;
-      omega_n = 0.5;
-
-			
-			
       auto normalvelocity_g_s = K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
       
       auto normalvelocity_w_s = K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);

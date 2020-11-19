@@ -1775,7 +1775,7 @@ public:
         XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
       } else {
         YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
-        Sh_n = 1. - Sg_n;
+        Sg_n = 1. - Sh_n;
       }
 
       auto gravity = -property.parameter.g() / Xc_grav  ; /* ndim */

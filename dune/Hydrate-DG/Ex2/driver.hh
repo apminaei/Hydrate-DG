@@ -217,11 +217,14 @@ void driver(const GV &gv, // GridView
 	// SELECT A LINEAR SOLVER BACKEND
 #ifdef PARALLEL
 
-	typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
-	LS ls(gfs, cc, 100, 2);
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
+	// LS ls(gfs, cc, 100, 2);
 
-	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-	// LS ls(gfs, max_linear_iteration, 1, true, true);
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SSORk<GFS,CC> LS;
+	// LS ls(gfs, cc, max_linear_iteration, 100,1);
+
+	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
+	LS ls(gfs, max_linear_iteration, 1, true, true);
 	/* 	NOTES:
 		LINEAR SOLVER STATISTICS
 		res.iterations = i;
@@ -249,10 +252,10 @@ void driver(const GV &gv, // GridView
 	// if (gfs.gridView().comm().rank() == 0)
 	// 	verbose = 1;
 	// LS ls(gfs, 100, verbose);
-	// auto param = ls.parameters();
-	// //param.setMaxLevel(3); // max number of coarsening levels
-	// param.setCoarsenTarget(100000); // max DoF at coarsest level
-	// ls.setParameters(param);
+	auto param = ls.parameters();
+	//param.setMaxLevel(3); // max number of coarsening levels
+	param.setCoarsenTarget(10000000); // max DoF at coarsest level
+	ls.setParameters(param);
 
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 
