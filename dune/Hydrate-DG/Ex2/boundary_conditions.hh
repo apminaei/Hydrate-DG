@@ -11,7 +11,7 @@ private :
 	ProblemInitialConditions<GV,Properties> icvalue;
 	// double time_fraction = property.parameter.time_end() / 31.536e6; 
 	double Xc_time = 1. / (364*24*3600);
-	double press_rate = 10.;
+	double press_rate = 0.001;
 
 public :
 
@@ -80,13 +80,13 @@ public :
 	    
 		if( property.mesh.isTopBoundary(globalPos)){
 			auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
-			double Pw_top = icv[Indices::PVId_Pw] - (1000.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)) / property.characteristicValue.P_c ;
+			double Pw_top = icv[Indices::PVId_Pw] - (2600.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)) / property.characteristicValue.P_c ;
 							
 			// std::cout << Pw_top << "  " << dt << std::endl;
 			// exit(0);
 			double Sg_top = icv[Indices::PVId_Sg];
 			double xc_top = icv[Indices::PVId_C];
-			double T_top  = icv[Indices::PVId_T] ;//+ 0.035 * press_rate * Xc_time * (time+dt) / property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T] + 0.035 * press_rate * Xc_time * (time+dt) / property.characteristicValue.T_c;
 			bcvalue[indices.PVId_Sg] = Sg_top;//property.parameter.InitialSg(globalPos);
 			bcvalue[indices.PVId_Pw] = Pw_top ;//property.parameter.InitialPw(globalPos) + 1000 * 9.81 * 0.01 * Xc_time * (time+dt);//0.01 is the burial velocity m/year
 			bcvalue[indices.PVId_T] = T_top;//property.parameter.InitialT(globalPos) ;//;//+ (2/(100*365*24*3600))*time - 3/2/1000 * globalPos[0]* time;
@@ -157,10 +157,10 @@ public :
 			auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
 
 			double Pw_top = icv[Indices::PVId_Pw]//(property.parameter.InitialPw(globalPos)/property.characteristicValue.P_c ;
-							- (1000. * property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt))/property.characteristicValue.P_c ;
+							- (2600. * property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt))/property.characteristicValue.P_c ;
 			double Sg_top = icv[Indices::PVId_Sg];
 			double xc_top = icv[Indices::PVId_C];
-			double T_top  = icv[Indices::PVId_T] ;//+ 0.035 * press_rate * Xc_time * (time+dt) / property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T] + 0.035 * press_rate * Xc_time * (time+dt) / property.characteristicValue.T_c;
 
 			bcvalue[Indices::BCId_water] = Pw_top ;
 			bcvalue[Indices::BCId_salt ] = xc_top ;

@@ -166,9 +166,9 @@ public:
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;/* ndim*/
     gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
-    #ifdef STATEINDEPENDENTPROPERTIES
-      		T_ref = property.parameter.RefT()/Xc_T;
-    #endif
+    // #ifdef STATEINDEPENDENTPROPERTIES
+    //   		T_ref = property.parameter.RefT()/Xc_T;
+    // #endif
 
     
   }
@@ -1258,15 +1258,15 @@ public:
       }
 
       RF omegaup_T_s, omegaup_T_n;
-      if (normalflux_T>0.0)
+      if (normalflux_T>=0.0)
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 1.0;
+        omegaup_T_n = 0.0;
       }
       else
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 0.0;
+        omegaup_T_n = 1.0;
       }
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       // integration factor
@@ -1517,11 +1517,7 @@ public:
       RF XC_y_s = XC_y_s0[0];
       
       RF Pw_n = Pw_s;
-      // if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
-      // {
-      //   Pw_n = bcvalue[Indices::PVId_Pw] ;
-      // }
-        
+      
       RF T_n = T_s;
       if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
@@ -1531,20 +1527,13 @@ public:
       RF Sh_n = Sh_s ;
 
       RF Sg_n = Sg_s ;//* (1. - Sh_n);
-      // if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
-      // {
-      //   Sg_n = bcvalue[Indices::PVId_Sg] ;
-      // }
-
+      
 
       RF Sw_s = 1. - Sg_s - Sh_s;
       RF Sw_n = 1. - Sg_n - Sh_n;
       
       RF XC_n = XC_s ;
-      // if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
-      // {
-      //   XC_n = bcvalue[Indices::PVId_C] ;
-      // }
+      
 
       RF XCH4_n = XCH4_s;
       RF YH2O_n = YH2O_s;
@@ -1685,10 +1674,7 @@ public:
 	    // evaluate normal flux of Pw i.e. grad_Pw.n
       RF grad_Pw_s = gradu_Pw_s * n_F_local;
       RF grad_Pw_n = grad_Pw_s;
-      // if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
-      // {
-      //   grad_Pw_n = (-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;// NOTE: put the correct coefficients K krw and Muw instead of 1.
-      // }
+      
       
       // evaluate normal flux of Sh
       RF grad_Sh_s = gradu_Sh_s * n_F_local;
@@ -1698,15 +1684,6 @@ public:
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
       
-      // if (bctype[Indices::PVId_Sg] == Indices::BCId_neumann)
-      // {
-      //   //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
-      //   grad_Sg_n = 0.0;
-      //   if (krN_n > 0.){
-      //     grad_Sg_n = ((1./(K*krN_n)) * velvalue[Indices::BCId_gas] + grad_Pw_n - rho_g_n * normalgravity 
-      //     + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n) / coeff_grad_Sw_n;// NOTE: put the correct coefficients K krg and Mug instead of 1.
-      //   }
-      // }
 
       // evaluate normal flux of XCH4
       RF grad_XCH4_s = gradu_XCH4_s * n_F_local;
@@ -1781,15 +1758,15 @@ public:
       }
 
       RF omegaup_T_s, omegaup_T_n;
-      if (normalflux_T>0.0)
+      if (normalflux_T>=0.0)
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 1.0;
+        omegaup_T_n = 0.0;
       }
       else
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 0.0;
+        omegaup_T_n = 1.0;
       }
 
       //   fluxes and diff. flux

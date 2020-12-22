@@ -153,7 +153,7 @@ public:
 		double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
 		
 		if( mesh.isGHSZ(xglobal)){
-			Sh = 2.4 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
+			Sh = 1.2 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
 		}
 		return Sh;
 	}

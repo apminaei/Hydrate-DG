@@ -80,7 +80,7 @@ public:
 
 
 	bool isLeftBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( (globalPos[0] < origin + eps) and (globalPos[1] < Z_GHSZ_bottom + eps) )
+		if( (globalPos[0] < origin + eps)  )//and (globalPos[1] < Z_GHSZ_bottom + eps)
 			return true;
 		else
 			return false;

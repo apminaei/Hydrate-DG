@@ -67,6 +67,8 @@ public:
   						   double time /*s*/,
 						   double dt /*s*/,
 						   int total_newton_iterations,
+						   double newton_first_defect,
+						   double newton_reduction,
 						   double clock_time_elapsed /*s*/) {
 
   		std::fstream result;
@@ -76,6 +78,8 @@ public:
   			result	<< "time [s]" << '\t'
   					<< "dt [s]"	<< '\t'
 					<< "total no. of newton iterations" << '\t'
+					<< "  newton first defect" << '\t'
+					<< "  newton reduaction" << '\t'
 					<< "clock time [s]" << '\t'
   					<< mesh.X_cells << "*" << mesh.Z_cells << '\t'
 					<< std::endl;
@@ -88,6 +92,8 @@ public:
 		result	<< time	<< '\t'
 				<< dt	<< '\t'
 				<< total_newton_iterations << '\t'
+				<< newton_first_defect << '\t'
+				<< newton_reduction << '\t'
 				<< clock_time_elapsed
 				<< std::endl;
 		result.close();

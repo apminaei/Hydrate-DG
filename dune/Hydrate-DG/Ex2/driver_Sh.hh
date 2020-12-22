@@ -726,6 +726,8 @@ void driver_Sh(const GV &gv, // GridView
 	bool exceptionCaught = false;
 
 	int newton_iterations = 0;
+	double newton_first_defect = 0.;
+	double newton_reduction = 0.;
 	
 	//	BEGIN TIME LOOP
 	while ( time < (t_END - 1e-8/Xc_t))
@@ -781,6 +783,8 @@ void driver_Sh(const GV &gv, // GridView
 			
 			osm.apply( time, dt, uold, unew );
 			newton_iterations = osm.getPDESolver().result().iterations;
+			newton_first_defect = osm.getPDESolver().result().first_defect;
+			newton_reduction = osm.getPDESolver().result().reduction;
 		
 			uold = unew;
 			// time = current_time;
@@ -879,6 +883,8 @@ void driver_Sh(const GV &gv, // GridView
 										time*Xc_t,
 										dt*Xc_t,
 										newton_iterations,
+										newton_first_defect,
+										newton_reduction,
 										clock_time_elapsed );
 		}
 		// GRAPHICS FOR NEW OUTPUT

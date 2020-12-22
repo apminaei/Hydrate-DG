@@ -198,9 +198,9 @@ public:
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;/* ndim*/
     gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
-    #ifdef STATEINDEPENDENTPROPERTIES
-      		T_ref = property.parameter.RefT()/Xc_T;
-    #endif
+    // #ifdef STATEINDEPENDENTPROPERTIES
+    //   		T_ref = property.parameter.RefT()/Xc_T;
+    // #endif
   }
 
   // volume integral depending on test and ansatz functions
@@ -1137,15 +1137,15 @@ public:
       }
 
       RF omegaup_x_s, omegaup_x_n;
-      if (normalflux_x>0.0)
+      if (normalflux_x>=0.0)
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 1.0;
+        omegaup_x_n = 0.0;
       }
       else
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 0.0;
+        omegaup_x_n = 1.0;
       }
 
       // integration factor
@@ -1527,10 +1527,10 @@ public:
       for (int i = 0; i < lfsu_Sg_s.size(); i++)
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
       RF Sg_n = Sg_s ;//* (1. - Sh_n);
-      if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
-      {
-        Sg_n = bcvalue[Indices::PVId_Sg] ;
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_dirichlet)
+      // {
+      //   Sg_n = bcvalue[Indices::PVId_Sg] ;
+      // }
 
 
       RF Sw_s = 1. - Sg_s - Sh_s;
@@ -1594,7 +1594,7 @@ public:
         XCH4_n = 1. - XH2O_n - XC_n  ;//Active => phase is present => summation condition holds
       } else {
         YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
-        Sg_n = 1. - Sh_n;
+        //Sg_n = 1. - Sh_n;
       }
 
       auto gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
@@ -1759,15 +1759,15 @@ public:
       RF grad_Sg_s = gradu_Sg_s * n_F_local;
       RF grad_Sg_n = grad_Sg_s;
       
-      if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
-      {
-        //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
-        grad_Sg_n = 0.0;
-        if (krN_n > 0.){
-          grad_Sg_n = ((1./(K*krN_n)) * velvalue[Indices::BCId_gas] + grad_Pw_n - rho_g_n * normalgravity 
-          + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n) / coeff_grad_Sw_n;// NOTE: put the correct coefficients K krg and Mug instead of 1.
-        }
-      }
+      // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
+      // {
+      //   //std::cout << coeff_grad_Sw_n << " " << dPc_dSwe_n << " " << dSwe_dSw_n << std::endl;
+      //   grad_Sg_n = 0.0;
+      //   if (krN_n > 0.){
+      //     grad_Sg_n = ((1./(K*krN_n)) * velvalue[Indices::BCId_gas] + grad_Pw_n - rho_g_n * normalgravity 
+      //     + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n) / coeff_grad_Sw_n;// NOTE: put the correct coefficients K krg and Mug instead of 1.
+      //   }
+      // }
 
       // evaluate normal flux of XCH4
       RF grad_XCH4_s = gradu_XCH4_s * n_F_local;
@@ -1844,15 +1844,15 @@ public:
       }
 
       RF omegaup_x_s, omegaup_x_n;
-      if (normalflux_x>0.0)
+      if (normalflux_x>=0.0)
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 1.0;
+        omegaup_x_n = 0.0;
       }
       else
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 0.0;
+        omegaup_x_n = 1.0;
       }
       
       

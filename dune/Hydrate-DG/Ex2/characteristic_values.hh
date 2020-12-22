@@ -2,7 +2,7 @@ class CharacteristicValues{
 
 public:
 
-	constexpr static double x_c = 1000.; 
+	constexpr static double x_c = 100.; 
 	constexpr static double t_c = 1.e6;//7.2e4; // t_end Characteristic value for time
 	constexpr static double permeability_c = 1.e-13;
 	constexpr static double density_c = 1.e3;

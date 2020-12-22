@@ -37,10 +37,10 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-		std::string PATH = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/Ex2/";
+		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/Ex2/inputs/";
+	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 
@@ -49,6 +49,7 @@ int main(int argc, char **argv)
 	    ptreeparser.readINITree(input_file,ptree);
 	    ptreeparser.readOptions(argc,argv,ptree);
 
+		
 		/**************************************************************************************************/
 		// MESH
 	    MeshParameters<Dune::ParameterTree> mesh(ptree);
@@ -107,22 +108,22 @@ int main(int argc, char **argv)
 
 #elif defined(ALUGRID)
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
-		// auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, -L[1]}};
-		// auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
-		// std::array<unsigned int, dim> elements;
-		// elements[0] = N[0];
-		// elements[1] = N[1];
-		// //std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+		std::array<unsigned int, dim> elements;
+		elements[0] = N[0];
+		elements[1] = N[1];
+		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
 
-		std::string filename = ptree.get("grid.alugrid.name",
-                                         (std::string)"grid.msh");
-		auto grid_file = PATH;
-		grid_file += "grids/";
-		grid_file += filename;
-        Dune::GridFactory<Grid> factory;
-        Dune::GmshReader<Grid>::read(factory,grid_file,true,false);
-        std::shared_ptr<Grid> grid(factory.createGrid());
+		// std::string filename = ptree.get("grid.alugrid.name",
+        //                                  (std::string)"grid.msh");
+		// auto grid_file = PATH;
+		// grid_file += "grids/";
+		// grid_file += filename;
+        // Dune::GridFactory<Grid> factory;
+        // Dune::GmshReader<Grid>::read(factory,grid_file,true,false);
+        // std::shared_ptr<Grid> grid(factory.createGrid());
 		 
 
 		typedef Grid::LeafGridView GV;
