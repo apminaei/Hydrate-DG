@@ -141,7 +141,11 @@ public:
 		}
 		else if ( Swe <= a ){
 			double Pc_a = Pentry * pow( a, -eta );
+<<<<<<< HEAD
 			double dPc_a = dPc_dSwe( a,Pentry,lambda ) *characteristicValue.P_c ;
+=======
+			double dPc_a = dPc_dSwe( a,Pentry,lambda ) * characteristicValue.P_c;
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 			Pc = Pc_a + dPc_a * ( Swe - a );
 		}
 		else {
@@ -198,7 +202,11 @@ public:
 //			exit(0);
 		}
 
+<<<<<<< HEAD
 		return dPc/characteristicValue.P_c ;
+=======
+		return dPc/characteristicValue.P_c;
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	}
 
 	/* Pc SCALING FACTORS */

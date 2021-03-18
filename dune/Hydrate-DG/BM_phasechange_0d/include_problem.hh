@@ -22,6 +22,13 @@
 #endif
 //#include "../operators/post_process.hh"
 #include "../operators/Initial.hh"
+// #include "../operators/LocalOperator_Sh1.hh"
+// #include "../operators/LocalOperator_T1.hh"
+// #include "../operators/TimeOperator_T1.hh"
+// #include "../operators/TimeOperator_Sh1.hh"
+// #include "../operators/LocalOperator_2comps.hh"
+// #include "../operators/TimeOperator_2comps.hh"
+// #include "driver_Sh.hh"
 #include "../operators/LocalOperator.hh"
 #include "../operators/TimeOperator.hh"
 #include "driver.hh"

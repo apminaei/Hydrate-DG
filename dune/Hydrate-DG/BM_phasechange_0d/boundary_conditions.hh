@@ -8,9 +8,14 @@ private :
 	const static int dim = GV::dimension;
 	Indices indices;
 	CharacteristicValues characteristicValues;
+<<<<<<< HEAD
 	ProblemInitialConditions<GV,Properties> icvalue;
 	// double time_fraction = property.parameter.time_end() / 2.16e6; 
 	double Xc_time = 100. * 3600. ;/// characteristicValues.t_c;
+=======
+	double time_fraction = property.parameter.time_end() / 2.16e6; 
+	double Xc_time = 100. * 3600. ;//* time_fraction ;/// characteristicValues.t_c;
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 
 public :
 
@@ -31,13 +36,18 @@ public :
 	std::vector< int >
 	type( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
 			const Dune::FieldVector<double,dim-1>& xlocal,
+<<<<<<< HEAD
 		  double time /* s */,
 		  double dt /* s */ ) const {
+=======
+		  double time /*s*/,
+		  double dt /*s*/ ) const {
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 		
-		std::vector< int > bctype(Indices::numOfPVs, 0);
-		bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
+		std::vector< int > bctype(Indices::numOfPVs, -1);
+		// bctype[indices.PVId_Sh] = indices.BCId_dirichlet ;
 		bctype[indices.PVId_T ] = indices.BCId_dirichlet ;
 		if( (time >= 0 ) and (time < (2.00*Xc_time) )){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet ;
@@ -154,7 +164,11 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
+<<<<<<< HEAD
 			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time) )/characteristicValues.P_c ;
+=======
+			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time)  )/characteristicValues.P_c ;
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 		}
 		return bcvalue;
 	}

@@ -1,9 +1,3 @@
-/*
- * TimeOperator.hh
- *
- *  
- */
-
 using namespace Dune::PDELab;
 
 template <class GV, typename Params>
@@ -55,7 +49,13 @@ public:
 		Xc_X = property.characteristicValue.x_c;
 		Xc_Y = property.characteristicValue.x_c;
 		T_ref = property.parameter.ReferenceTemperature()/Xc_T;
+<<<<<<< HEAD
 
+=======
+	// #ifdef STATEINDEPENDENTPROPERTIES
+  	// 	T_ref = property.parameter.RefT()/Xc_T;
+	// #endif
+>>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	}
 	// volume integral depending on test and ansatz functions
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename R>
@@ -186,24 +186,28 @@ public:
         		XC += x(lfsu_XC, i) * phi_XC[i];
 
 			RF Sw = 1. - Sg - Sh;
-			// evaluate Pw
-			auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
-      		auto por = property.soil.SedimentPorosity(cell, ip_local);
+
+			// evaluate Pg
+			auto por = property.soil.SedimentPorosity(cell, ip_local);
       		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
       
 			RF Pg = Pw + Pc ;
 			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 
+			auto Pw_dim = Pw * Xc_P;
+      		auto Pg_dim = Pg * Xc_P;
+      		auto T_dim = T * Xc_T;
+
 			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
-      		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
+      		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 			  
-			auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
-			auto rho_w = property.water.Density(T * Xc_T, Pw * Xc_P, S);
+			auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
+			auto rho_w = property.water.Density(T_dim, Pw_dim, S);
 			auto rho_h = property.hydrate.Density() ;
 			auto rho_s = property.soil.Density() ;
-			auto Cv_g = property.gas.Cv(T * Xc_T, Pg * Xc_P, zCH4) ;
-			auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P, S) ;
-			auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) ;
+			auto Cv_g = property.gas.Cv(T_dim, Pg_dim, zCH4) ;
+			auto Cv_w = property.water.Cv(T_dim, Pw_dim, S) ;
+			auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
@@ -232,7 +236,6 @@ public:
 
 		} 	//End Quadrature Rule
 	}	// End of alpha volume
-	
 	
  	// jacobian contribution of volume term
 	// template <typename EG, typename LFSU, typename X, typename LFSV, typename M>
@@ -371,14 +374,14 @@ public:
 			
 	// 		//auto por = property.soil.SedimentPorosity(cell, ip_local);
 	// 		double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
-    //   	auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
-	// 		auto rho_g = property.gas.Density(T * Xc_T, Pg * Xc_P, zCH4);
-	// 		auto rho_w = property.water.Density(T * Xc_T, Pw * Xc_P, S);
+    //   	auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
+	// 		auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
+	// 		auto rho_w = property.water.Density(T_dim, Pw * Xc_P, S);
 	// 		auto rho_h = property.hydrate.Density() ;
 	// 		auto rho_s = property.soil.Density() ;
-	// 		auto Cv_g = property.gas.Cv(T * Xc_T, Pg * Xc_P, zCH4) ;
-	// 		auto Cv_w = property.water.Cv(T * Xc_T, Pw * Xc_P, S) ;
-	// 		auto Cv_h = property.hydrate.Cv(T * Xc_T, Peff * Xc_P) ;
+	// 		auto Cv_g = property.gas.Cv(T_dim, Pg_dim, zCH4) ;
+	// 		auto Cv_w = property.water.Cv(T_dim, Pw * Xc_P, S) ;
+	// 		auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 	// 		auto Cv_s = property.soil.Cv();
 	// 		auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 

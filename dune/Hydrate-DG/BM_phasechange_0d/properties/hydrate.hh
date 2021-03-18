@@ -1,16 +1,18 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template<typename PTree>
+template<typename GV, typename PTree>
 class Hydrate {
 
 private:
 	CharacteristicValues characteristicValue;
 	const PTree& ptree;
+	const GV& gv;
 	Parameters<PTree> parameter;
+	
 public:
-
-	Hydrate (const PTree& ptree_  )
-	 : ptree(ptree_),
-	 parameter(ptree_)
+	typedef Dune::PDELab::GridFunctionTraits<GV,double,1,Dune::FieldVector<double,1> > Traits;
+	Hydrate (const GV& gv_, const PTree& ptree_  )
+	 	:ptree(ptree_), gv(gv_),
+	 	parameter(ptree_)
   	{}
 
 	double Density( ) const {
@@ -73,4 +75,6 @@ public:
 		return Cv / characteristicValue.volumetricheat_c;
 
 	}
+	
 };
+
