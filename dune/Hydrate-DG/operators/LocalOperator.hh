@@ -1683,9 +1683,9 @@ public:
       for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
         Pw_s += x(lfsu_Pw_s, i) * phi_Pw_s[i];
       RF Pw_n = Pw_s;
-      if (veltype[Indices::BCId_water] == Indices::BCId_dirichlet)
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_dirichlet)
       {
-        Pw_n = velvalue[Indices::BCId_water] ;
+        Pw_n = bcvalue[Indices::PVId_Pw] ;
       }
 
       // evaluate T
@@ -1694,9 +1694,9 @@ public:
         T_s += x(lfsu_T_s, i) * phi_T_s[i];
         
       RF T_n = T_s;
-      if (veltype[Indices::BCId_heat] == Indices::BCId_dirichlet)
+      if (bctype[Indices::PVId_T] == Indices::BCId_dirichlet)
       {
-        T_n = velvalue[Indices::BCId_heat] ;
+        T_n = bcvalue[Indices::PVId_T] ;
       }
 
       // evaluate Sh
@@ -1725,9 +1725,9 @@ public:
         XC_s += x(lfsu_XC_s, i) * phi_XC_s[i];
       
       RF XC_n = XC_s ;
-      if (veltype[Indices::BCId_salt] == Indices::BCId_dirichlet)
+      if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
       {
-        XC_n = velvalue[Indices::BCId_salt] ;
+        XC_n = bcvalue[Indices::PVId_C] ;
       }
 
       // evaluate XCH4
@@ -1946,6 +1946,10 @@ public:
 	    // evaluate normal flux of Pw i.e. grad_Pw.n
       RF grad_Pw_s = gradu_Pw_s * n_F_local;
       RF grad_Pw_n = grad_Pw_s;
+      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
+      {
+        grad_Pw_n = bcvalue[Indices::PVId_Pw];//velvalue[Indices::BCId_water];
+      }
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann)
       {
         grad_Pw_n = (-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;//velvalue[Indices::BCId_water];
@@ -2076,26 +2080,26 @@ public:
       }
 
       RF omegaup_x_s, omegaup_x_n;
-      if (normalflux_x>=0.0)
+      if (normalflux_x>0.0)
       {
-        omegaup_x_s = 1.0;
-        omegaup_x_n = 0.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       else
       {
-        omegaup_x_s = 0.0;
-        omegaup_x_n = 1.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       RF omegaup_T_s, omegaup_T_n;
-      if (normalflux_T>=0.0)
+      if (normalflux_T>0.0)
       {
-        omegaup_T_s = 1.0;
-        omegaup_T_n = 0.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
       else
       {
-        omegaup_T_s = 0.0;
-        omegaup_T_n = 1.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
       
       //   fluxes and diff. flux
