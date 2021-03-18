@@ -24,8 +24,8 @@ public:
 	std::vector<double> EquilibriumMoleFractions( double T/*K*/, double Pg/*Pa*/, double Sg, double Sw , double Xc, double z )const{
 
 		double S = Xc * (salt.MolarMass()/methane.MolarMass());
-		double f_CH4 = z*Pg/methane.SolubilityCoefficient(T,S);
-		double f_H2O = Pg/water.SaturatedVaporPressure( T,S );
+		double f_CH4 = z*Pg/(methane.SolubilityCoefficient(T,S)*X_c.P_c);
+		double f_H2O = Pg/(water.SaturatedVaporPressure( T,S )*X_c.P_c);
 
 		double Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
 		double Y_CH4 = 1.-Y_H2O;
@@ -45,7 +45,7 @@ public:
 
 		// NOTE: it is not necessary to check case1,2 for fncs f_CH4 and f_H2O because the cases are already determined within classes CH4 and H2O.
 		double S = Xc * (salt.MolarMass()/methane.MolarMass());
-		double Y_CH4 = X_CH4 * methane.SolubilityCoefficient(T,S) / ( z * Pg ) ;
+		double Y_CH4 = X_CH4 * (methane.SolubilityCoefficient(T,S)*X_c.P_c) / ( z * Pg ) ;
 		return Y_CH4;
 	}
 
@@ -53,7 +53,7 @@ public:
 
 		// NOTE: it is not necessary to check case1,2 for fncs f_CH4 and f_H2O because the cases are already determined within classes CH4 and H2O.
 		double S = Xc * (salt.MolarMass()/methane.MolarMass());
-		double X_H2O = Y_H2O * Pg / water.SaturatedVaporPressure( T,S );
+		double X_H2O = Y_H2O * Pg / (water.SaturatedVaporPressure( T,S )*X_c.P_c);
 		return X_H2O;
 	}
 

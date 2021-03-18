@@ -9,7 +9,7 @@
 #define INCLUDESDUNE_HH_
 // (options: PVS, NCP, CGP)
 #define NCP
-#define YASP
+#define ALUGRID
 #define PARALLEL
 
 #include<dune/common/parametertreeparser.hh>
@@ -27,6 +27,7 @@
 #include<dune/grid/io/file/gmshreader.hh>
 #include<dune/grid/yaspgrid.hh>
 
+#include <dune/localfunctions/utility/localfiniteelement.hh>
 
 #ifdef HAVE_ALBERTA
 #include<dune/grid/albertagrid.hh>
@@ -48,7 +49,7 @@
 #include<dune/istl/io.hh>
 #include<dune/istl/superlu.hh>
 #include<dune/pdelab/function/callableadapter.hh>
-
+//  #include<dune/pdelab.hh>
 #include<dune/pdelab/newton/newton.hh>
 #include<dune/pdelab/common/function.hh>
 #include<dune/pdelab/common/vtkexport.hh>

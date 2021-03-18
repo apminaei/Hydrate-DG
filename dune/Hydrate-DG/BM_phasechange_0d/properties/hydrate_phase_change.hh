@@ -108,28 +108,28 @@ public:
 					  * potential_P
 					  ;
 		}
-	    return gas_gen;
+	    return gas_gen/ characteristicValue.X_source_mass;
 	}
 
 	// rate of water generation:
 	double WaterGenerationRate ( double gasGenRate ) const {
-      double water_gen =  gasGenRate * hydrate.HydrationNumber() * ( water.MolarMass() / methane.MolarMass() ) ;
-      return water_gen;	/*[kg/m³s]*/
+      double water_gen =  gasGenRate * characteristicValue.X_source_mass * hydrate.HydrationNumber() * ( water.MolarMass() / methane.MolarMass() ) ;
+      return water_gen/ characteristicValue.X_source_mass;	/*[kg/m³s]*/
 	}
 
 	// rate of hydrate dissociation:
 	double HydrateDissociationRate( double gasGenRate ) const {
-      double hyd_decomp= - gasGenRate * ( hydrate.MolarMass() / methane.MolarMass() ) ;
-      return hyd_decomp;/*[kg/m³s]*/
+      double hyd_decomp= - gasGenRate * characteristicValue.X_source_mass * ( hydrate.MolarMass() / methane.MolarMass() ) ;
+      return hyd_decomp/ characteristicValue.X_source_mass;/*[kg/m³s]*/
 	}
 
 	// heat of hydrate dissociation:
 	double HeatOfDissociation( double gasGenRate, double T ) const {
-      double Q_decomp/*[W/m³]*/= - ( gasGenRate / hydrate.MolarMass() )
+      double Q_decomp/*[W/m³]*/= - ( gasGenRate * characteristicValue.X_source_mass / hydrate.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
 								 * 1.;
 
-      return Q_decomp;
+      return Q_decomp/ characteristicValue.X_source_heat;
 	}
   //! get a reference to the grid view
   inline const GV& getGridView () {return gv;}

@@ -66,7 +66,7 @@ public:
 	}
 
 	double MolarDensity(double T, double Pw, double S)const{
-		return Density( T,Pw,S)/MolarMass();
+		return Density( T,Pw,S)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity( double T, double Pw, double S ) const {
@@ -125,9 +125,9 @@ public:
 		double Cv;
 		/* mu: unit -> J*kg^-1*K^-1 */
 
-		Cv = Cp( T, Pw, S );
+		Cv = Cp( T, Pw, S )*characteristicValue.specificheat_c ;
 
-		return Cv;
+		return Cv/characteristicValue.volumetricheat_c;
 
 	}
 

@@ -52,7 +52,7 @@ constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
 	}
 
 	double MolarDensity(double T, double Pg, double z_CH4)const{
-		return Density( T,Pg,z_CH4)/MolarMass();
+		return Density( T,Pg,z_CH4)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity(double T, double Pg) const {
@@ -214,7 +214,7 @@ constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
 		Cv += (-1.) * Ru * nonidealfactor ;
 #endif
 
-		return Cv/characteristicValue.specificheat_c;
+		return Cv/characteristicValue.volumetricheat_c;
 	}
 
 	double SolubilityCoefficient( double T/*K*/, double S ) const {
