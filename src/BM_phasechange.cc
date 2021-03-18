@@ -36,10 +36,6 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-<<<<<<< HEAD:src/hydrateDG-Ex1.cc
-
-=======
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4:src/BM_phasechange.cc
 		std::string PATH = "/home/peiravim/dune/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
@@ -96,15 +92,8 @@ int main(int argc, char **argv)
 		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
 		grid->refineOptions(false); // keep overlap in cells
 
-<<<<<<< HEAD:src/hydrateDG-Ex1.cc
 #elif defined(UG)
 
-=======
-		typedef Grid::LeafGridView GV;
-		const GV &gv = grid->leafGridView();
-		grid->loadBalance();
-#elif defined(UG)
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4:src/BM_phasechange.cc
 		typedef Dune::UGGrid<dim> Grid;
 
 		// typedef std::vector<int> GmshIndexMap;
@@ -128,21 +117,11 @@ int main(int argc, char **argv)
 		elements[1] = N[1]; 
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-<<<<<<< HEAD:src/hydrateDG-Ex1.cc
 		
 		
 		
 
 #elif defined(ALUGRID)
-=======
-
-		typedef Grid::LeafGridView GV;
-		GV gv = grid->leafGridView();
-		grid->loadBalance();
-
-#elif defined(ALUGRID) 
-		
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4:src/BM_phasechange.cc
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		// typedef Dune::ALUGrid<dim, dim, Dune::simplex, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};

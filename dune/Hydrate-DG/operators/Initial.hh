@@ -38,11 +38,7 @@ public:
     const int dim = Traits::GridViewType::Grid::dimension;
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
-<<<<<<< HEAD
     y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pw];///CharacteristicValues::P_c ;	/* Pa */
-=======
-    y = icvalue.evaluate(e,xlocal)[Indices::PVId_Pw] ;	/* ndim */
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
     //std::cout<< "Pw_boundary = " << y << std::endl;
     return;
   }
@@ -183,11 +179,7 @@ public:
     typedef typename Traits::GridViewType::Grid::ctype ctype;
     Dune::FieldVector<ctype,dim> x = e.geometry().global(xlocal);
 
-<<<<<<< HEAD
     y= icvalue.evaluate(e,xlocal)[Indices::PVId_T];///CharacteristicValues::T_c ; //initial temperature
-=======
-    y= icvalue.evaluate(e,xlocal)[Indices::PVId_T] ; //initial temperature
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
     return;
   }
   //! get a reference to the grid view

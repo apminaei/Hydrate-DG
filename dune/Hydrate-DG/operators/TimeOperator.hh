@@ -49,13 +49,6 @@ public:
 		Xc_X = property.characteristicValue.x_c;
 		Xc_Y = property.characteristicValue.x_c;
 		T_ref = property.parameter.ReferenceTemperature()/Xc_T;
-<<<<<<< HEAD
-
-=======
-	// #ifdef STATEINDEPENDENTPROPERTIES
-  	// 	T_ref = property.parameter.RefT()/Xc_T;
-	// #endif
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	}
 	// volume integral depending on test and ansatz functions
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename R>

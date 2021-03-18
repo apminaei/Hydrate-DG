@@ -511,19 +511,11 @@ public:
 														    zCH4,
 														    S,
 														    por,
-<<<<<<< HEAD
 														    permeability*Xc_K); /*ndim*/
 			auto q_w  = property.kinetics.WaterGenerationRate( q_g ); /*ndim*/
 			auto q_h  = property.kinetics.HydrateDissociationRate( q_g ); /*ndim*/
 			auto q_s = property.salt.Source(); /*ndim------kg/m³s*/
 			auto Q = property.kinetics.HeatOfDissociation( q_g, T*Xc_T ); /*ndim----[W/m³]*/
-=======
-														    permeability*Xc_K); /*[kg/m³s]*/
-			auto q_w  = property.kinetics.WaterGenerationRate( q_g ); /*[kg/m³s]*/
-			auto q_h  = property.kinetics.HydrateDissociationRate( q_g ); /*[kg/m³s]*/
-			auto q_s = property.salt.Source(); /*kg/m³s*/
-			auto Q = property.kinetics.HeatOfDissociation( q_g, T_dim ); /*[W/m³]*/
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
     
       auto Cp_g = property.gas.Cp(T_dim, Pg_dim, zCH4); /* ndim */
       auto Cp_w = property.water.Cp(T_dim, Pw_dim, S); /* ndim */
@@ -1666,13 +1658,8 @@ public:
 			auto bctype = bc.type(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t) ;
       auto veltype = bc.velType(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t) ;
 			// evaluate boundary condition values for {Pw,Sg} or {Fw,Fg} 
-<<<<<<< HEAD
 			auto bcvalue = bc.value(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t) ;
       auto velvalue = bc.velValue(ig, ip.position(), (*time)*Xc_t, (*dt)*Xc_t ) ;
-=======
-			auto bcvalue = bc.value(ig, ip.position(), (*time)*Xc_t, (*dt) *Xc_t) ;
-      auto velvalue = bc.velValue(ig, ip.position(), (*time)*Xc_t, (*dt) *Xc_t) ;
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 
       // evaluate basis functions at local quadrature points 
       auto &psi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
@@ -2006,35 +1993,32 @@ public:
         grad_XC_n = velvalue[Indices::BCId_salt];
       }
      
-<<<<<<< HEAD
-      // evaluate Pg
-      auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
-      auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
-      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
+      // // evaluate Pg
+      // auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
+      // auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
+      // auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
       
-      RF Pg_s = Pw_s + Pc_s;
-      auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s);
-      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
+      // RF Pg_s = Pw_s + Pc_s;
+      // auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s);
+      // auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
       
-      RF Pg_n = Pw_n + Pc_n;
-      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
+      // RF Pg_n = Pw_n + Pc_n;
+      // RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
+      // RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
 
-      auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */
-      auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
-      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
+      // auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */
+      // auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
+      // * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
       
-      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s,0.0,0.0);
-      auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
-      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0.0, 0.0);
-      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
+      // auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s,Sh_s,0.0,0.0);
+      // auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
+      // auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0.0, 0.0);
+      // auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s ;
 
-      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
-      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0.0, 0.0);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
+      // auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
+      // auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0.0, 0.0);
+      // auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
 
-=======
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
       auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s - coeff_grad_Sw_s) * grad_Sh_s;
       auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n - coeff_grad_Sw_n) * grad_Sh_n;
       if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)

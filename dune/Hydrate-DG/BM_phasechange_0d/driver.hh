@@ -194,7 +194,6 @@ void driver(const GV &gv, // GridView
 	
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-<<<<<<< HEAD
 	// ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::IIPG;
 	// ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::IIPG;
 	// ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::IIPG;
@@ -211,19 +210,6 @@ void driver(const GV &gv, // GridView
 	double alpha_T = 1.e0;
 	double alpha_x = 1.e0;
 	double alpha_y = 1.e0;
-=======
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::NIPG;
-	double alpha_g = 1.e3;
-	double alpha_w = 1.e3;
-	double alpha_s = 1.e3; 
-	double alpha_T = 1.e3;
-	double alpha_x = 1.e3;
-	double alpha_y = 1.e3;
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	double intorder=4;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
@@ -260,11 +246,7 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, cc, max_linear_iteration, 5,1);
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
-<<<<<<< HEAD
 	LS ls(gfs, max_linear_iteration, 1, true, true);
-=======
-	LS ls(gfs, 100, 1, true, true);
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	/* 	NOTES:
 		LINEAR SOLVER STATISTICS
 		res.iterations = i;
@@ -341,7 +323,6 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
 	PDESOLVER pdesolver(igo, ls);
 	// 	select control parameters for non-linear PDE-solver
-<<<<<<< HEAD
 	// typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
 	// typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
 	// lineSearchStrategy linesearchstrategy(pdesolver);
@@ -352,17 +333,6 @@ void driver(const GV &gv, // GridView
     // // pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
 	// pdesolver.setAbsoluteLimit(ptree.get("newton.AbsoluteLimit",(double)1.e-4)); 
 
-=======
-	// 	typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
-	// typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
-	// lineSearchStrategy linesearchstrategy(pdesolver);
-	// pdesolver.setParameters(ptree.sub("newton"));
-	// pdesolver.setVerbosityLevel(2);
-	// pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
-	// pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
-	// pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
-	
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 
 	// SELECT TIME-STEPPER
@@ -618,11 +588,7 @@ void driver(const GV &gv, // GridView
 		/*********************************************************************************************
 			 * OUTPUT
 			 *********************************************************************************************/
-<<<<<<< HEAD
 		if (((time + dt)/(t_OP * opcount) > (1.-1.e-6)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-6)))
-=======
-		if ((time + dt > (t_OP * opcount - 1.e-3)) and (time + dt < t_OP * opcount + 1.e-3))
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 		{
 			// primary variables
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
@@ -685,11 +651,7 @@ void driver(const GV &gv, // GridView
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-<<<<<<< HEAD
 		if ((time + dt) > (t_OP * opcount + 1.e-6) and time < (t_OP * opcount - 1.e-6) )
-=======
-		if ((time + dt) * Xc_t > (t_OP * opcount * Xc_t + 1.e-8) )
->>>>>>> b6861152c9316c889668daf611e4f10774af28a4
 		{
 			
 			dt = t_OP * opcount - time;
