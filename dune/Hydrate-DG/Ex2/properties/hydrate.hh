@@ -30,7 +30,7 @@ public:
 	}
 
 	double MolarDensity() const {
-		return Density()/MolarMass();
+		return Density()*characteristicValue.density_c/MolarMass();
 	}
 
 	double HydrationNumber() const
@@ -60,6 +60,8 @@ public:
 
 		Cp = ( 1.9370547e-05*T*T*T - 1.5151760e-02*T*T + 3.9553876*T - 342.70565 )*1.0e3;
 
+
+	
 		return Cp/characteristicValue.specificheat_c;
 
 	}
@@ -69,9 +71,9 @@ public:
 		double Cv;
 		/* Cv: unit -> J/kg.K */
 
-		Cv = Cp( T, P ) ;
+		Cv = Cp( T, P )*characteristicValue.specificheat_c ;
 
-		return Cv;
+		return Cv/characteristicValue.volumetricheat_c;
 
 	}
 };

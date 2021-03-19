@@ -66,7 +66,7 @@ public:
 	}
 
 	double MolarDensity(double T, double Pw, double S)const{
-		return Density( T,Pw,S)/MolarMass();
+		return Density( T,Pw,S)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity( double T, double Pw, double S ) const {
@@ -108,7 +108,7 @@ public:
 
 		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );
 
-		return kth/characteristicValue.thermalconductivity_c;
+		return kth/characteristicValue.thermalconductivity_c ;
 	}
 
 	double Cp( double T, double Pw, double S ) const {
@@ -125,9 +125,9 @@ public:
 		double Cv;
 		/* mu: unit -> J*kg^-1*K^-1 */
 
-		Cv = Cp( T, Pw, S );
+		Cv = Cp( T, Pw, S )*characteristicValue.specificheat_c;
 
-		return Cv;
+		return Cv/characteristicValue.volumetricheat_c;;
 
 	}
 
@@ -135,10 +135,10 @@ public:
 
 		double psat;   /* [Pa] */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		T = T_ref;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		double T_ref = parameter.RefT();
+// 		T = T_ref;
+// #endif
 
 		// REF: SUGAR TOOLBOX
 

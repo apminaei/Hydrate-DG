@@ -1243,25 +1243,26 @@ public:
       RF omegaup_x_s, omegaup_x_n;
       if (normalflux_x>0.0)
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 1.0;
+        omegaup_x_n = 0.0;
       }
       else
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 0.0;
+        omegaup_x_n = 1.0;
       }
       RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>0.0)
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 1.0;
+        omegaup_T_n = 0.0;
       }
       else
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 0.0;
+        omegaup_T_n = 1.0;
       }
+      
 
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
 
@@ -2082,24 +2083,24 @@ public:
       RF omegaup_x_s, omegaup_x_n;
       if (normalflux_x>0.0)
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 1.0;
+        omegaup_x_n = 0.0;
       }
       else
       {
-        omegaup_x_s = 0.5;
-        omegaup_x_n = 0.5;
+        omegaup_x_s = 0.0;
+        omegaup_x_n = 1.0;
       }
       RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>0.0)
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 1.0;
+        omegaup_T_n = 0.0;
       }
       else
       {
-        omegaup_T_s = 0.5;
-        omegaup_T_n = 0.5;
+        omegaup_T_s = 0.0;
+        omegaup_T_n = 1.0;
       }
       
       //   fluxes and diff. flux

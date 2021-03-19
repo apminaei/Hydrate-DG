@@ -480,11 +480,11 @@ void driver(const GV &gv, // GridView
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
 			
-			auto jacobian = osm.getPDESolver().getJacobian();
-			if(helper.rank()==0){
-			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
-			Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
-			}
+			// auto jacobian = osm.getPDESolver().getJacobian();
+			// if(helper.rank()==0){
+			// Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
+			// Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
+			// }
 			auto newton_defects = osm.getPDESolver().result().defects;
 			auto u_norm_two = unew.two_norm();
 			auto u_norm_one = unew.one_norm();
@@ -617,9 +617,8 @@ void driver(const GV &gv, // GridView
 		//		2. ADVANCE TIME:
 		time += dt;
 		if(helper.rank()==0){
-			std::cout<<" "
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< " time = " << time ;
+			std::cout<<" "<< std::endl;
+			std::cout<< " time = " << time*Xc_t ;
 			std::cout<< std::flush;
 		}
 		if (adaptive_time_control)
@@ -643,32 +642,25 @@ void driver(const GV &gv, // GridView
 			dt = dtstart;
 		}
 		if(helper.rank()==0){
-			std::cout << " , time+dt = " 
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< (time + dt)
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< " , opTime = "  << t_OP * opcount  ;
+			std::cout << " , time+dt = " << (time + dt)*Xc_t
+					  << " , opTime = "  << t_OP * opcount * Xc_t ;
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-		if ((time + dt) > (t_OP * opcount + 1.e-6) and time < (t_OP * opcount - 1.e-6) )
+		if ((time + dt) > (t_OP * opcount + 1.e-6) and time < (t_OP * opcount - 1.e-6))
 		{
 			
 			dt = t_OP * opcount - time;
 
 			if(helper.rank()==0){
-				std::cout<< " , because timeNext > opNext , dt set to : " 
-				<< std::setw(12) << std::setprecision(8) << std::scientific
-				<< dt  << std::endl;
+				std::cout<< " , because timeNext > opNext , dt set to : " << dt*Xc_t << std::endl;
 				std::cout<< std::flush;
 			}
 			dtFlag = -1;
 		}
- 
+
 		if(helper.rank()==0){
-			std::cout<< " , dt  : "  
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< dt  << std::endl;
+			std::cout<< " , dt  : " << dt*Xc_t << std::endl;
 			std::cout<<" "<< std::endl;
 			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
 			std::cout<< std::flush;

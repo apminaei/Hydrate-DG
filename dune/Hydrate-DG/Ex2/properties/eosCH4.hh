@@ -3,8 +3,13 @@
 	Check for the pressure? Pg or Pw
 
 */
+template<typename PTree>
 class BaseEoS{
+	const PTree& ptree;
 public:
+	BaseEoS (const PTree& ptree_  )
+	 : ptree(ptree_)
+  	{}
 	double EvaluateCompressibilityFactor( double T, double P )const{
 		return 0.7;
 	}
@@ -50,8 +55,8 @@ public:
 
 		double ac = pow( (1 + kappa * ( 1 - sqrt(T/Tc) ) ) , 2 );
 
-		double a_T = 0.45724 * ( ( R_u * R_u * Tc * Tc ) / Pc ) * ac ;
-		double b = 0.07780 * ( R_u * Tc / Pc );
+		double a_T = 0.45724 * ( ( R_u * R_u * Tc * Tc ) / Pc ) * ac ; /* K^2 / Pa */
+		double b = 0.07780 * ( R_u * Tc / Pc );  /* K / Pa */
 
 		PREoSParams[0] = a_T;
 		PREoSParams[1] = b  ;

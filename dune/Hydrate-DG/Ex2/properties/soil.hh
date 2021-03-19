@@ -24,7 +24,7 @@ public:
 		auto prop_L = parameter.layer_properties();
 
 		double por = prop_L[0][0];;
-		if( parameter.mesh.isLenz(xglobal)){
+		if( parameter.mesh.isLenz(xglobal) and parameter.num_materials() > 1){
 			por = prop_L[1][0];
 		}
 		return por;
@@ -38,7 +38,7 @@ public:
 		
 		auto prop_L = parameter.layer_properties();
 		double K = prop_L[0][1];/*m^2*/
-		if( parameter.mesh.isLenz(xglobal)){
+		if( parameter.mesh.isLenz(xglobal) and parameter.num_materials() > 1){
 			K = prop_L[1][1];
 		}
 
@@ -84,8 +84,8 @@ public:
 	}
 
 	double ThermalConductivity() const {
-		/* unit -> W/mK */
-		double kth = 3.0;
+		/* unit -> Watt/(meter Kelvin) */ 
+		double kth = 3.0 ;
 		return kth/characteristicValue.thermalconductivity_c;
 	}
 
@@ -97,8 +97,8 @@ public:
 
 	double Cv() const {
 		/* unit -> W/kg.K */
-		double Cv = Cp();
-		return Cv;
+		double Cv = Cp()*characteristicValue.specificheat_c;
+		return Cv/characteristicValue.volumetricheat_c;
 	}
 
 	double Tortuosity( double porosity ) const {

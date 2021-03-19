@@ -46,13 +46,13 @@ public:
 		Pg = P_ref;
 #endif
 		double R_CH4 = Ru/MolarMass();
-		rho = Pg/( z_CH4 * R_CH4 * T);
+		rho =  Pg / ( z_CH4 * R_CH4 * T);
 
 		return rho/characteristicValue.density_c;
 	}
 
 	double MolarDensity(double T, double Pg, double z_CH4)const{
-		return Density( T,Pg,z_CH4)/MolarMass();
+		return Density( T,Pg,z_CH4)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity(double T, double Pg) const {
@@ -73,8 +73,8 @@ public:
 		double mu_0 = 1.0707e-5;
 		// ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
 		mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
-											- 4.1719e-20 * Pg * Pg
-											+ 7.3232e-28 * Pg * Pg * Pg )
+											+ 4.1719e-20 * Pg * Pg
+											- 7.3232e-28 * Pg * Pg * Pg )
 				); // Pa.s -> ref: Frauenhofer Comsol Model
 		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
 
@@ -101,7 +101,7 @@ public:
 #endif
 
 		kth = A0 + A1 * T + A2 * T*T + A3 * T*T*T ;
-		return kth/characteristicValue.thermalconductivity_c;
+		return kth/characteristicValue.thermalconductivity_c ;
 	}
 
 	double Cp_ideal( double T, double Pg ) const {
@@ -169,7 +169,6 @@ public:
 #else
 		Cp = Cp_ideal( T, Pg ) + Cp_res( T, Pg, z_CH4 );		/* [J/(kg*K)] */
 #endif
-
 		return Cp/characteristicValue.specificheat_c;
 	}
 
@@ -214,7 +213,8 @@ public:
 		Cv += (-1.) * Ru * nonidealfactor ;
 #endif
 
-		return Cv/characteristicValue.specificheat_c;
+
+		return Cv/characteristicValue.volumetricheat_c;
 	}
 
 	double SolubilityCoefficient( double T/*K*/, double S ) const {
@@ -224,12 +224,12 @@ public:
 #ifdef STATEINDEPENDENTPROPERTIES
 		double T_ref = parameter.RefT();
 		T = T_ref;
-#elif P1_CASE2
+// #elif P1_CASE2
 
-#else
-		std::cout<< "Error thrown from " << __FILE__ << " , line: " << __LINE__  << std::endl;
-		std::cout<< "Problem case in problem_NCPvsPVS_p1 is not defined. Check 'problem_NCPvsPVS_p1/include_problem_files.hh'." << std::endl;
-		exit(0);
+// #else
+// 		std::cout<< "Error thrown from " << __FILE__ << " , line: " << __LINE__  << std::endl;
+// 		std::cout<< "Problem case in problem_NCPvsPVS_p1 is not defined. Check 'problem_NCPvsPVS_p1/include_problem_files.hh'." << std::endl;
+// 		exit(0);
 #endif
 
 		// REF: SUGAR TOOLBOX

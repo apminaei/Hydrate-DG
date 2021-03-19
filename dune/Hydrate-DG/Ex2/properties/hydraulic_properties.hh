@@ -63,6 +63,8 @@ public:
 		if( Swe<0.){
 			Swe=0.;
 		}
+		// std::cout<< " NOT ERROR in HydraulicProperties::dPcSF1:dSh( Sh ),   Sh = " << Sh << std::endl;
+		// exit(0);
 		return Swe;
 	}
 
@@ -258,6 +260,7 @@ public:
 
 		return PcSF ;
 	}
+
 
 	/* RELATIVE PERMEABILITIES */
 

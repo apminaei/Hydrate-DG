@@ -26,7 +26,7 @@ public:
 		double S = Xc * (salt.MolarMass()/methane.MolarMass());
 		double f_CH4 = z*Pg/(methane.SolubilityCoefficient(T,S)*X_c.P_c);
 		double f_H2O = Pg/(water.SaturatedVaporPressure( T,S )*X_c.P_c);
-
+		
 		double Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
 		double Y_CH4 = 1.-Y_H2O;
 		double X_H2O = Y_H2O * f_H2O;
@@ -76,7 +76,7 @@ public:
 
 		D = ( a0 + a1*T + a2/Pg ) ;
 
-		return D/X_c.dispersivity_c;
+		return D/X_c.dispersivity_c ;
 
 	}
 
@@ -94,7 +94,7 @@ public:
 		double A = 0.003475 ; 	/* K */
 		double B = 1.57e-5;		/* cm^2/s */
 
-		D = pow((Pw/1.e5),2.) * B * exp(-A/T) * 1.0e-6;
+		D = B * exp(-A/T) * 1.0e-6;//pow((Pw/1.e5),2.) * B * exp(-A/T) * 1.0e-6;
 
 		return D/X_c.dispersivity_c;
 	}
