@@ -48,7 +48,7 @@ public :
 		}
 		if( property.mesh.isBottomBoundary(globalPos)){
 			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
-			bctype[indices.PVId_Pw] = indices.BCId_neumann;
+			// bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
 		}
@@ -99,7 +99,7 @@ public :
 		
 		if( property.mesh.isBottomBoundary(globalPos)){
 			bcvalue[indices.PVId_T] = 0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
-			bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]* (property.characteristicValue.x_c/property.characteristicValue.P_c);
+			// bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]* (property.characteristicValue.x_c/property.characteristicValue.P_c);
 			// 			 - 2600.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
 			// 									/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
 		}

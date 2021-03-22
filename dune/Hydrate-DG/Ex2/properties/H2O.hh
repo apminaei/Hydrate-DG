@@ -47,14 +47,14 @@ public:
 		double alpha_S = 0.78*1e3;
 		double alpha_P = 0.0045;
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		double P_ref = parameter.RefP();
-		double S_ref = parameter.RefSal();
-		T  = T_ref;
-		Pw = P_ref;
-		S  = S_ref;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		double T_ref = parameter.RefT();
+// 		double P_ref = parameter.RefP();
+// 		double S_ref = parameter.RefSal();
+// 		T  = T_ref;
+// 		Pw = P_ref;
+// 		S  = S_ref;
+// #endif
 
 		rho = rho_0
 			+ (   alpha_P*(Pw*1.e-4)
@@ -100,14 +100,15 @@ public:
 #ifdef STATEINDEPENDENTPROPERTIES
 		double T_ref = parameter.RefT();
 		double P_ref = parameter.RefP();
-		double S_ref = parameter.RefSal();
+		//double S_ref = parameter.RefSal();
 		T  = T_ref;
 		Pw = P_ref;
-		S  = S_ref;
+		//S  = S_ref;
 #endif
 
 		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );
-
+		// std::cout << kth << std::endl;
+		// exit(0);
 		return kth/characteristicValue.thermalconductivity_c ;
 	}
 

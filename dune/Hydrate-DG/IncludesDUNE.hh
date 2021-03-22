@@ -10,7 +10,7 @@
 // (options: PVS, NCP, CGP)
 #define NCP
 #define ALUGRID
-#define PARALLEL
+// #define PARALLEL
 
 #include<dune/common/parametertreeparser.hh>
 #include<dune/common/parallel/mpihelper.hh>

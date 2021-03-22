@@ -39,12 +39,12 @@ public:
 		double rho;
 		/* rho: unit -> kg/m^3 */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		double P_ref = parameter.RefP();
-		T = T_ref;
-		Pg = P_ref;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		double T_ref = parameter.RefT();
+// 		double P_ref = parameter.RefP();
+// 		T = T_ref;
+// 		Pg = P_ref;
+// #endif
 		double R_CH4 = Ru/MolarMass();
 		rho =  Pg / ( z_CH4 * R_CH4 * T);
 
@@ -164,11 +164,11 @@ public:
 		// REFERENCE:
 		double Cp; /* [J/(kg*K)] */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		Cp = Cp_ideal( T, Pg );		/* [J/(kg*K)] */ // NOTE: Cases are checked in Cp_ideal function!
-#else
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		Cp = Cp_ideal( T, Pg );		/* [J/(kg*K)] */ // NOTE: Cases are checked in Cp_ideal function!
+// #else
 		Cp = Cp_ideal( T, Pg ) + Cp_res( T, Pg, z_CH4 );		/* [J/(kg*K)] */
-#endif
+// #endif
 		return Cp/characteristicValue.specificheat_c;
 	}
 
@@ -178,9 +178,9 @@ public:
 
 		Cv =   Cp( T, Pg, z_CH4 )*characteristicValue.specificheat_c; // NOTE: Cases are checked in Cp_ideal function!
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		Cv += (-1.) * Ru/MolarMass();		/* [J/(kg*K)] */
-#else
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		Cv += (-1.) * Ru/MolarMass();		/* [J/(kg*K)] */
+// #else
 		// Based on Peng Robinson's EoS
 		// REFERENCE:
 		double omega = AccentricityFactor();
@@ -211,7 +211,7 @@ public:
 		double nonidealfactor = ( pow( M-N , 2 ) ) / ( M*M - 2.*A * (z_CH4+B) );
 
 		Cv += (-1.) * Ru * nonidealfactor ;
-#endif
+// #endif
 
 
 		return Cv/characteristicValue.volumetricheat_c;

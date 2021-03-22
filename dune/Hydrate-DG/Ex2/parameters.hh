@@ -222,7 +222,7 @@ public:
 #ifdef STATEINDEPENDENTPROPERTIES
 	// (P,T,sal) reference state for CASE1
 	double RefP() const {
-		return 10.*ReferencePressure(); /*Pa*/
+		return 10.* ReferencePressure(); /*Pa*/
 	}
 
 	double RefT() const {
