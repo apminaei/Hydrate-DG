@@ -53,12 +53,13 @@ void driver(const GV &gv, // GridView
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 	int max_linear_iteration = ptree.get("newton.maxLinearIteration",(int)10);
-	const int degree_S = 0;
+	const int degree_Sg = 1;
 	const int degree_P = 1;
-	const int degree_T = 0;
+	const int degree_Sh = 0;
+	const int degree_T = 1;
 	const int degree_X = 0;
+	const int degree_C = 1;
 	const int degree_Y = 0;
-
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
@@ -69,13 +70,17 @@ void driver(const GV &gv, // GridView
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_S;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_T; 
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_X; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Y; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Y;
+
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sh; 
+
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_C;  
 
 	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_P;
 	
@@ -88,30 +93,35 @@ void driver(const GV &gv, // GridView
 	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_Y; 
 	FEM_X fem_x;
 	FEM_T fem_T;
-	FEM_S fem_S;
+	FEM_Sg fem_Sg;
 	FEM_P fem_P;
 	FEM_Y fem_y;
+	FEM_C fem_c;
+	FEM_Sh fem_Sh;
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
-	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_S, CON0, VBE0> GFS_S; // gfs
-	GFS_S gfs_S(gv, fem_S);
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sg, CON0, VBE0> GFS_Sg; // gfs
+	GFS_Sg gfs_Sg(gv, fem_Sg);
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sh, CON0, VBE0> GFS_Sh; // gfs
+	GFS_Sh gfs_Sh(gv, fem_Sh);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_T, CON0, VBE0> GFS_T; // gfs
 	GFS_T gfs_T(gv, fem_T);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_X, CON0, VBE0> GFS_X; // gfs
 	GFS_X gfs_x(gv, fem_x);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Y, CON0, VBE0> GFS_Y; // gfs
 	GFS_Y gfs_y(gv, fem_y);
-
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_C, CON0, VBE0> GFS_C; // gfs
+	GFS_C gfs_c(gv, fem_c);
 	//	COMPOSITE GFS
 	using VBE = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>;//  block size -> numOfPVs
 
 	// gfs for composite system Pw,Sg,Sh,T,XCH4,YH2O,XC
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, 
 													 Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_P, GFS_S, GFS_S, GFS_T, GFS_X,GFS_Y,GFS_X> 
+													 GFS_P, GFS_Sg, GFS_Sh, GFS_T, GFS_X,GFS_Y,GFS_C> 
 													 GFS;
-	GFS gfs(gfs_P,  gfs_S, gfs_S, gfs_T, gfs_x, gfs_y,gfs_x);
-	
+	GFS gfs(gfs_P,  gfs_Sg, gfs_Sh, gfs_T, gfs_x, gfs_y,gfs_c);
+
     typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
     CC cc;
 
@@ -212,7 +222,7 @@ void driver(const GV &gv, // GridView
 	double alpha_y = 1.e0;
 	double intorder=4;
 
-	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
+	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C> LOP; // spatial part
 	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part

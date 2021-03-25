@@ -23,10 +23,19 @@ public:
 
 	std::vector<double> EquilibriumMoleFractions( double T/*K*/, double Pg/*Pa*/, double Xc, double z )const{
 
-		double S = Xc * (salt.MolarMass()/methane.MolarMass());
-		double f_CH4 = z*Pg/(methane.SolubilityCoefficient(T,S)*X_c.P_c);
-		double f_H2O = Pg/(water.SaturatedVaporPressure( T,S )*X_c.P_c);
+		// double S = Xc * (salt.MolarMass()/methane.MolarMass());
+		// double f_CH4 = z*Pg/(methane.SolubilityCoefficient(T,S)*X_c.P_c);
+		// double f_H2O = Pg/(water.SaturatedVaporPressure( T,S )*X_c.P_c);
 		
+		// double Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
+		// double Y_CH4 = 1.-Y_H2O;
+		// double X_H2O = Y_H2O * f_H2O;
+		// double X_CH4 = 1. - Xc - X_H2O;
+
+		double S = Xc * (salt.MolarMass()/methane.MolarMass());
+		double f_CH4 = z*Pg/methane.SolubilityCoefficient(T,S)/X_c.P_c;
+		double f_H2O = Pg/water.SaturatedVaporPressure( T,S )/X_c.P_c;
+
 		double Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
 		double Y_CH4 = 1.-Y_H2O;
 		double X_H2O = Y_H2O * f_H2O;

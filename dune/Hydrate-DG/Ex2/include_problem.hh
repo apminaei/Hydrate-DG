@@ -7,7 +7,7 @@
 
 #include "../operators/indices.hh"
 
-#define STATEINDEPENDENTPROPERTIES
+// #define STATEINDEPENDENTPROPERTIES
 #define PENG_ROBINSON_EOS
 /*******************************************/
 // PROBLEM SPECIFICATION

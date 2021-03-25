@@ -193,7 +193,8 @@ public:
 
 			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
-			  
+			auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
+			auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */  
 			auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
 			auto rho_w = property.water.Density(T_dim, Pw_dim, S);
 			auto rho_h = property.hydrate.Density() ;
@@ -202,13 +203,13 @@ public:
 			auto Cv_w = property.water.Cv(T_dim, Pw_dim, S) ;
 			auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
-			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. - YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
+				r.accumulate(lfsv_Sg, i, ((rho_g * por * (H_CH4_w * YH2O * XCH4 /(zCH4*P_H_satu*(1. - XC - XCH4))) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);//(1. - YH2O)
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{

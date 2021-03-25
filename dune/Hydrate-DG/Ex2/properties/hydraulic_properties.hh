@@ -56,7 +56,7 @@ public:
 						double Sgr ) const {
 
 		double Sw_max = 1. - Sh - Sgr;
-		double Swe = ( Sw - Swr )/( Sw_max - Swr );
+		double Swe = ( Sw - Swr - Sgr)/( Sw_max - Swr );
 		if( Swe>1.){
 			Swe=1.;
 		}
@@ -97,14 +97,14 @@ public:
 
 		return dSwe;
 	}
-
+	
 	double dSwe_dSh( double Sw,
 					 double Sh,
 					 double Swr,
 					 double Sgr) const {
 
 		double Sw_max = 1. - Sh - Sgr;
-		double Swe = ( Sw - Swr )/( Sw_max - Swr );
+		double Swe = ( Sw - Swr -Sgr)/( Sw_max - Swr );
 		double dSwe = Swe /( Sw_max - Swr );
 
 		return dSwe;
@@ -372,6 +372,17 @@ public:
 		return KSF;
 	}
 
+
+	double Sw_fromPcInverse( double Pc, double Pentry, double m, double lambda, double Sh, double Swr, double Sgr) const {
+
+		double Sw = std::pow(Pc/Pentry, -lambda);
+		Sw *= std::pow((1.-Sh),-((m*lambda-1.)/m));
+		Sw *= (1.-Sh-Swr-Sgr);
+		Sw += Swr ;
+		Sw += Sgr;
+
+		return Sw;
+	}
 
 
   //! get a reference to the grid view

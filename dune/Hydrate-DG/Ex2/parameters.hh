@@ -53,7 +53,7 @@ public:
 
 	MeshParameters<PTree> mesh;
 	//! constructor
-	Parameters (const PTree& ptree_)
+	Parameters (const PTree& ptree_) 
 	:ptree(ptree_),
     mesh(ptree_)
 	{

@@ -11,7 +11,7 @@ private :
 	ProblemInitialConditions<GV,Properties> icvalue;
 	// double time_fraction = property.parameter.time_end() / 31.536e6; 
 	double Xc_time = 1. / (36.*24.*36. * 1e3);
-	double press_rate = 1.e-3;
+	double press_rate = 1.e0;
 
 public :
 
@@ -48,7 +48,7 @@ public :
 		}
 		if( property.mesh.isBottomBoundary(globalPos)){
 			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
-			// bctype[indices.PVId_Pw] = indices.BCId_neumann;
+			bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
 		}
@@ -83,7 +83,7 @@ public :
 	   	auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
 		if( property.mesh.isTopBoundary(globalPos)){
 			//auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
-			double Pw_top = icv[Indices::PVId_Pw] - 920.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
+			double Pw_top = icv[Indices::PVId_Pw] - property.soil.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
 												/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
 							
 			// std::cout << Pw_top << "  " << dt << std::endl;
@@ -99,7 +99,7 @@ public :
 		
 		if( property.mesh.isBottomBoundary(globalPos)){
 			bcvalue[indices.PVId_T] = 0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
-			// bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]* (property.characteristicValue.x_c/property.characteristicValue.P_c);
+			bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]* (property.characteristicValue.x_c/property.characteristicValue.P_c);
 			// 			 - 2600.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
 			// 									/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
 		}
@@ -129,7 +129,7 @@ public :
 			//bctype[indices.BCId_gas] = indices.BCId_dirichlet;
 		}
 		if( property.mesh.isBottomBoundary(globalPos)){
-			bctype[indices.BCId_water] = indices.BCId_neumann;
+			// bctype[indices.BCId_water] = indices.BCId_neumann;
 			bctype[indices.BCId_heat] = indices.BCId_neumann;
 			bctype[indices.BCId_salt] = indices.BCId_neumann;
 			bctype[indices.BCId_gas] = indices.BCId_neumann;
@@ -165,7 +165,7 @@ public :
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
 		if( property.mesh.isTopBoundary(globalPos) ){
 			
-			double Pw_top =  icv[Indices::PVId_Pw] - 920.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)
+			double Pw_top =  icv[Indices::PVId_Pw] - property.soil.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)
 												/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
