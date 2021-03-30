@@ -36,10 +36,10 @@ public:
 		double f_CH4 = z*Pg/methane.SolubilityCoefficient(T,S)/X_c.P_c;
 		double f_H2O = Pg/water.SaturatedVaporPressure( T,S )/X_c.P_c;
 
-		double Y_H2O = ((1.-Xc)-f_CH4)/(f_H2O-f_CH4);
-		double Y_CH4 = 1.-Y_H2O;
+		double Y_H2O = std::max(0., std::min(1., ((1.-Xc)-f_CH4)/(f_H2O-f_CH4)));
+		double Y_CH4 = std::max(0., std::min(1., (1.-Y_H2O)));
 		double X_H2O = Y_H2O * f_H2O;
-		double X_CH4 = 1. - Xc - X_H2O;
+		double X_CH4 = std::max(0., std::min(1., (1. - Xc - X_H2O)));
 
 		std::vector<double> X(Indices::numOfComps,0.);
 		X[Indices::compId_XCH4] = X_CH4;

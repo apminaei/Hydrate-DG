@@ -1201,7 +1201,11 @@ public:
       auto P_H_satu_n = property.water.SaturatedVaporPressure( T_n_dim /*K*/, S_n ); /*ndim */
       auto rho_g_n = property.gas.Density(T_n_dim, Pg_n_dim, zCH4_n) ; /* ndim */
       auto rho_w_n = property.water.Density(T_n_dim, Pw_n_dim, S_n) ; /* ndim */
-      
+      auto YCH4_s = property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
+      auto XH2O_s = property.mixture.XH2O(YH2O_s, T_s_dim, Pg_s_dim, XC_s);
+
+      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
+      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
       auto Cp_g_n = property.gas.Cp(T_n_dim, Pg_n_dim, zCH4_n) ; /* ndim */
       auto Cp_w_n = property.water.Cp(T_n_dim, Pw_n_dim, S_n) ; /* ndim */
       auto kth_g_n = property.gas.ThermalConductivity(T_n_dim, Pg_n_dim) ; /* ndim */
@@ -1480,27 +1484,27 @@ public:
         r_n.accumulate(lfsv_Sh_n, i, term_penalty_sh * -psi_Sh_n[i] * factor);
       }
 
-      double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
-      {
-        r_s.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
-      }
-      for (size_type i = 0; i < lfsv_XCH4_n.size(); i++)
-      {
-        r_n.accumulate(lfsv_XCH4_n, i, term_penalty_XCH4 * -psi_XCH4_n[i] * factor);
-      }
+      // double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
+      // {
+      //   r_s.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
+      // }
+      // for (size_type i = 0; i < lfsv_XCH4_n.size(); i++)
+      // {
+      //   r_n.accumulate(lfsv_XCH4_n, i, term_penalty_XCH4 * -psi_XCH4_n[i] * factor);
+      // }
 
-      double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
-      {
-        r_s.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
-      }
-      for (size_type i = 0; i < lfsv_YH2O_n.size(); i++)
-      {
-        r_n.accumulate(lfsv_YH2O_n, i, term_penalty_YH2O * -psi_YH2O_n[i] * factor);
-      }
+      // double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
+      // {
+      //   r_s.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
+      // }
+      // for (size_type i = 0; i < lfsv_YH2O_n.size(); i++)
+      // {
+      //   r_n.accumulate(lfsv_YH2O_n, i, term_penalty_YH2O * -psi_YH2O_n[i] * factor);
+      // }
 
       // ENERGY balance
       tmp =  convectiveflux_Heat +  diffusiveflux_Heat;
@@ -1533,6 +1537,30 @@ public:
       {
         r_n.accumulate(lfsv_T_n, i, term_penalty_T * -psi_T_n[i] * factor);
       }
+
+      //Integrals regarding the NCP1
+			RF max1_s = std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) ;
+			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
+				r_s.accumulate(lfsv_YH2O_s,i,( ((Sg_s) - max1_s) * psi_YH2O_s[i]  *factor));
+			}
+      RF max1_n = std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
+      for (size_type i=0; i<lfsv_YH2O_n.size(); i++){
+				r_n.accumulate(lfsv_YH2O_n,i,( ((Sg_n) - max1_n) * -psi_YH2O_n[i]  *factor));
+			}
+
+			// Integrals regarding the NCP2
+			RF max2_s = std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) ;
+			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
+				r_s.accumulate(lfsv_XCH4_s,i,(((Sw_s) - max2_s) * psi_XCH4_s[i]  *factor));
+			}
+      RF max2_n = std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
+			for (size_type i=0; i<lfsv_XCH4_n.size(); i++){
+				r_n.accumulate(lfsv_XCH4_n,i,(((Sw_n) - max2_n) * -psi_XCH4_n[i]  *factor));
+			}
+      // if (XCH4_n < 0. || XCH4_n > 1.){
+      // std::cout << XCH4_n << "   " << XH2O_n << "  " << XCH4_s << std::endl;
+      // exit(0);
+      // }
     } //End Quadrature Rule
   }//End of alpha_skeleton
 
@@ -1809,18 +1837,14 @@ public:
 
 
       
-      if( ( Sg_n - ( 1.  - YCH4_n -  YH2O_n ) ) > 0.){ //active set.			
-				YH2O_n = (1. - YCH4_n);//std::max(0., std::min(1., )) ;//Active => phase is present => summation condition holds
-			}
-      // else{
-			// 	XCH4_n = 1. - XH2O_n - XC_n;// inactive set. Inactive => phase is absent => Sg=0, Sw>0
+      // if( ( Sg_n - ( 1.  - YCH4_n -  YH2O_n ) ) > 0.){ //active set.			
+			// 	YH2O_n = (1. - YCH4_n);//std::max(0., std::min(1., )) ;//Active => phase is present => summation condition holds
+			// }
+      
+      // if( ( Sw_n - ( 1. -  XCH4_n -  XH2O_n -  XC_n ) ) > 0. ){
+      //   XCH4_n = (1. - XH2O_n - XC_n);//std::max(0., std::min(1., ))  ;//Active => phase is present => summation condition holds
       // }
-      if( ( Sw_n - ( 1. -  XCH4_n -  XH2O_n -  XC_n ) ) > 0. ){
-        XCH4_n = (1. - XH2O_n - XC_n);//std::max(0., std::min(1., ))  ;//Active => phase is present => summation condition holds
-      }
-      // else {
-      //   YH2O_n = 1. - YCH4_n ;//property.parameter.InitialYH2O(ip_global_s);
-      // }
+      
 
       auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */
       auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
@@ -2321,19 +2345,19 @@ public:
         r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
       }
 
-      double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
-      {
-        r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
-      }
+      // double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
+      // }
 
-      double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
-      {
-        r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
-      }
+      // double term_penalty_YH2O = penalty_factor_y * (YH2O_s - YH2O_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_YH2O_s, i, term_penalty_YH2O * psi_YH2O_s[i] * factor);
+      // }
 
       // ENERGY balance
       tmp =  convectiveflux_Heat +  diffusiveflux_Heat;
@@ -2355,6 +2379,22 @@ public:
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
         r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
+      }
+
+      //Integrals regarding the NCP1
+			RF max1 = 0.5 * std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) + 0.5 * std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
+			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
+				r.accumulate(lfsv_YH2O_s,i,( ((0.5*Sg_s+0.5*Sg_n) - max1) * psi_YH2O_s[i]  *factor));
+			}
+
+			// Integrals regarding the NCP2
+			RF max2 = 0.5 * std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) + 0.5 * std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
+			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
+				r.accumulate(lfsv_XCH4_s,i,(((0.5*Sw_s+0.5*Sw_n) - max2) * psi_XCH4_s[i]  *factor));
+			}
+      if (XCH4_n < 0. || XCH4_n > 1.){
+      std::cout << XCH4_n << "   " << XH2O_n << "  " << XCH4_s << std::endl;
+      exit(0);
       }
       
     } // end of quadrature rule
