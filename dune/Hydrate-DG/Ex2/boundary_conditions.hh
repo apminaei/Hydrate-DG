@@ -167,16 +167,16 @@ public :
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
 		if( property.mesh.isTopBoundary(globalPos) ){
 			
-			double Pw_top =  icv[Indices::PVId_Pw] - property.soil.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)
-												/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
-			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
+			// double Pw_top =  icv[Indices::PVId_Pw] - property.soil.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)
+			// 									/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
+			// double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
 			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 
-			bcvalue[Indices::BCId_water] = Pw_top ;
+			// bcvalue[Indices::BCId_water] = Pw_top ;
 			bcvalue[Indices::BCId_salt ] = xc_top ;
 			bcvalue[Indices::BCId_heat ] = T_top  ;
-			bcvalue[Indices::BCId_gas ] = Sg_top  ;
+			// bcvalue[Indices::BCId_gas ] = Sg_top  ;
 
 		}
 		if( property.mesh.isBottomBoundary(globalPos) ){

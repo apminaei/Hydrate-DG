@@ -178,7 +178,8 @@ public:
       		for (size_type i = 0; i < lfsu_XC.size(); i++)
         		XC += x(lfsu_XC, i) * phi_XC[i];
 
-			RF Sw = 1. - Sg - Sh;
+			RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
+
 
 			// evaluate Pg
 			auto por = property.soil.SedimentPorosity(cell, ip_local);

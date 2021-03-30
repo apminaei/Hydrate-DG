@@ -573,7 +573,7 @@ void driver(const GV &gv, // GridView
 
 				newton_iterations = 0;
 
-				dt *= 0.75;
+				dt *= 0.5;
 				dtLast = dt;
 					continue;
 			}
@@ -673,7 +673,7 @@ void driver(const GV &gv, // GridView
 			}
 			else if (newton_iterations <= minAllowableIterations)
 			{
-				dt = std::min(dt * 1.1, dt_max);
+				dt = std::min(dt * 1.2, dt_max);
 			}
 			if (dtFlag == -1)
 			{

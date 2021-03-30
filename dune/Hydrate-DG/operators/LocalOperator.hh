@@ -354,8 +354,8 @@ public:
       for (size_type i = 0; i < lfsu_XC.size(); i++)
         XC += x(lfsu_XC, i) * phi_XC[i];
 
-      //
-      RF Sw = 1. - Sg - Sh;
+      RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
+
 
       // evaluate Pg
       auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
@@ -926,9 +926,9 @@ public:
       for (size_type i = 0; i < lfsu_XC_n.size(); i++)
         XC_n += x_n(lfsu_XC_n, i) * phi_XC_n[i];
 
-      //
-      RF Sw_s = 1. - Sg_s - Sh_s;
-      RF Sw_n = 1. - Sg_n - Sh_n;
+      RF Sw_s = (1. - Sg_s - Sh_s);//std::max(0., std::min(1., ));
+      RF Sw_n = (1. - Sg_n - Sh_n);//std::max(0., std::min(1., ));
+
 
       // evaluate Pw
       auto BrooksCParams_s = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
@@ -1277,13 +1277,13 @@ public:
       RF omegaup_x_s, omegaup_x_n;
       if (normalflux_x>=0.0)
       {
-        omegaup_x_s = 1.0;
-        omegaup_x_n = 0.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       else
       {
-        omegaup_x_s = 0.0;
-        omegaup_x_n = 1.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       RF omegaup_T_s, omegaup_T_n; 
       if (normalflux_T>=0.0)
@@ -1423,14 +1423,14 @@ public:
                                       * Sw_n * DC_w_n * gradpsi_XC_n[i] * n_F_local * factor);
       }
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
-      {
-        r_s.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
-      }
-      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
-      {
-        r_n.accumulate(lfsv_XC_n, i, term_penalty_c * -psi_XC_n[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      // {
+      //   r_s.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      // }
+      // for (size_type i = 0; i < lfsv_XC_n.size(); i++)
+      // {
+      //   r_n.accumulate(lfsv_XC_n, i, term_penalty_c * -psi_XC_n[i] * factor);
+      // }
      
       
       // H2O-component-wise mass-balance
@@ -1473,16 +1473,16 @@ public:
       }
 
 
-      double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
-      {
-        r_s.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
-      }
-      for (size_type i = 0; i < lfsv_Sh_n.size(); i++)
-      {
-        r_n.accumulate(lfsv_Sh_n, i, term_penalty_sh * -psi_Sh_n[i] * factor);
-      }
+      // double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+      // {
+      //   r_s.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
+      // }
+      // for (size_type i = 0; i < lfsv_Sh_n.size(); i++)
+      // {
+      //   r_n.accumulate(lfsv_Sh_n, i, term_penalty_sh * -psi_Sh_n[i] * factor);
+      // }
 
       // double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
       // // standard IP term integral
@@ -1539,23 +1539,37 @@ public:
       }
 
       //Integrals regarding the NCP1
-			RF max1_s = std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) ;
+			RF max1 = 0.5 * std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) + 0.5 * std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
 			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
-				r_s.accumulate(lfsv_YH2O_s,i,( ((Sg_s) - max1_s) * psi_YH2O_s[i]  *factor));
+				r_s.accumulate(lfsv_YH2O_s,i,( ((0.5*Sg_s+0.5*Sg_n) - max1) * psi_YH2O_s[i]  *factor));
 			}
-      RF max1_n = std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
       for (size_type i=0; i<lfsv_YH2O_n.size(); i++){
-				r_n.accumulate(lfsv_YH2O_n,i,( ((Sg_n) - max1_n) * -psi_YH2O_n[i]  *factor));
+				r_n.accumulate(lfsv_YH2O_n,i,( ((0.5*Sg_s+0.5*Sg_n) - max1) * -psi_YH2O_n[i]  *factor));
+			}
+      //Integrals regarding the NCP1
+			max1 = std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) - std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
+			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
+				r_s.accumulate(lfsv_YH2O_s,i,( ((Sg_s-Sg_n) - max1) * 0.5* psi_YH2O_s[i]  *factor));
+			}
+      for (size_type i=0; i<lfsv_YH2O_n.size(); i++){
+				r_n.accumulate(lfsv_YH2O_n,i,( ((0.5*Sg_s+0.5*Sg_n) - max1) * 0.5* psi_YH2O_n[i]  *factor));
 			}
 
 			// Integrals regarding the NCP2
-			RF max2_s = std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) ;
+			RF max2 = 0.5 * std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) + 0.5 * std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
 			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
-				r_s.accumulate(lfsv_XCH4_s,i,(((Sw_s) - max2_s) * psi_XCH4_s[i]  *factor));
+				r_s.accumulate(lfsv_XCH4_s,i,(((0.5*Sw_s+0.5*Sw_n) - max2) * psi_XCH4_s[i]  *factor));
 			}
-      RF max2_n = std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
 			for (size_type i=0; i<lfsv_XCH4_n.size(); i++){
-				r_n.accumulate(lfsv_XCH4_n,i,(((Sw_n) - max2_n) * -psi_XCH4_n[i]  *factor));
+				r_n.accumulate(lfsv_XCH4_n,i,(((0.5*Sw_s+0.5*Sw_n) - max2) * -psi_XCH4_n[i]  *factor));
+			}
+      // Integrals regarding the NCP2
+			max2 = std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) - std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
+			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
+				r_s.accumulate(lfsv_XCH4_s,i,(((Sw_s-Sw_n) - max2) * 0.5*psi_XCH4_s[i]  *factor));
+			}
+			for (size_type i=0; i<lfsv_XCH4_n.size(); i++){
+				r_n.accumulate(lfsv_XCH4_n,i,(((Sw_s-Sw_n) - max2) * 0.5*psi_XCH4_n[i]  *factor));
 			}
       // if (XCH4_n < 0. || XCH4_n > 1.){
       // std::cout << XCH4_n << "   " << XH2O_n << "  " << XCH4_s << std::endl;
@@ -2155,13 +2169,13 @@ public:
       RF omegaup_x_s, omegaup_x_n;
       if (normalflux_x>=0.0)
       {
-        omegaup_x_s = 1.0;
-        omegaup_x_n = 0.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       else
       {
-        omegaup_x_s = 0.0;
-        omegaup_x_n = 1.0;
+        omegaup_x_s = 0.5;
+        omegaup_x_n = 0.5;
       }
       RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>=0.0)
@@ -2310,11 +2324,11 @@ public:
         r.accumulate(lfsv_XC_s, i,  term_nipg_c_x *
             (  rho_w_s * Sw_s * DC_w_s  )* gradpsi_XC_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
       }
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
-      {
-        r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
-      } 
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      // } 
 
       // H2O-component-wise mass-balance
       tmp =  convectiveflux_H2O +  diffusiveflux_H2O ;
@@ -2338,12 +2352,12 @@ public:
         r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
       }
 
-      double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
-      // standard IP term integral
-      for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
-      {
-        r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
-      }
+      // double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
+      // // standard IP term integral
+      // for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
+      // }
 
       // double term_penalty_XCH4 = penalty_factor_x * (XCH4_s - XCH4_n);
       // // standard IP term integral
@@ -2386,11 +2400,21 @@ public:
 			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
 				r.accumulate(lfsv_YH2O_s,i,( ((0.5*Sg_s+0.5*Sg_n) - max1) * psi_YH2O_s[i]  *factor));
 			}
+      //Integrals regarding the NCP1
+			max1 = std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) - std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
+			for (size_type i=0; i<lfsv_YH2O_s.size(); i++){
+				r.accumulate(lfsv_YH2O_s,i,( ((Sg_s-Sg_n) - max1) * psi_YH2O_s[i]  *factor));
+			}
 
 			// Integrals regarding the NCP2
 			RF max2 = 0.5 * std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) + 0.5 * std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
 			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
 				r.accumulate(lfsv_XCH4_s,i,(((0.5*Sw_s+0.5*Sw_n) - max2) * psi_XCH4_s[i]  *factor));
+			}
+      // Integrals regarding the NCP2
+			max2 = std::max(0., (Sw_s -1. + XC_s + XCH4_s + XH2O_s )) - std::max(0., (Sw_n -1. + XC_n + XCH4_n + XH2O_n ));
+			for (size_type i=0; i<lfsv_XCH4_s.size(); i++){
+				r.accumulate(lfsv_XCH4_s,i,(((Sw_s-Sw_n) - max2) * psi_XCH4_s[i]  *factor));
 			}
       if (XCH4_n < 0. || XCH4_n > 1.){
       std::cout << XCH4_n << "   " << XH2O_n << "  " << XCH4_s << std::endl;
