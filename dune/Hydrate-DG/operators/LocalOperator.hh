@@ -1734,7 +1734,7 @@ public:
       RF Sh_s = 0.0;
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i]; 
-      RF Sh_n = Sh_s;
+      RF Sh_n = std::max(0., std::min(1., Sh_s));
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1744,11 +1744,11 @@ public:
       RF Sg_n = Sg_s ;
       if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
       {
-        Sg_n = bcvalue[Indices::PVId_Sg] ;
+        Sg_n = std::max(0., std::min(1., bcvalue[Indices::PVId_Sg])) ;
       }
 
-      RF Sw_s = 1. - Sg_s - Sh_s;
-      RF Sw_n = 1. - Sg_n - Sh_n;
+      RF Sw_s = std::max(0., std::min(1., (1. - Sg_s - Sh_s)));
+      RF Sw_n = std::max(0., std::min(1., (1. - Sg_n - Sh_n)));
 
       // evaluate XC
       RF XC_s = 0.0;
@@ -1758,20 +1758,20 @@ public:
       RF XC_n = XC_s ;
       if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
       {
-        XC_n = bcvalue[Indices::PVId_C] ;
+        XC_n = std::max(0., std::min(1., bcvalue[Indices::PVId_C])) ;
       }
 
       // evaluate XCH4
       RF XCH4_s = 0.0;
       for (size_type i = 0; i < lfsu_XCH4_s.size(); i++)
         XCH4_s += x(lfsu_XCH4_s, i) * phi_XCH4_s[i];
-      RF XCH4_n = XCH4_s;
+      RF XCH4_n = std::max(0., std::min(1., XCH4_s));
 
       // evaluate YH2O
       RF YH2O_s = 0.0;
       for (size_type i = 0; i < lfsu_YH2O_s.size(); i++)
         YH2O_s += x(lfsu_YH2O_s, i) * phi_YH2O_s[i];
-      RF YH2O_n = YH2O_s;
+      RF YH2O_n = std::max(0., std::min(1., YH2O_s));
 
        // evaluate Pg
       auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
