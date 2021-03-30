@@ -11,7 +11,7 @@ private :
 	ProblemInitialConditions<GV,Properties> icvalue;
 	// double time_fraction = property.parameter.time_end() / 31.536e6; 
 	double Xc_time = 1. / (36.*24.*36. * 1e3);
-	double press_rate = 1.e0;
+	double press_rate = 1.e-3;
 
 public :
 
@@ -39,6 +39,8 @@ public :
 		
 		std::vector< int > bctype(Indices::numOfPVs, -1);
 		
+		bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+		bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		
 		if( property.mesh.isTopBoundary(globalPos)){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet;
@@ -99,7 +101,7 @@ public :
 		
 		if( property.mesh.isBottomBoundary(globalPos)){
 			bcvalue[indices.PVId_T] = 0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
-			bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]* (property.characteristicValue.x_c/property.characteristicValue.P_c);
+			bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity);
 			// 			 - 2600.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
 			// 									/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
 		}
