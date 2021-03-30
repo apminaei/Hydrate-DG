@@ -354,7 +354,7 @@ public:
       for (size_type i = 0; i < lfsu_XC.size(); i++)
         XC += x(lfsu_XC, i) * phi_XC[i];
 
-      RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
+      RF Sw = std::max(0., std::min(1., (1. - Sg - Sh)));
 
 
       // evaluate Pg
@@ -926,8 +926,8 @@ public:
       for (size_type i = 0; i < lfsu_XC_n.size(); i++)
         XC_n += x_n(lfsu_XC_n, i) * phi_XC_n[i];
 
-      RF Sw_s = (1. - Sg_s - Sh_s);//std::max(0., std::min(1., ));
-      RF Sw_n = (1. - Sg_n - Sh_n);//std::max(0., std::min(1., ));
+      RF Sw_s = std::max(0., std::min(1., (1. - Sg_s - Sh_s)));
+      RF Sw_n = std::max(0., std::min(1., (1. - Sg_n - Sh_n)));
 
 
       // evaluate Pw
@@ -1423,14 +1423,14 @@ public:
                                       * Sw_n * DC_w_n * gradpsi_XC_n[i] * n_F_local * factor);
       }
       // standard IP term integral
-      // for (size_type i = 0; i < lfsv_XC_s.size(); i++)
-      // {
-      //   r_s.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
-      // }
-      // for (size_type i = 0; i < lfsv_XC_n.size(); i++)
-      // {
-      //   r_n.accumulate(lfsv_XC_n, i, term_penalty_c * -psi_XC_n[i] * factor);
-      // }
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r_s.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      }
+      for (size_type i = 0; i < lfsv_XC_n.size(); i++)
+      {
+        r_n.accumulate(lfsv_XC_n, i, term_penalty_c * -psi_XC_n[i] * factor);
+      }
      
       
       // H2O-component-wise mass-balance
@@ -2111,12 +2111,12 @@ public:
         normalvelocity_w_n = velvalue[Indices::BCId_water];
       }
 
-      double normalflux_g = -1.*( omega_s * normalvelocity_g_s + omega_n * normalvelocity_g_n);// 
-      double normalflux_w = -1.*(  omega_s * normalvelocity_w_s + omega_n * normalvelocity_w_n);// 
-      double normalflux_x = (omega_s * grad_XC_s + omega_n * grad_XC_n);
-      double normalflux_T = (omega_s * grad_T_s + omega_n * grad_T_n);
-      double normaldiff_xch4 = (omega_s * grad_XCH4_s + omega_n * grad_XCH4_n);
-      double normaldiff_yh2o = (omega_s * grad_YH2O_s + omega_n * grad_YH2O_n);
+      double normalflux_g = -1.*(  omega_n * normalvelocity_g_n);// omega_s * normalvelocity_g_s +
+      double normalflux_w = -1.*(   omega_n * normalvelocity_w_n);// omega_s * normalvelocity_w_s +
+      double normalflux_x = ( omega_n * grad_XC_n);// omega_s * grad_XC_s +
+      double normalflux_T = ( omega_n * grad_T_n);// omega_s * grad_T_s +
+      double normaldiff_xch4 = ( omega_n * grad_XCH4_n);// omega_s * grad_XCH4_s +
+      double normaldiff_yh2o = ( omega_n * grad_YH2O_n);// omega_s * grad_YH2O_s +
       // upwinding wrt gas-phase velocity
       RF omegaup_g_s, omegaup_g_n;
       if (normalflux_g>=0.0) /* equality leads to wrong upwind choice*/
@@ -2325,10 +2325,10 @@ public:
             (  rho_w_s * Sw_s * DC_w_s  )* gradpsi_XC_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
       }
       // // standard IP term integral
-      // for (size_type i = 0; i < lfsv_XC_s.size(); i++)
-      // {
-      //   r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
-      // } 
+      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      {
+        r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      } 
 
       // H2O-component-wise mass-balance
       tmp =  convectiveflux_H2O +  diffusiveflux_H2O ;
