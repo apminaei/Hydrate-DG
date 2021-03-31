@@ -115,7 +115,7 @@ public:
   		
   			result.open(file_name, std::fstream::out | std::fstream::trunc);
   			result	<< "penalty coeff.  " << alpha_g << '\t' << alpha_w << '\t'<< alpha_s << '\t'<< alpha_T << '\t'<< alpha_x << '\t'<< alpha_y << '\n'
-					<< " S=1, N=0, I=-1,  " << method_g << '\t'<< method_w << '\t'<< method_T << '\t'<< method_x << '\t'<< method_y << '\n'
+					<< " S=-1, N=0, I=1,  " << method_g << '\t'<< method_w << '\t'<< method_T << '\t'<< method_x << '\t'<< method_y << '\n'
 					<<  " dissCoeff " << dissCoeff << '\t' << " formCoeff " << formCoeff<< '\n'
 					<< "Xc_Permeability= " << X_P << '\t' << "Xc_gravity= "<< X_G << '\t'<< "X_source_mass= " << X_M << '\t'
 					<< "X_source_heat= " <<X_H << '\t'<<"X_dispersivity= " << X_D << '\t'<< "X_specific_heat= " << X_S  

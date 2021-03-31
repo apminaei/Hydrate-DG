@@ -39,8 +39,6 @@ public :
 		
 		std::vector< int > bctype(Indices::numOfPVs, -1);
 		
-		bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-		bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		
 		if( property.mesh.isTopBoundary(globalPos)){
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet;
@@ -53,18 +51,27 @@ public :
 			bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
+
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		}
 		if( property.mesh.isLeftBoundary(globalPos)){
 			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
 			//bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
+
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		}
 		if( property.mesh.isRightBoundary(globalPos)){
 			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
 			//bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
+
+			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		}
 		return bctype;
 	}

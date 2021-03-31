@@ -1212,8 +1212,7 @@ public:
       auto kth_w_n = property.water.ThermalConductivity(T_n_dim, Pw_n_dim, S_n) ; /* ndim */
       auto kth_h_n = property.hydrate.ThermalConductivity(T_n_dim, Peff_n * Xc_P) ; /* ndim */
       auto kth_s_n = property.soil.ThermalConductivity() ; /* ndim */
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n 
-                                              + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * (Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       
       
 			for(int i = 0;i<dim;i++){
@@ -1285,7 +1284,7 @@ public:
         omegaup_x_s = 0.5;
         omegaup_x_n = 0.5;
       }
-      RF omegaup_T_s, omegaup_T_n; 
+      RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>=0.0)
       {
         omegaup_T_s = 0.5;
@@ -1302,62 +1301,62 @@ public:
       // integration factor
       auto factor = ip.weight() * geo.integrationElement(ip.position());
       //   fluxes and diff. flux
-      auto convectiveflux_CH4_g_s = rho_g_s * (1. - YH2O_s) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);//(1. - YH2O_s)
-      auto convectiveflux_CH4_w_s = rho_w_s * (XCH4_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
-      auto convectiveflux_H2O_g_s = rho_g_s * YH2O_s * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
-      auto convectiveflux_H2O_w_s = rho_w_s * (1. - XC_s - XCH4_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
-      auto convectiveflux_SALT_w_s = rho_w_s * (XC_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
-      auto convectiveflux_Heat_w_s = rho_w_s * Cp_w_s * (T_s - T_ref) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
-      auto convectiveflux_Heat_g_s = rho_g_s * Cp_g_s * (T_s - T_ref) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
+      auto convectiveflux_CH4_g_s = omegaup_g_s * rho_g_s * (1. - YH2O_s) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);//(1. - YH2O_s)
+      auto convectiveflux_CH4_w_s = omegaup_w_s * rho_w_s * (XCH4_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_H2O_g_s = omegaup_g_s * rho_g_s * YH2O_s * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
+      auto convectiveflux_H2O_w_s = omegaup_w_s * rho_w_s * (1. - XC_s - XCH4_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_SALT_w_s = omegaup_w_s * rho_w_s * (XC_s) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_Heat_w_s = omegaup_w_s * rho_w_s * Cp_w_s * (T_s - T_ref) * krW_s * (Kgradu_Pw_s - rho_w_s * Kg_s);
+      auto convectiveflux_Heat_g_s = omegaup_g_s * rho_g_s * Cp_g_s * (T_s - T_ref) * krN_s * (Kgradu_Pg_s - rho_g_s * Kg_s);
 
-      auto j_H2O_g_s = rho_g_s * Sg_s * DH2O_g_s * gradu_YH2O_s;
-      auto j_CH4_w_s = rho_w_s * Sw_s * DCH4_w_s * gradu_XCH4_s;
-      auto j_SALT_w_s = rho_w_s * Sw_s * DC_w_s * gradu_XC_s;
+      auto j_H2O_g_s = omegaup_yh2o_s * rho_g_s * Sg_s * DH2O_g_s * gradu_YH2O_s;
+      auto j_CH4_w_s = omegaup_xch4_s * rho_w_s * Sw_s * DCH4_w_s * gradu_XCH4_s;
+      auto j_SALT_w_s = omegaup_x_s * rho_w_s * Sw_s * DC_w_s * gradu_XC_s;
       auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
       auto j_CH4_g_s = - j_H2O_g_s;
 
-      auto convectiveflux_CH4_s = omegaup_g_s * convectiveflux_CH4_g_s + omegaup_w_s * convectiveflux_CH4_w_s;
-      auto convectiveflux_H2O_s = omegaup_g_s * convectiveflux_H2O_g_s + omegaup_w_s * convectiveflux_H2O_w_s;
-      auto convectiveflux_Heat_s = omegaup_g_s * convectiveflux_Heat_g_s + omegaup_w_s * convectiveflux_Heat_w_s;
+      auto convectiveflux_CH4_s = convectiveflux_CH4_g_s + convectiveflux_CH4_w_s;
+      auto convectiveflux_H2O_s = convectiveflux_H2O_g_s + convectiveflux_H2O_w_s;
+      auto convectiveflux_Heat_s = convectiveflux_Heat_g_s + convectiveflux_Heat_w_s;
 
       auto diffusiveflux_CH4_s = j_CH4_g_s + j_CH4_w_s;
       auto diffusiveflux_H2O_s = j_H2O_g_s + j_H2O_w_s;
       auto diffusiveflux_SALT_s = j_SALT_w_s;
-      auto diffusiveflux_Heat_s = kth_eff_s * gradu_T_s;
+      auto diffusiveflux_Heat_s = omegaup_T_s * kth_eff_s * gradu_T_s;
       // *******************   //
-      auto convectiveflux_CH4_g_n = rho_g_n * (1. - YH2O_n) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);//(1. - YH2O_n)
-      auto convectiveflux_CH4_w_n = rho_w_n * (XCH4_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
-      auto convectiveflux_H2O_g_n = rho_g_n * YH2O_n * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
-      auto convectiveflux_H2O_w_n = rho_w_n * (1. - XC_n - XCH4_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
-      auto convectiveflux_SALT_w_n = rho_w_n * (XC_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
-      auto convectiveflux_Heat_w_n = rho_w_n * Cp_w_n * (T_n - T_ref) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
-      auto convectiveflux_Heat_g_n = rho_g_n * Cp_g_n * (T_n - T_ref) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
+      auto convectiveflux_CH4_g_n = omegaup_g_n * rho_g_n * (1. - YH2O_n) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);//(1. - YH2O_n)
+      auto convectiveflux_CH4_w_n = omegaup_w_n * rho_w_n * (XCH4_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_H2O_g_n = omegaup_g_n * rho_g_n * YH2O_n * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
+      auto convectiveflux_H2O_w_n = omegaup_w_n * rho_w_n * (1. - XC_n - XCH4_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_SALT_w_n = omegaup_w_n * rho_w_n * (XC_n) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_Heat_w_n = omegaup_w_n * rho_w_n * Cp_w_n * (T_n - T_ref) * krW_n * (Kgradu_Pw_n - rho_w_n * Kg_n);
+      auto convectiveflux_Heat_g_n = omegaup_g_n * rho_g_n * Cp_g_n * (T_n - T_ref) * krN_n * (Kgradu_Pg_n - rho_g_n * Kg_n);
 
-      auto j_H2O_g_n = rho_g_n * Sg_n * DH2O_g_n * gradu_YH2O_n;
-      auto j_CH4_w_n = rho_w_n * Sw_n * DCH4_w_n * gradu_XCH4_n;
-      auto j_SALT_w_n = rho_w_n * Sw_n * DC_w_n * gradu_XC_n;
+      auto j_H2O_g_n = omegaup_yh2o_n * rho_g_n * Sg_n * DH2O_g_n * gradu_YH2O_n;
+      auto j_CH4_w_n = omegaup_xch4_n * rho_w_n * Sw_n * DCH4_w_n * gradu_XCH4_n;
+      auto j_SALT_w_n = omegaup_x_n * rho_w_n * Sw_n * DC_w_n * gradu_XC_n;
       auto j_H2O_w_n = - j_CH4_w_n - j_SALT_w_n;
       auto j_CH4_g_n = - j_H2O_g_n;
 
-      auto convectiveflux_CH4_n = omegaup_g_n * convectiveflux_CH4_g_n + omegaup_w_n * convectiveflux_CH4_w_n;
-      auto convectiveflux_H2O_n = omegaup_g_n * convectiveflux_H2O_g_n + omegaup_w_n * convectiveflux_H2O_w_n;
-      auto convectiveflux_Heat_n = omegaup_g_n * convectiveflux_Heat_g_n + omegaup_w_n * convectiveflux_Heat_w_n;
+      auto convectiveflux_CH4_n = convectiveflux_CH4_g_n + convectiveflux_CH4_w_n;
+      auto convectiveflux_H2O_n = convectiveflux_H2O_g_n + convectiveflux_H2O_w_n;
+      auto convectiveflux_Heat_n = convectiveflux_Heat_g_n + convectiveflux_Heat_w_n;
 
       auto diffusiveflux_CH4_n = j_CH4_g_n + j_CH4_w_n;
       auto diffusiveflux_H2O_n = j_H2O_g_n + j_H2O_w_n;
       auto diffusiveflux_SALT_n = j_SALT_w_n;
-      auto diffusiveflux_Heat_n = kth_eff_n * gradu_T_n;
+      auto diffusiveflux_Heat_n = omegaup_T_n * kth_eff_n * gradu_T_n;
 
 
-      auto convectiveflux_CH4 = - ( convectiveflux_CH4_s + convectiveflux_CH4_n) * n_F_local;
-      auto convectiveflux_H2O = - ( convectiveflux_H2O_s + convectiveflux_H2O_n) * n_F_local;
-      auto convectiveflux_SALT = -(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n) * n_F_local;
-      auto convectiveflux_Heat = - ( convectiveflux_Heat_s + convectiveflux_Heat_n) * n_F_local;
+      auto convectiveflux_CH4 = -( convectiveflux_CH4_s + convectiveflux_CH4_n) * n_F_local;
+      auto convectiveflux_H2O = -( convectiveflux_H2O_s + convectiveflux_H2O_n) * n_F_local;
+      auto convectiveflux_SALT = -( convectiveflux_SALT_w_s + convectiveflux_SALT_w_n) * n_F_local;
+      auto convectiveflux_Heat = -( convectiveflux_Heat_s + convectiveflux_Heat_n) * n_F_local;
 
-      auto diffusiveflux_CH4 = + omegaup_xch4_s * (diffusiveflux_CH4_s * n_F_local) + omegaup_xch4_n * (diffusiveflux_CH4_n * n_F_local);
-      auto diffusiveflux_H2O = + omegaup_yh2o_s * (diffusiveflux_H2O_s * n_F_local) + omegaup_yh2o_n * (diffusiveflux_H2O_n * n_F_local);
-      auto diffusiveflux_SALT = (omegaup_x_s * diffusiveflux_SALT_s + omegaup_x_n * diffusiveflux_SALT_n) * n_F_local;
-      auto diffusiveflux_Heat = - (omegaup_T_s * diffusiveflux_Heat_s +  omegaup_T_n * diffusiveflux_Heat_n) * n_F_local;
+      auto diffusiveflux_CH4 = (diffusiveflux_CH4_s * n_F_local) +  (diffusiveflux_CH4_n * n_F_local);
+      auto diffusiveflux_H2O = (diffusiveflux_H2O_s * n_F_local) +  (diffusiveflux_H2O_n * n_F_local);
+      auto diffusiveflux_SALT = (diffusiveflux_SALT_s +  diffusiveflux_SALT_n) * n_F_local;
+      auto diffusiveflux_Heat = -(diffusiveflux_Heat_s + diffusiveflux_Heat_n) * n_F_local;
 
       /*ACCCUMULATE RESIDUALS*/
 			double tmp=0.;
@@ -1454,13 +1453,13 @@ public:
       {
         r_s.accumulate(lfsv_Pw_s, i, - term_nipg_w * (krW_s * omegaup_w_s * rho_w_s 
                                     * (1. - XC_s - XCH4_s)  ) 
-                                    * Kn_F_s * gradpsi_Pw_s[i] * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s
+                                    * Kn_F_s * (gradpsi_Pw_s[i]) * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s
       }
       for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
         r_n.accumulate(lfsv_Pw_n, i, - term_nipg_w * (krW_n * omegaup_w_n * rho_w_n 
                                     * (1. - XC_n - XCH4_n)) 
-                                    *  Kn_F_n * gradpsi_Pw_n[i] * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n 
+                                    *  Kn_F_n * (gradpsi_Pw_n[i]) * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n 
       }
       //standard IP term integral
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
@@ -1892,8 +1891,7 @@ public:
       auto kth_w_s = property.water.ThermalConductivity(T_s_dim, Pw_s_dim, S_s);
       auto kth_h_s = property.hydrate.ThermalConductivity(T_s_dim, Peff_s * Xc_P);
       auto kth_s_s = property.soil.ThermalConductivity() ;
-      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * (((H_CH4_w_s * YH2O_s * XCH4_s /(zCH4_s*P_H_satu_s*(1. - XC_s - XCH4_s))+YH2O_s)) * Sg_s * kth_g_s 
-                                              + Sw_s * kth_w_s + Sh_s * kth_h_s);
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ( Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
       auto h_g_s =  Cp_g_s * (T_s-T_ref) ;
       auto h_w_s =  Cp_w_s * (T_s-T_ref) ;
       
@@ -1924,8 +1922,7 @@ public:
       auto kth_w_n = property.water.ThermalConductivity(T_n_dim, Pw_n_dim, S_n);
       auto kth_h_n = property.hydrate.ThermalConductivity(T_n_dim, Peff_n * Xc_P);
       auto kth_s_n = property.soil.ThermalConductivity() ;
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_n * kth_g_n 
-                                              + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       auto h_g_n =  Cp_g_n * (T_n-T_ref) ;
       auto h_w_n =  Cp_w_n * (T_n-T_ref) ;
@@ -2097,39 +2094,38 @@ public:
       
      
 			double tmp = 0.;		
-      auto normalvelocity_g_s = K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
+      auto normalvelocity_g_s = -K * krN_s * (grad_Pg_s - rho_g_s * normalgravity);
       
-      auto normalvelocity_w_s = K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
+      auto normalvelocity_w_s = -K * krW_s * (grad_Pw_s - rho_w_s * normalgravity);
      
-      auto normalvelocity_g_n = K * krN_n * (grad_Pg_n - rho_g_n * normalgravity);
+      auto normalvelocity_g_n = -K * krN_n * (grad_Pg_n - rho_g_n * normalgravity);
       if (veltype[Indices::BCId_gas] = Indices::BCId_neumann){
         normalvelocity_g_n = velvalue[Indices::BCId_gas];
       }
      
-      auto normalvelocity_w_n = K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
+      auto normalvelocity_w_n = -K * krW_n * (grad_Pw_n - rho_w_n * normalgravity);
       if (veltype[Indices::BCId_water] = Indices::BCId_neumann){
         normalvelocity_w_n = velvalue[Indices::BCId_water];
       }
 
-      double normalflux_g = -1.*(  omega_n * normalvelocity_g_n);// omega_s * normalvelocity_g_s +
-      double normalflux_w = -1.*(   omega_n * normalvelocity_w_n);// omega_s * normalvelocity_w_s +
+      double normalflux_g = ( omega_n * normalvelocity_g_n);// omega_s * normalvelocity_g_s +
+      double normalflux_w = ( omega_n * normalvelocity_w_n);// omega_s * normalvelocity_w_s +
       double normalflux_x = ( omega_n * grad_XC_n);// omega_s * grad_XC_s +
       double normalflux_T = ( omega_n * grad_T_n);// omega_s * grad_T_s +
       double normaldiff_xch4 = ( omega_n * grad_XCH4_n);// omega_s * grad_XCH4_s +
       double normaldiff_yh2o = ( omega_n * grad_YH2O_n);// omega_s * grad_YH2O_s +
       // upwinding wrt gas-phase velocity
       RF omegaup_g_s, omegaup_g_n;
-      if (normalflux_g>=0.0) /* equality leads to wrong upwind choice*/
+      if (normalflux_g>=0.0)
       {
         omegaup_g_s = 1.0;
         omegaup_g_n = 0.0;
       }
-      else 
+      else
       {
         omegaup_g_s = 0.0;
         omegaup_g_n = 1.0;
       }
-      
       // upwinding wrt water-phase velocity
       RF omegaup_w_s, omegaup_w_n;
       if (normalflux_w>=0.0)
@@ -2137,7 +2133,7 @@ public:
         omegaup_w_s = 1.0;
         omegaup_w_n = 0.0;
       }
-      else 
+      else
       {
         omegaup_w_s = 0.0;
         omegaup_w_n = 1.0;
@@ -2188,16 +2184,16 @@ public:
         omegaup_T_s = 0.5;
         omegaup_T_n = 0.5;
       }
-
+      
       
       //   fluxes and diff. flux
-      auto convectiveflux_CH4_g_s = rho_g_s * (1. - YH2O_s) * normalvelocity_g_s;//(1. - YH2O_s)
-      auto convectiveflux_CH4_w_s = rho_w_s * (XCH4_s) * normalvelocity_w_s;
-      auto convectiveflux_H2O_g_s = rho_g_s * YH2O_s * normalvelocity_g_s;
-      auto convectiveflux_H2O_w_s = rho_w_s * (1. - XC_s - XCH4_s) * normalvelocity_w_s;
-      auto convectiveflux_SALT_w_s = rho_w_s * (XC_s) * normalvelocity_w_s;
-      auto convectiveflux_Heat_w_s = rho_w_s * Cp_w_s * (T_s - T_ref) * normalvelocity_w_s;
-      auto convectiveflux_Heat_g_s = rho_g_s * Cp_g_s * (T_s - T_ref) * normalvelocity_g_s;
+      auto convectiveflux_CH4_g_s = omegaup_g_s * rho_g_s * (1. - YH2O_s) * normalvelocity_g_s;//(1. - YH2O_s)
+      auto convectiveflux_CH4_w_s = omegaup_w_s * rho_w_s * (XCH4_s) * normalvelocity_w_s;
+      auto convectiveflux_H2O_g_s = omegaup_g_s * rho_g_s * YH2O_s * normalvelocity_g_s;
+      auto convectiveflux_H2O_w_s = omegaup_w_s * rho_w_s * (1. - XC_s - XCH4_s) * normalvelocity_w_s;
+      auto convectiveflux_SALT_w_s = omegaup_w_s * rho_w_s * (XC_s) * normalvelocity_w_s;
+      auto convectiveflux_Heat_w_s = omegaup_w_s * rho_w_s * Cp_w_s * (T_s - T_ref) * normalvelocity_w_s;
+      auto convectiveflux_Heat_g_s = omegaup_g_s * rho_g_s * Cp_g_s * (T_s - T_ref) * normalvelocity_g_s;
 
       auto j_H2O_g_s = omegaup_yh2o_s * rho_g_s * Sg_s * DH2O_g_s * grad_YH2O_s;
       auto j_CH4_w_s = omegaup_xch4_s * rho_w_s * Sw_s * DCH4_w_s * grad_XCH4_s;
@@ -2205,23 +2201,20 @@ public:
       auto j_H2O_w_s = - j_CH4_w_s - j_SALT_w_s;
       auto j_CH4_g_s = - j_H2O_g_s;
 
-      auto convectiveflux_CH4_s = omegaup_g_s * convectiveflux_CH4_g_s + omegaup_w_s * convectiveflux_CH4_w_s;
-      auto convectiveflux_H2O_s = omegaup_g_s * convectiveflux_H2O_g_s + omegaup_w_s * convectiveflux_H2O_w_s;
-      auto convectiveflux_Heat_s = omegaup_g_s * convectiveflux_Heat_g_s + omegaup_w_s * convectiveflux_Heat_w_s;
-
+      
       auto diffusiveflux_CH4_s = j_CH4_g_s + j_CH4_w_s;
       auto diffusiveflux_H2O_s = j_H2O_g_s + j_H2O_w_s;
       auto diffusiveflux_SALT_s = j_SALT_w_s;
-      auto diffusiveflux_Heat_s = kth_eff_s * grad_T_s; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
+      auto diffusiveflux_Heat_s = omegaup_T_s * kth_eff_s * grad_T_s; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
 
       //   *******************   //
-      auto convectiveflux_CH4_g_n = rho_g_n * (1. - YH2O_n) * normalvelocity_g_n;//(1. - YH2O_n)
-      auto convectiveflux_CH4_w_n = rho_w_n * (XCH4_n) * normalvelocity_w_n;
-      auto convectiveflux_H2O_g_n = rho_g_n * YH2O_n * normalvelocity_g_n;
-      auto convectiveflux_H2O_w_n = rho_w_n * (1. - XC_n - XCH4_n) * normalvelocity_w_n;
-      auto convectiveflux_SALT_w_n = rho_w_n * (XC_n) * normalvelocity_w_n;
-      auto convectiveflux_Heat_w_n = rho_w_n * Cp_w_n * (T_n - T_ref) * normalvelocity_w_n;
-      auto convectiveflux_Heat_g_n = rho_g_n * Cp_g_n * (T_n - T_ref) * normalvelocity_g_n;
+      auto convectiveflux_CH4_g_n = omegaup_g_n * rho_g_n * (1. - YH2O_n) * normalvelocity_g_n;//(1. - YH2O_n)
+      auto convectiveflux_CH4_w_n = omegaup_w_n * rho_w_n * (XCH4_n) * normalvelocity_w_n;
+      auto convectiveflux_H2O_g_n = omegaup_g_n * rho_g_n * YH2O_n * normalvelocity_g_n;
+      auto convectiveflux_H2O_w_n = omegaup_w_n * rho_w_n * (1. - XC_n - XCH4_n) * normalvelocity_w_n;
+      auto convectiveflux_SALT_w_n = omegaup_w_n * rho_w_n * (XC_n) * normalvelocity_w_n;
+      auto convectiveflux_Heat_w_n = omegaup_w_n * rho_w_n * Cp_w_n * (T_n - T_ref) * normalvelocity_w_n;
+      auto convectiveflux_Heat_g_n = omegaup_g_n * rho_g_n * Cp_g_n * (T_n - T_ref) * normalvelocity_g_n;
 
       auto j_H2O_g_n = omegaup_yh2o_n * rho_g_n * Sg_n * DH2O_g_n * grad_YH2O_n;
       auto j_CH4_w_n = omegaup_xch4_n * rho_w_n * Sw_n * DCH4_w_n * grad_XCH4_n;
@@ -2233,57 +2226,63 @@ public:
       auto diffusiveflux_CH4_n = j_CH4_g_n + j_CH4_w_n;
       auto diffusiveflux_H2O_n = j_H2O_g_n + j_H2O_w_n;
       auto diffusiveflux_SALT_n = j_SALT_w_n;
-      auto diffusiveflux_Heat_n = kth_eff_n * grad_T_n; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
+      auto diffusiveflux_Heat_n = omegaup_T_n * kth_eff_n * grad_T_n; // k_eff will be harmonic_average of k_eff_s and k_eff_n 
 
-      auto convectiveflux_CH4_g = omegaup_g_s * convectiveflux_CH4_g_s + omegaup_g_n * convectiveflux_CH4_g_n;
+      auto convectiveflux_CH4_g = convectiveflux_CH4_g_s +  convectiveflux_CH4_g_n;
       if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
         convectiveflux_CH4_g =  ( rho_g_n * (1. - YH2O_n)) * normalvelocity_g_n; //(1. - YH2O_n)  rho_g_s * (1. - YH2O_s) +
       }
-      auto convectiveflux_CH4_w = omegaup_w_s * convectiveflux_CH4_w_s + omegaup_w_n * convectiveflux_CH4_w_n;
+      auto convectiveflux_CH4_w = convectiveflux_CH4_w_s + convectiveflux_CH4_w_n;
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann || bctype[Indices::PVId_Pw] == Indices::BCId_neumann){
         convectiveflux_CH4_w =  (  rho_w_n * (XCH4_n)) * normalvelocity_w_n; // rho_w_s * (XCH4_s) +
       }
 
-      auto convectiveflux_H2O_g = omegaup_g_s * convectiveflux_H2O_g_s + omegaup_g_n * convectiveflux_H2O_g_n;
+      auto convectiveflux_H2O_g =  convectiveflux_H2O_g_s + convectiveflux_H2O_g_n;
       if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
         convectiveflux_H2O_g =  ( rho_g_n * (YH2O_n)) * normalvelocity_g_n; // rho_g_s * (YH2O_s) +
       }
-      auto convectiveflux_H2O_w = omegaup_w_s * convectiveflux_H2O_w_s + omegaup_w_n * convectiveflux_H2O_w_n;
+      auto convectiveflux_H2O_w = convectiveflux_H2O_w_s + convectiveflux_H2O_w_n;
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann || bctype[Indices::PVId_Pw] == Indices::BCId_neumann){
         convectiveflux_H2O_w =  ( rho_w_n * (1. - XC_n - XCH4_n)) * normalvelocity_w_n;// rho_w_s * (1. - XC_s - XCH4_s) + 
       }
 
-      auto convectiveflux_SALT_w = omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n;
+      auto convectiveflux_SALT_w =  convectiveflux_SALT_w_s +  convectiveflux_SALT_w_n;
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann || bctype[Indices::PVId_Pw] == Indices::BCId_neumann){
         convectiveflux_SALT_w =   ( rho_w_n * (XC_n)) * normalvelocity_w_n; //  rho_w_s * ( XC_s ) +
       }
 
-      auto convectiveflux_Heat_g = omegaup_g_s * convectiveflux_Heat_g_s + omegaup_g_n * convectiveflux_Heat_g_n;
+      auto convectiveflux_Heat_g = convectiveflux_Heat_g_s + convectiveflux_Heat_g_n;
       if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
         convectiveflux_Heat_g =   (  rho_g_n * Cp_g_n * (T_n - T_ref)) * normalvelocity_g_n; // rho_g_s * Cp_g_s * (T_s - T_ref) +
       }
 
-      auto convectiveflux_Heat_w = omegaup_w_s * convectiveflux_Heat_w_s + omegaup_w_n * convectiveflux_Heat_w_n;
+      auto convectiveflux_Heat_w = convectiveflux_Heat_w_s + convectiveflux_Heat_w_n;
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann || bctype[Indices::PVId_Pw] == Indices::BCId_neumann){
         convectiveflux_Heat_w =  ( rho_w_n * Cp_w_n * (T_n - T_ref)) * normalvelocity_w_n; //rho_w_s * Cp_w_s * (T_s - T_ref) +// omegaup_w_n *
       }
 
-      auto convectiveflux_CH4 = - ( convectiveflux_CH4_g + convectiveflux_CH4_w);
+      auto convectiveflux_CH4 = ( convectiveflux_CH4_g + convectiveflux_CH4_w);
       auto diffusiveflux_CH4 =   diffusiveflux_CH4_s +  diffusiveflux_CH4_n;
       
-      auto convectiveflux_H2O = - ( convectiveflux_H2O_g + convectiveflux_H2O_w);
+      auto convectiveflux_H2O = ( convectiveflux_H2O_g + convectiveflux_H2O_w);
       auto diffusiveflux_H2O =  diffusiveflux_H2O_s + diffusiveflux_H2O_n;
      
-      auto convectiveflux_SALT = -convectiveflux_SALT_w;//(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
+      auto convectiveflux_SALT = convectiveflux_SALT_w;//(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
       auto diffusiveflux_SALT =  diffusiveflux_SALT_s +  diffusiveflux_SALT_n;
       if (veltype[Indices::BCId_salt] == Indices::BCId_neumann){
         diffusiveflux_SALT =    ( rho_w_n * Sw_n * DC_w_n) * grad_XC_n; //rho_w_s * Sw_s * DC_w_s +
       }
 
-      auto convectiveflux_Heat = - ( convectiveflux_Heat_g + convectiveflux_Heat_w);
-      auto diffusiveflux_Heat = - (omegaup_T_s * diffusiveflux_Heat_s + omegaup_T_n * diffusiveflux_Heat_n);
+      auto convectiveflux_Heat =  (convectiveflux_Heat_g + convectiveflux_Heat_w);
+      auto diffusiveflux_Heat = - (diffusiveflux_Heat_s + diffusiveflux_Heat_n);
       if (veltype[Indices::BCId_heat] == Indices::BCId_neumann){
         diffusiveflux_Heat = -  (kth_eff_n * grad_T_n);
+      }
+      if (ip_global_s[1] == 0. && (*time) == 3000.){
+
+      std::cout << ip_global_s << "   " << convectiveflux_CH4 << "  " << diffusiveflux_CH4 << "  "<< convectiveflux_SALT << "  " <<  diffusiveflux_SALT<< std::endl;
+      std::cout << convectiveflux_H2O << "   " << diffusiveflux_H2O << "  " << convectiveflux_Heat << "  "<<diffusiveflux_Heat << std::endl;
+      exit(0);
       }
 
       //  ACCCUMULATE RESIDUALS  //
@@ -2299,14 +2298,14 @@ public:
       }
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r.accumulate(lfsv_Sg_s, i, - term_nipg_g * K * (omegaup_g_s * krN_s * rho_g_s 
-                                        * (1. - YH2O_s) * (- coeff_grad_Sw_s)) * n_F_local * gradpsi_Sg_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n) 
+        r.accumulate(lfsv_Sg_s, i, - term_nipg_g * K * (omegaup_g_n * krN_n * rho_g_n 
+                                        * (1. - YH2O_n) * (- coeff_grad_Sw_s)) * n_F_local * gradpsi_Sg_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n) 
       }
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
-      {
-        r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_Sg_s, i, term_penalty_sg * psi_Sg_s[i] * factor);
+      // }
      
       // SALT-component-wise mass-balance
       tmp =  convectiveflux_SALT + diffusiveflux_SALT ;
@@ -2322,13 +2321,13 @@ public:
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
       {
         r.accumulate(lfsv_XC_s, i,  term_nipg_c_x *
-            (  rho_w_s * Sw_s * DC_w_s  )* gradpsi_XC_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
+            (  rho_w_n * Sw_n * DC_w_n  )* gradpsi_XC_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
       }
       // // standard IP term integral
-      for (size_type i = 0; i < lfsv_XC_s.size(); i++)
-      {
-        r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
-      } 
+      // for (size_type i = 0; i < lfsv_XC_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_XC_s, i, term_penalty_c * psi_XC_s[i] * factor);
+      // } 
 
       // H2O-component-wise mass-balance
       tmp =  convectiveflux_H2O +  diffusiveflux_H2O ;
@@ -2342,15 +2341,15 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r.accumulate(lfsv_Pw_s, i, - term_nipg_w * K * (omegaup_w_s * krW_s * rho_w_s * (1. - XC_s - XCH4_s)  )
-                                                                   * n_F_local * gradpsi_Pw_s[i] * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
+        r.accumulate(lfsv_Pw_s, i, - term_nipg_w * K * (omegaup_w_n * krW_n * rho_w_n * (1. - XC_n - XCH4_n)  )
+                                                                   * n_F_local * (gradpsi_Pw_s[i]-rho_w_n*gravity) * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
         
       }
       //standard IP term integral
-      for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
-      {
-        r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_Pw_s, i, term_penalty_w * psi_Pw_s[i] * factor);
+      // }
 
       // double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
       // // standard IP term integral
@@ -2386,14 +2385,14 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
-        r.accumulate(lfsv_T_s, i, -  kth_eff_s * term_nipg_T * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
+        r.accumulate(lfsv_T_s, i, - kth_eff_s * term_nipg_T * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
       }
       
       // standard IP term integral
-      for (size_type i = 0; i < lfsv_T_s.size(); i++)
-      {
-        r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
-      }
+      // for (size_type i = 0; i < lfsv_T_s.size(); i++)
+      // {
+      //   r.accumulate(lfsv_T_s, i, term_penalty_T * psi_T_s[i] * factor);
+      // }
 
       //Integrals regarding the NCP1
 			RF max1 = 0.5 * std::max(0., (Sg_s -1. + YCH4_s + YH2O_s)) + 0.5 * std::max(0., (Sg_n -1. + YCH4_n + YH2O_n));
