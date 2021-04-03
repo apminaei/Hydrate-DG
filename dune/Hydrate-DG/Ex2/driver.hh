@@ -228,7 +228,7 @@ void driver(const GV &gv, // GridView
 	double alpha_w = 1.e0 ;//* property.characteristicValue.P_c;
 	double alpha_s = 1.e0;
 	double alpha_T = 1.e0;//* property.characteristicValue.T_c;
-	double alpha_x = 1.e-3 ;//* property.characteristicValue.X_source_mass;
+	double alpha_x = 1.e-2 ;//* property.characteristicValue.X_source_mass;
 	double alpha_y = 1.e0;
 	double intorder=4;
 
@@ -523,7 +523,7 @@ void driver(const GV &gv, // GridView
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
             auto jacobian = osm.getPDESolver().getJacobian();
-			if(helper.rank()==0and  (opcount%10==0)){
+			if(helper.rank()==0 &&  (opcount%10==0)){
 			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
 			Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
 			}
@@ -531,7 +531,7 @@ void driver(const GV &gv, // GridView
 			auto u_norm_two = unew.two_norm();
 			auto u_norm_one = unew.one_norm();
 			auto u_norm_infinity = unew.infinity_norm();
-			if(helper.rank()==0 and  (opcount%2==0) and (newton_iterations>1)){//((time+dt )/(t_OP * opcount) > (1.-1.e-6)) and ((time+dt ) / (t_OP * opcount)< (1. + 1.e-6))
+			if(helper.rank()==0 &&  (newton_iterations>1)){//((time+dt )/(t_OP * opcount) > (1.-1.e-6)) and ((time+dt ) / (t_OP * opcount)< (1. + 1.e-6))
 				std::string s_OP = std::__cxx11::to_string(time);
 				std::string parameters_file = pathNameDefects;
 				parameters_file +="/";
