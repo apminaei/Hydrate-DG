@@ -3,7 +3,7 @@ class CharacteristicValues{
 public:
 
 	constexpr static double x_c = 1.e2; 
-	constexpr static double t_c = 12.*3.*24.*36.*1.e2; // t_end Characteristic value for time
+	constexpr static double t_c = 1.e-1* 12.*3.*24.*36.; // t_end Characteristic value for time
 	constexpr static double density_c = 1.e3;
 	constexpr static double viscosity_c = 1.e-3;
 	constexpr static double thermalconductivity_c = 1.e0;// 
