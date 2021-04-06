@@ -197,7 +197,7 @@ public:
 				return false;
 		}
 		else if( dimension == 2 ){
-			if((Z_GHSZ_bottom - eps) < globalPos[1] and globalPos[1]< (Z_GHSZ_top + eps))
+			if(Z_GHSZ_bottom <= globalPos[1] and globalPos[1] <= Z_GHSZ_top)
 				return true;
 			else
 				return false;

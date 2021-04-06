@@ -121,21 +121,21 @@ int main(int argc, char **argv)
 
 #elif defined(UG) 
 		typedef  Dune::UGGrid<dim> Grid;
-		// auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
-		// auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
-		// std::array<unsigned int, dim> elements;
-		// elements[0] = N[0];
-		// elements[1] = N[1];
+		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+		std::array<unsigned int, dim> elements;
+		elements[0] = N[0];
+		elements[1] = N[1];
 		// // std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-		std::string filename = ptree.get("grid.alugrid.name",
-                                         (std::string)"grid.msh");
-		auto grid_file = PATH;
-		grid_file += "grids/";
-		grid_file += filename;
-        Dune::GridFactory<Grid> factory;
-        Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
-        std::shared_ptr<Grid> grid(factory.createGrid());
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+		// std::string filename = ptree.get("grid.alugrid.name",
+        //                                  (std::string)"grid.msh");
+		// auto grid_file = PATH;
+		// grid_file += "grids/";
+		// grid_file += filename;
+        // Dune::GridFactory<Grid> factory;
+        // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
+        // std::shared_ptr<Grid> grid(factory.createGrid());
 
 #endif
 
