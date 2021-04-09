@@ -54,8 +54,8 @@ public :
 			// bctype[indices.PVId_Pw] = indices.BCId_neumann;
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
-			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+			// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 
 		}
 		if( property.mesh.isLeftBoundary(globalPos)){
@@ -64,8 +64,8 @@ public :
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
 
-			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+			// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		}
 		if( property.mesh.isRightBoundary(globalPos)){
 			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
@@ -73,8 +73,8 @@ public :
 			bctype[indices.PVId_T] = indices.BCId_neumann;
 			bctype[indices.PVId_C] = indices.BCId_neumann;
 
-			bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-			bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+			// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 		}
 		return bctype;
 	}
@@ -107,8 +107,6 @@ public :
 			bcvalue[indices.PVId_Pw] = Pw_top ;//property.parameter.InitialPw(globalPos) + 1000 * 9.81 * 0.01 * Xc_time * (time+dt);//0.01 is the burial velocity m/year
 			bcvalue[indices.PVId_T] = T_top;//property.parameter.InitialT(globalPos) ;//;//+ (2/(100*365*24*3600))*time - 3/2/1000 * globalPos[0]* time;
 			bcvalue[indices.PVId_C] = xc_top;//property.parameter.InitialXC(globalPos);
-			bcvalue[indices.PVId_XCH4] = icv[Indices::PVId_XCH4];//property.parameter.InitialXC(globalPos);
-			bcvalue[indices.PVId_YH2O] = icv[Indices::PVId_YH2O];//property.parameter.InitialXC(globalPos);
 		}
 		
 		if( property.mesh.isBottomBoundary(globalPos)){

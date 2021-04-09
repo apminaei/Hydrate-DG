@@ -172,60 +172,60 @@ void driver(const GV &gv, // GridView
 	U unew(gfs, 0.0);
 
 	//	MAKE FUNCTION FOR INITIAL VALUES   Which must be nondim 
-	// typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
-	// Pw_InitialType Pw_initial(gv,property); /* ndim */
-	// typedef Sg_Initial<GV,Properties,Real> Sg_InitialType;
-	// Sg_InitialType Sg_initial(gv,property);
-	// typedef Sh_Initial<GV,Properties,Real> Sh_InitialType;
-	// Sh_InitialType Sh_initial(gv,property);
-	// typedef T_Initial<GV,Properties,Real> T_InitialType;
-	// T_InitialType T_initial(gv,property); /* ndim */
-	// typedef XCH4_Initial<GV,Properties,Real> XCH4_InitialType;
-	// XCH4_InitialType XCH4_initial(gv,property);
+	typedef Pw_Initial<GV,Properties,Real> Pw_InitialType;
+	Pw_InitialType Pw_initial(gv,property); /* ndim */
+	typedef Sg_Initial<GV,Properties,Real> Sg_InitialType;
+	Sg_InitialType Sg_initial(gv,property);
+	typedef Sh_Initial<GV,Properties,Real> Sh_InitialType;
+	Sh_InitialType Sh_initial(gv,property);
+	typedef T_Initial<GV,Properties,Real> T_InitialType;
+	T_InitialType T_initial(gv,property); /* ndim */
+	typedef XCH4_Initial<GV,Properties,Real> XCH4_InitialType;
+	XCH4_InitialType XCH4_initial(gv,property);
 	typedef YH2O_Initial<GV,Properties,Real> YH2O_InitialType;
 	YH2O_InitialType YH2O_initial(gv,property);
-	// typedef XC_Initial<GV,Properties,Real> XC_InitialType;
-	// XC_InitialType XC_initial(gv,property);
-	// typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
-	// 											Sg_InitialType,
-	// 											Sh_InitialType,
-	// 											T_InitialType,
-	// 											XCH4_InitialType,
-	// 											YH2O_InitialType, XC_InitialType> InitialType;
-	// InitialType initial(Pw_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
-	// Dune::PDELab::interpolate(initial, gfs, uold); 
+	typedef XC_Initial<GV,Properties,Real> XC_InitialType;
+	XC_InitialType XC_initial(gv,property);
+	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
+												Sg_InitialType,
+												Sh_InitialType,
+												T_InitialType,
+												XCH4_InitialType,
+												YH2O_InitialType, XC_InitialType> InitialType;
+	InitialType initial(Pw_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
+	Dune::PDELab::interpolate(initial, gfs, uold); 
     // Initialize the solution at t=0 (uold) with the given initial values
 	
 	// ProblemInitialConditions<GV,Properties> Icvalue;
 	// Icvalue icvalue(gv, property);
-	auto Pw_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){
-		return (1.5e7 + 1030.21 * 9.81 * (0.-x[1])*property.characteristicValue.x_c)/property.characteristicValue.P_c;};
-	auto Pw = Dune::PDELab::makeGridFunctionFromCallable(gv, Pw_Initiallamda);
-	auto Sg_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.;};
-	auto Sg = Dune::PDELab::makeGridFunctionFromCallable(gv, Sg_Initiallamda);
-	auto Sh_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){double Sh = 0.0 ;
-		double GHSZ_width = -3.20 - (-4.);
+	// auto Pw_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){
+	// 	return (1.5e7 + 1030.21 * 9.81 * (0.-x[1])*property.characteristicValue.x_c)/property.characteristicValue.P_c;};
+	// auto Pw = Dune::PDELab::makeGridFunctionFromCallable(gv, Pw_Initiallamda);
+	// auto Sg_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.;};
+	// auto Sg = Dune::PDELab::makeGridFunctionFromCallable(gv, Sg_Initiallamda);
+	// auto Sh_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){double Sh = 0.0 ;
+	// 	double GHSZ_width = -3.20 - (-4.);
 		
-		if( x[1]<= -3.20 && x[1]>=-4.){
-			Sh = 1.2 * (x[1]-(-4.))/GHSZ_width * (x[1]-(-3.2))/(-GHSZ_width);//* (rand()%2) + 0.001;//
-		}
-		return Sh;
-	};
-	auto Sh = Dune::PDELab::makeGridFunctionFromCallable(gv, Sh_Initiallamda);
-	auto T_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){
-		return (4. + 273.15 - 0.035 * x[1]*property.characteristicValue.x_c)/property.characteristicValue.T_c;};
-	auto T = Dune::PDELab::makeGridFunctionFromCallable(gv, T_Initiallamda);
-	auto XCH4_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.;};
-	auto XCH4 = Dune::PDELab::makeGridFunctionFromCallable(gv, XCH4_Initiallamda);
-	// auto YH2O_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 6.e-5;};
-	// auto YH2O = Dune::PDELab::makeGridFunctionFromCallable(gv, YH2O_Initiallamda);
-	auto XC_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.035 * (property.gas.MolarMass()/property.salt.MolarMass());};
-	auto XC = Dune::PDELab::makeGridFunctionFromCallable(gv, XC_Initiallamda);
-	using InitialTypelamda = Dune::PDELab::CompositeGridFunction<decltype(Pw), decltype(Sg), decltype(Sh),
-										decltype(T), decltype(XCH4),
-										YH2O_InitialType, decltype(XC)> ;
-	InitialTypelamda initialamda(Pw, Sg, Sh, T, XCH4, YH2O_initial, XC);
-	Dune::PDELab::interpolate(initialamda, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
+	// 	if( x[1]<= -3.20 && x[1]>=-4.){
+	// 		Sh = 1.2 * (x[1]-(-4.))/GHSZ_width * (x[1]-(-3.2))/(-GHSZ_width);//* (rand()%2) + 0.001;//
+	// 	}
+	// 	return Sh;
+	// };
+	// auto Sh = Dune::PDELab::makeGridFunctionFromCallable(gv, Sh_Initiallamda);
+	// auto T_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){
+	// 	return (4. + 273.15 - 0.035 * x[1]*property.characteristicValue.x_c)/property.characteristicValue.T_c;};
+	// auto T = Dune::PDELab::makeGridFunctionFromCallable(gv, T_Initiallamda);
+	// auto XCH4_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.;};
+	// auto XCH4 = Dune::PDELab::makeGridFunctionFromCallable(gv, XCH4_Initiallamda);
+	// // auto YH2O_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 6.e-5;};
+	// // auto YH2O = Dune::PDELab::makeGridFunctionFromCallable(gv, YH2O_Initiallamda);
+	// auto XC_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.035 * (property.gas.MolarMass()/property.salt.MolarMass());};
+	// auto XC = Dune::PDELab::makeGridFunctionFromCallable(gv, XC_Initiallamda);
+	// using InitialTypelamda = Dune::PDELab::CompositeGridFunction<decltype(Pw), decltype(Sg), decltype(Sh),
+	// 									decltype(T), decltype(XCH4),
+	// 									YH2O_InitialType, decltype(XC)> ;
+	// InitialTypelamda initialamda(Pw, Sg, Sh, T, XCH4, YH2O_initial, XC);
+	// Dune::PDELab::interpolate(initialamda, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 	
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
@@ -240,7 +240,7 @@ void driver(const GV &gv, // GridView
 	double alpha_T = 1.e0;//* property.characteristicValue.T_c;
 	double alpha_x = 1.e0 ;//* property.characteristicValue.X_source_mass;
 	double alpha_y = 1.e0;
-	double intorder=4;
+	double intorder=4; 
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;

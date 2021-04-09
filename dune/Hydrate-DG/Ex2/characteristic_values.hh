@@ -3,7 +3,7 @@ class CharacteristicValues{
 public:
 
 	constexpr static double x_c = 1.e2; 
-	constexpr static double t_c = 1.e-2* 12.*3.*24.*36.; //31104 t_end Characteristic value for time
+	constexpr static double t_c = 1.e-1* 12.*3.*24.*36.; //31104 t_end Characteristic value for time
 	constexpr static double density_c = 1.e3;
 	constexpr static double viscosity_c = 1.e-3;
 	constexpr static double thermalconductivity_c = 1.e0;// 
@@ -15,12 +15,12 @@ public:
 	constexpr static double dispersivity_c = 1.e-9;//x_c * x_c / t_c;
 
 	constexpr static double X_source_mass 		= t_c/density_c  ;//t_c/density_c;// Correct
-	constexpr static double X_convective_mass 	= (permeability_c/(x_c*x_c) ) * ( P_c*t_c/viscosity_c );// Correct
+	constexpr static double X_convective_mass 	= (permeability_c/(x_c) ) * ( t_c/viscosity_c );// Correct
 	constexpr static double X_diffusive_mass 	= ( dispersivity_c * t_c ) / ( x_c*x_c ) ;// Correct
-	constexpr static double X_gravity 			= 1. * P_c/ x_c/density_c; // Correct
+	constexpr static double X_gravity 			= 1.;// * P_c/ x_c/density_c; // Correct
 	constexpr static double X_solidvelocity 	= 1.;//viscosity_c*x_c/(P_c*permeability_c);
 	constexpr static double X_source_heat 		= t_c/(density_c * T_c * volumetricheat_c) ;// Correct
-	constexpr static double X_convective_heat 	= ( permeability_c/(x_c*x_c) ) * ( P_c*t_c/viscosity_c )*(specificheat_c/volumetricheat_c) ;// Correct
+	constexpr static double X_convective_heat 	= ( permeability_c/(x_c) ) * ( t_c/viscosity_c )*(specificheat_c/volumetricheat_c) ;// Correct
 	constexpr static double X_diffusive_heat 	=  (thermalconductivity_c/(x_c*x_c) ) * ( t_c/(density_c * volumetricheat_c));// Correct
 	constexpr static double X_penalty_heat 		= 1.;//t_c/(density_c*specificheat_c); // Correct
 	constexpr static double X_penalty_pressure 	= 1;//P_c * X_source_mass; // Correct

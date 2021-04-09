@@ -55,14 +55,14 @@ public:
 
 	double FormationLimitFactor( double Sh , double Sw, double porosity ) const {
 
-		double term = Sw*(1.-Sw-Sh) ;
+		double term = Sw*(1. - Sw - Sh);//std::max(0., std::min(1., )) ;
 		return term;
 
 	}
 
 	double DissociationLimitFactor( double Sh , double Sw, double porosity ) const {
 
-		double term = Sh;
+		double term = Sh;//std::max(0., std::min(1.,  Sh));
 		return term  ;
 	}
 
@@ -72,6 +72,7 @@ public:
 		double A_s;
 
  		double M_base = 1.e5;
+		double sh = std::max(0., std::min(1., Sh));
  		double M_SF = pow( porosity*(1.-Sh), 3./2. );
  		A_s = M_base * M_SF ;
 
@@ -88,26 +89,28 @@ public:
 
 		double Peq = EquilibriumPressure( T,S );
 
-		double potential_P = Peq/Pg - 1.  ;
+		double potential_P = Peq - Pg  ;
 
 		if(potential_P > 0. ){
 			gas_gen =   DissociationRateConstant( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
 					  * DissociationLimitFactor( Sh, Sw, porosity )
-					  * Pg
 					  * potential_P
 					  ;
+					
 		}
-		else if(potential_P < 0. ){
+		else if(potential_P < 0.  ){
 			gas_gen =   FormationRateConstant_ingas( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
 					  * FormationLimitFactor( Sh, Sw, porosity )
-					  * Pg
 					  * potential_P
 					  ;
 		}
+		// if(gas_gen > 1.e-9 ){
+		// 	std::cout << Peq << "  " << Pg << "  " << T << "  " << S << std::endl;
+		// }
 	    return gas_gen ;
 	}
 

@@ -44,7 +44,7 @@ public:
 		double T_0 = 10.;
 		double S_0 = 0.035;
 		double alpha_T = -0.15;
-		double alpha_S = 0.78*1e3;
+		double alpha_S = 0.96706917808*1e2;//0.78*1e3
 		double alpha_P = 0.0045;
 
 // #ifdef STATEINDEPENDENTPROPERTIES
@@ -106,7 +106,7 @@ public:
 		//S  = S_ref;
 #endif
 
-		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );
+		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.0797*S );//0.29
 		// std::cout << kth << std::endl;
 		// exit(0);
 		return kth/characteristicValue.thermalconductivity_c ;
