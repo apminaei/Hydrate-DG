@@ -31,7 +31,7 @@ void driver_Sh(const GV &gv, // GridView
 	Properties property(gv,ptree);
 	/* Non-dimensionalize time prams */
 	auto Xc_t = property.characteristicValue.t_c;
-	auto t_year_sec = 364.*24.*60.*60.;
+	auto t_year_sec = 12.*30.*24*60.*60.;
 	// double dt_initprob  = ptree.get("initial_problem.dt_initial",(double)0.0001);
 	// dt_initprob *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
 	// dt_initprob *= 1./Xc_t; /*ndim*/
@@ -67,13 +67,14 @@ void driver_Sh(const GV &gv, // GridView
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
 
-	const int degree_Sh = 1;//ptree.get("polynomial_degree.Sh",(int)1);
-	const int degree_Sg = 1;//ptree.get("polynomial_degree.Sg",(int)1);
-	const int degree_P = 1;//ptree.get("polynomial_degree.Pw",(int)1);
-	const int degree_T = 1;//ptree.get("polynomial_degree.T",(int)1);
-	const int degree_XCH4 = 1;//ptree.get("polynomial_degree.XCH4",(int)1);
-	const int degree_XC = 1;//ptree.get("polynomial_degree.XC",(int)1);
-	const int degree_Y = 1;//ptree.get("polynomial_degree.Y",(int)1);
+	int max_linear_iteration = ptree.get("newton.MaxLinearIteration",(int)10);
+	const int degree_Sg = 1;
+	const int degree_P = 1;
+	const int degree_Sh = 1;
+	const int degree_T = 1;
+	const int degree_X = 1;
+	const int degree_C = 1;
+	const int degree_Y = 1;
 
 	//	GFS
 #ifdef PARALLEL
@@ -87,30 +88,30 @@ void driver_Sh(const GV &gv, // GridView
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Pw;// FEM_P;
 	FEM_Pw fem_pw;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sh;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sh;
 	FEM_Sh fem_sh;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sg;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
 	FEM_Sg fem_sg;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	FEM_T fem_t;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_XCH4, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_XCH4; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_XCH4, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_XCH4; 
 	FEM_XCH4 fem_xch4;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_XC, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_XC; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_XC, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_XC; 
 	FEM_XC fem_xc;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_YH2O; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_YH2O; 
 	FEM_YH2O fem_yh2o;
 
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Pw, CON0, VBE0> GFS_Pw; // gfs
 	GFS_Pw gfs_pw(gv, fem_pw);
-	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sh, CON0, VBE> GFS_Sh; // gfs
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sh, CON0, VBE0> GFS_Sh; // gfs
 	GFS_Sh gfs_sh(gv, fem_sh);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sg, CON0, VBE0> GFS_Sg; // gfs
 	GFS_Sg gfs_sg(gv, fem_sg);
-	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_T, CON0, VBE> GFS_T; // gfs
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_T, CON0, VBE0> GFS_T; // gfs
 	GFS_T gfs_t(gv, fem_t);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_XCH4, CON0, VBE0> GFS_XCH4; // gfs
 	GFS_XCH4 gfs_xch4(gv, fem_xch4);
-	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_XC, CON0, VBE0> GFS_XC; // gfs
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_XC, CON0, VBE> GFS_XC; // gfs
 	GFS_XC gfs_xc(gv, fem_xc);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_YH2O, CON0, VBE0> GFS_YH2O; // gfs
 	GFS_YH2O gfs_yh2o(gv, fem_yh2o);
@@ -120,22 +121,22 @@ void driver_Sh(const GV &gv, // GridView
 	// gfs for composite system Pw,Sg,Sh,T,XCH4,YH2O,XC
 	typedef Dune::PDELab::CompositeGridFunctionSpace<VBE1, 
 													 Dune::PDELab::EntityBlockedOrderingTag,
-													 GFS_Pw, GFS_Sg, GFS_XCH4, GFS_YH2O, GFS_XC> 
+													 GFS_Pw, GFS_Sg, GFS_Sh, GFS_T, GFS_XCH4,GFS_YH2O> 
 													 GFS;
-	GFS gfs(gfs_pw, gfs_sg, gfs_xch4, gfs_yh2o, gfs_xc);
+	GFS gfs(gfs_pw,  gfs_sg, gfs_sh, gfs_t, gfs_xch4, gfs_yh2o);
 	
-	typedef typename GFS_Sh::template ConstraintsContainer<Real>::Type CC_Sh;
-    CC_Sh cc_sh;
+	// typedef typename GFS_Sh::template ConstraintsContainer<Real>::Type CC_Sh;
+    // CC_Sh cc_sh;
     // typedef typename GFS_Pw::template ConstraintsContainer<Real>::Type CC_Pw;
     // CC_Pw cc_pw;
 	// typedef typename GFS_Sg::template ConstraintsContainer<Real>::Type CC_Sg;
     // CC_Sg cc_sg;
-	typedef typename GFS_T::template ConstraintsContainer<Real>::Type CC_T;
-    CC_T cc_t;
+	// typedef typename GFS_T::template ConstraintsContainer<Real>::Type CC_T;
+    // CC_T cc_t;
     // typedef typename GFS_XCH4::template ConstraintsContainer<Real>::Type CC_XCH4;
     // CC_XCH4 cc_xch4;
-	// typedef typename GFS_XC::template ConstraintsContainer<Real>::Type CC_XC;
-    // CC_XC cc_xc;
+	typedef typename GFS_XC::template ConstraintsContainer<Real>::Type CC_XC;
+    CC_XC cc_xc;
 	// typedef typename GFS_YH2O::template ConstraintsContainer<Real>::Type CC_YH2O;
     // CC_YH2O cc_yh2o;
 	typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
@@ -148,44 +149,44 @@ void driver_Sh(const GV &gv, // GridView
 	using PathSg = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_Sg>>;
     using SUBGFS_Sg = Dune::PDELab::GridFunctionSubSpace<GFS,PathSg>;
     SUBGFS_Sg    subgfs_Sg(gfs);
-	// using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>>;
-    // using SUBGFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
-    // SUBGFS_Sh    subgfs_Sh(gfs);
-	// using PathT = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_T>>;
-    // using SUBGFS_T = Dune::PDELab::GridFunctionSubSpace<GFS,PathT>;
-    // SUBGFS_T    subgfs_T(gfs);
+	using PathSh = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_Sh>>;
+    using SUBGFS_Sh = Dune::PDELab::GridFunctionSubSpace<GFS,PathSh>;
+    SUBGFS_Sh    subgfs_Sh(gfs);
+	using PathT = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_T>>;
+    using SUBGFS_T = Dune::PDELab::GridFunctionSubSpace<GFS,PathT>;
+    SUBGFS_T    subgfs_T(gfs);
 	using PathXCH4 = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_XCH4>>;
     using SUBGFS_XCH4 = Dune::PDELab::GridFunctionSubSpace<GFS,PathXCH4>;
     SUBGFS_XCH4    subgfs_XCH4(gfs);
 	using PathYH2O = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_YH2O>>;
     using SUBGFS_YH2O = Dune::PDELab::GridFunctionSubSpace<GFS,PathYH2O>;
     SUBGFS_YH2O    subgfs_YH2O(gfs);
-	using Pathc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_XC>>;
-    using SUBGFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
-    SUBGFS_XC    subgfs_XC(gfs);
+	// using Pathc = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::VId_XC>>;
+    // using SUBGFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
+    // SUBGFS_XC    subgfs_XC(gfs);
 
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
-	using U_Sh = Dune::PDELab::Backend::Vector<GFS_Sh, double>;
-	U_Sh uold_sh(gfs_sh, 0.0);
-	U_Sh unew_sh(gfs_sh, 0.0);
+	// using U_Sh = Dune::PDELab::Backend::Vector<GFS_Sh, double>;
+	// U_Sh uold_sh(gfs_sh, 0.0);
+	// U_Sh unew_sh(gfs_sh, 0.0);
 	// using U_Sg = Dune::PDELab::Backend::Vector<GFS_Sg, double>;
 	// U_Sg uold_sg(gfs_sg, 0.0);
 	// U_Sg unew_sg(gfs_sg, 0.0);
 	// using U_Pw = Dune::PDELab::Backend::Vector<GFS_Pw, double>;
 	// U_Pw uold_pw(gfs_pw, 0.0);
 	// U_Pw unew_pw(gfs_pw, 0.0);
-	using U_T = Dune::PDELab::Backend::Vector<GFS_T, double>;
-	U_T uold_t(gfs_t, 0.0);
-	U_T unew_t(gfs_t, 0.0);
+	// using U_T = Dune::PDELab::Backend::Vector<GFS_T, double>;
+	// U_T uold_t(gfs_t, 0.0);
+	// U_T unew_t(gfs_t, 0.0);
 	// using U_XCH4 = Dune::PDELab::Backend::Vector<GFS_XCH4, double>;
 	// U_XCH4 uold_xch4(gfs_xch4, 0.0);
 	// U_XCH4 unew_xch4(gfs_xch4, 0.0);
 	// using U_YH2O = Dune::PDELab::Backend::Vector<GFS_YH2O, double>;
 	// U_YH2O uold_yh2o(gfs_yh2o, 0.0);
 	// U_YH2O unew_yh2o(gfs_yh2o, 0.0);
-	// using U_XC = Dune::PDELab::Backend::Vector<GFS_XC, double>;
-	// U_XC uold_xc(gfs_xc, 0.0);
-	// U_XC unew_xc(gfs_xc, 0.0);
+	using U_XC = Dune::PDELab::Backend::Vector<GFS_XC, double>;
+	U_XC uold_xc(gfs_xc, 0.0);
+	U_XC unew_xc(gfs_xc, 0.0);
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
 	U uold(gfs, 0.0);
 	U unew(gfs, 0.0);
@@ -208,16 +209,18 @@ void driver_Sh(const GV &gv, // GridView
 
 	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
 												Sg_InitialType,
+												Sh_InitialType,
+												T_InitialType,
 												XCH4_InitialType,
-												YH2O_InitialType, XC_InitialType> InitialType;
-	InitialType initial(Pw_initial, Sg_initial, XCH4_initial, YH2O_initial, XC_initial);
+												YH2O_InitialType> InitialType;
+	InitialType initial(Pw_initial, Sg_initial, Sh_initial, T_initial, XCH4_initial, YH2O_initial, XC_initial);
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 	// Dune::PDELab::interpolate(Pw_initial, gfs_pw, uold_pw); // Initialize the solution at t=0 (uold) with the given initial values
 	// Dune::PDELab::interpolate(Sg_initial, gfs_sg, uold_sg); // Initialize the solution at t=0 (uold) with the given initial values
-	Dune::PDELab::interpolate(Sh_initial, gfs_sh, uold_sh); // Initialize the solution at t=0 (uold) with the given initial values
-	Dune::PDELab::interpolate(T_initial, gfs_t, uold_t); // Initialize the solution at t=0 (uold) with the given initial values
+	// Dune::PDELab::interpolate(Sh_initial, gfs_sh, uold_sh); // Initialize the solution at t=0 (uold) with the given initial values
+	// Dune::PDELab::interpolate(T_initial, gfs_t, uold_t); // Initialize the solution at t=0 (uold) with the given initial values
 	// Dune::PDELab::interpolate(XCH4_initial, gfs_xch4, uold_xch4); // Initialize the solution at t=0 (uold) with the given initial values
-	// Dune::PDELab::interpolate(XC_initial, gfs_xc, uold_xc); // Initialize the solution at t=0 (uold) with the given initial values
+	Dune::PDELab::interpolate(XC_initial, gfs_xc, uold_xc); // Initialize the solution at t=0 (uold) with the given initial values
 	// Dune::PDELab::interpolate(YH2O_initial, gfs_yh2o, uold_yh2o); // Initialize the solution at t=0 (uold) with the given initial values
 	
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
@@ -239,9 +242,9 @@ void driver_Sh(const GV &gv, // GridView
 
 
 
-	typedef LocalOperator_Sh<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_Sh> LOP_Sh; // spatial part
-	LOP_Sh lop_sh(gv, property, bc, &unew_sh, gfs_sh, uold, gfs, uold_t, gfs_t,
-                &time, &dt, intorder);
+	// typedef LocalOperator_Sh<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_Sh> LOP_Sh; // spatial part
+	// LOP_Sh lop_sh(gv, property, bc, &unew_sh, gfs_sh, uold, gfs, uold_t, gfs_t,
+    //             &time, &dt, intorder);
 
 	// typedef LocalOperator_Sg<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U_Pw, GFS_Pw, U_Sg, GFS_Sg, U_T, GFS_T,
     //       					U_XCH4, GFS_XCH4, U_YH2O, GFS_YH2O, U_XC, GFS_XC, FEM_Sg> LOP_Sg; // spatial part
@@ -255,13 +258,13 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_t, gfs_t, uold_xch4, gfs_xch4, uold_yh2o, gfs_yh2o,
     //                 uold_xc, gfs_xc, &time, &dt, intorder, method_w, alpha_w);
 
-	typedef LocalOperator_T<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_T> LOP_T; // spatial part
-	LOP_T lop_t(gv, property, bc, uold_sh, gfs_sh, uold, gfs, &unew_t, gfs_t,
-                    &time, &dt, intorder, method_T, alpha_T);
+	// typedef LocalOperator_T<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_T> LOP_T; // spatial part
+	// LOP_T lop_t(gv, property, bc, uold_sh, gfs_sh, uold, gfs, &unew_t, gfs_t,
+    //                 &time, &dt, intorder, method_T, alpha_T);
 
-	// typedef LocalOperator_XC<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, U_XC, GFS_XC, FEM_XC> LOP_XC; // spatial part
-	// LOP_XC lop_xc(gv, property, bc, uold_sh, gfs_sh, uold, gfs, uold_t, gfs_t,
-    //                 &unew_xc, gfs_xc, &time, &dt, intorder, method_x, alpha_x);
+	typedef LocalOperator_XC<GV, Properties, BoundaryConditions, U, GFS, U_XC, GFS_XC, FEM_XC> LOP_XC; // spatial part
+	LOP_XC lop_xc(gv, property, bc, uold, gfs, 
+                    &unew_xc, gfs_xc, &time, &dt, intorder, method_x, alpha_x);
 
 	// typedef LocalOperator_XCH4<GV, Properties, BoundaryConditions, U_Sh, GFS_Sh, U_Pw, GFS_Pw, U_Sg, GFS_Sg, U_T, GFS_T,
     //       					U_XCH4, GFS_XCH4, U_YH2O, GFS_YH2O, U_XC, GFS_XC, FEM_XCH4> LOP_XCH4; // spatial part
@@ -269,13 +272,13 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_t, gfs_t, &unew_xch4, gfs_xch4, uold_yh2o, gfs_yh2o,
     //                 uold_xc, gfs_xc, &time, &dt, intorder, method_x, alpha_x);
 
-	typedef LocalOperator_2comps<GV, Properties, BoundaryConditions, U, GFS, U_Sh, GFS_Sh, U_T, GFS_T,
-          					FEM_Pw, FEM_Sg, FEM_XCH4, FEM_YH2O, FEM_XC> LOP; // spatial part
-	LOP lop(gv, property, bc, &unew, gfs, uold_sh, gfs_sh, uold_t, gfs_t,
+	typedef LocalOperator_2comps<GV, Properties, BoundaryConditions, U, GFS, U_XC, GFS_XC, 
+          					FEM_Pw, FEM_Sg, FEM_Sh, FEM_T,FEM_XCH4, FEM_YH2O> LOP; // spatial part
+	LOP lop(gv, property, bc, &unew, gfs, uold_xc, gfs_xc,
 			&time, &dt, intorder, method_g, method_w, method_x, method_y, alpha_g, alpha_w, alpha_x, alpha_y);
 
-	typedef TimeOperator_Sh<GV, Properties, U, GFS, U_T, GFS_T, FEM_Sh> TOP_Sh; // spatial part
-	TOP_Sh top_sh(gv, property, uold, gfs, uold_t, gfs_t, intorder);
+	// typedef TimeOperator_Sh<GV, Properties, U, GFS, U_T, GFS_T, FEM_Sh> TOP_Sh; // spatial part
+	// TOP_Sh top_sh(gv, property, uold, gfs, uold_t, gfs_t, intorder);
 
 	// typedef TimeOperator_Sg<GV, Properties, U_Sh, GFS_Sh, U_Pw, GFS_Pw, U_Sg, GFS_Sg, U_T, GFS_T,
     //       					U_XCH4, GFS_XCH4, U_YH2O, GFS_YH2O, U_XC, GFS_XC, FEM_Sg> TOP_Sg; // spatial part
@@ -289,12 +292,12 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_t, gfs_t, uold_xch4, gfs_xch4, uold_yh2o, gfs_yh2o,
     //                 uold_xc, gfs_xc, intorder);
 
-	typedef TimeOperator_T<GV, Properties, U_Sh, GFS_Sh, U, GFS, FEM_T> TOP_T; // spatial part
-	TOP_T top_t(gv, property, uold_sh, gfs_sh, uold, gfs, 
-                     intorder);
+	// typedef TimeOperator_T<GV, Properties, U_Sh, GFS_Sh, U, GFS, FEM_T> TOP_T; // spatial part
+	// TOP_T top_t(gv, property, uold_sh, gfs_sh, uold, gfs, 
+    //                  intorder);
 
-	// typedef TimeOperator_XC<GV, Properties, U_Sh, GFS_Sh, U, GFS, U_T, GFS_T, FEM_XC> TOP_XC; // spatial part
-	// TOP_XC top_xc(gv, property, uold_sh, gfs_sh, uold, gfs, uold_t, gfs_t, intorder);
+	typedef TimeOperator_XC<GV, Properties, U, GFS, FEM_XC> TOP_XC; // spatial part
+	TOP_XC top_xc(gv, property, uold, gfs, intorder);
 
 	// typedef TimeOperator_XCH4<GV, Properties, U_Sh, GFS_Sh, U_Pw, GFS_Pw, U_Sg, GFS_Sg, U_T, GFS_T,
     //       					U_XCH4, GFS_XCH4, U_YH2O, GFS_YH2O, U_XC, GFS_XC, FEM_XCH4> TOP_XCH4; // spatial part
@@ -302,8 +305,8 @@ void driver_Sh(const GV &gv, // GridView
     //                 uold_t, gfs_t, &unew_xch4, gfs_xch4, uold_yh2o, gfs_yh2o,
     //                 uold_xc, gfs_xc, intorder);
 
-	typedef TimeOperator_2comps<GV, Properties, U_Sh, GFS_Sh, U_T, GFS_T, FEM_YH2O> TOP; // spatial part
-	TOP top(gv, property, uold_sh, gfs_sh, uold_t, gfs_t, intorder);
+	typedef TimeOperator_2comps<GV, Properties, U_XC, GFS_XC, FEM_YH2O> TOP; // spatial part
+	TOP top(gv, property, uold_xc, gfs_xc,  intorder);
 
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
@@ -317,8 +320,8 @@ void driver_Sh(const GV &gv, // GridView
 	// CC , CC	//  constraints for ansatz and test space 
 	// > GO ;
 
-	typedef Dune::PDELab::GridOperator<GFS_Sh, GFS_Sh, LOP_Sh, MBE, Real, Real, Real, CC_Sh, CC_Sh> GOLOP_Sh;
-	GOLOP_Sh goLOP_sh(gfs_sh, cc_sh, gfs_sh, cc_sh, lop_sh, mbe);
+	// typedef Dune::PDELab::GridOperator<GFS_Sh, GFS_Sh, LOP_Sh, MBE, Real, Real, Real, CC_Sh, CC_Sh> GOLOP_Sh;
+	// GOLOP_Sh goLOP_sh(gfs_sh, cc_sh, gfs_sh, cc_sh, lop_sh, mbe);
 
 	// typedef Dune::PDELab::GridOperator<GFS_Sg, GFS_Sg, LOP_Sg, MBE, Real, Real, Real, CC_Sg, CC_Sg> GOLOP_Sg;
 	// GOLOP_Sg goLOP_sg(gfs_sg, cc_sg, gfs_sg, cc_sg, lop_sg, mbe);
@@ -326,11 +329,11 @@ void driver_Sh(const GV &gv, // GridView
 	// typedef Dune::PDELab::GridOperator<GFS_Pw, GFS_Pw, LOP_Pw, MBE, Real, Real, Real, CC_Pw, CC_Pw> GOLOP_Pw;
 	// GOLOP_Pw goLOP_pw(gfs_pw, cc_pw, gfs_pw, cc_pw, lop_pw, mbe);
 
-	typedef Dune::PDELab::GridOperator<GFS_T, GFS_T, LOP_T, MBE, Real, Real, Real, CC_T, CC_T> GOLOP_T;
-	GOLOP_T goLOP_t(gfs_t, cc_t, gfs_t, cc_t, lop_t, mbe);
+	// typedef Dune::PDELab::GridOperator<GFS_T, GFS_T, LOP_T, MBE, Real, Real, Real, CC_T, CC_T> GOLOP_T;
+	// GOLOP_T goLOP_t(gfs_t, cc_t, gfs_t, cc_t, lop_t, mbe);
 
-	// typedef Dune::PDELab::GridOperator<GFS_XC, GFS_XC, LOP_XC, MBE, Real, Real, Real, CC_XC, CC_XC> GOLOP_XC;
-	// GOLOP_XC goLOP_xc(gfs_xc, cc_xc, gfs_xc, cc_xc, lop_xc, mbe);
+	typedef Dune::PDELab::GridOperator<GFS_XC, GFS_XC, LOP_XC, MBE, Real, Real, Real, CC_XC, CC_XC> GOLOP_XC;
+	GOLOP_XC goLOP_xc(gfs_xc, cc_xc, gfs_xc, cc_xc, lop_xc, mbe);
 
 	// typedef Dune::PDELab::GridOperator<GFS_XCH4, GFS_XCH4, LOP_XCH4, MBE, Real, Real, Real, CC_XCH4, CC_XCH4> GOLOP_XCH4;
 	// GOLOP_XCH4 goLOP_xch4(gfs_xch4, cc_xch4, gfs_xch4, cc_xch4, lop_xch4, mbe);
@@ -346,8 +349,8 @@ void driver_Sh(const GV &gv, // GridView
 	// std::cout << " LOP DONE ! " << std::endl;
 
 
-	typedef Dune::PDELab::GridOperator<GFS_Sh, GFS_Sh, TOP_Sh, MBE, Real, Real, Real, CC_Sh, CC_Sh> GOTOP_Sh;
-	GOTOP_Sh goTOP_sh(gfs_sh, cc_sh, gfs_sh, cc_sh, top_sh, mbe);
+	// typedef Dune::PDELab::GridOperator<GFS_Sh, GFS_Sh, TOP_Sh, MBE, Real, Real, Real, CC_Sh, CC_Sh> GOTOP_Sh;
+	// GOTOP_Sh goTOP_sh(gfs_sh, cc_sh, gfs_sh, cc_sh, top_sh, mbe);
 
 	// typedef Dune::PDELab::GridOperator<GFS_Sg, GFS_Sg, TOP_Sg, MBE, Real, Real, Real, CC_Sg, CC_Sg> GOTOP_Sg;
 	// GOTOP_Sg goTOP_sg(gfs_sg, cc_sg, gfs_sg, cc_sg, top_sg, mbe);
@@ -355,11 +358,11 @@ void driver_Sh(const GV &gv, // GridView
 	// typedef Dune::PDELab::GridOperator<GFS_Pw, GFS_Pw, TOP_Pw, MBE, Real, Real, Real, CC_Pw, CC_Pw> GOTOP_Pw;
 	// GOTOP_Pw goTOP_pw(gfs_pw, cc_pw, gfs_pw, cc_pw, top_pw, mbe);
 
-	typedef Dune::PDELab::GridOperator<GFS_T, GFS_T, TOP_T, MBE, Real, Real, Real, CC_T, CC_T> GOTOP_T;
-	GOTOP_T goTOP_t(gfs_t, cc_t, gfs_t, cc_t, top_t, mbe);
+	// typedef Dune::PDELab::GridOperator<GFS_T, GFS_T, TOP_T, MBE, Real, Real, Real, CC_T, CC_T> GOTOP_T;
+	// GOTOP_T goTOP_t(gfs_t, cc_t, gfs_t, cc_t, top_t, mbe);
 
-	// typedef Dune::PDELab::GridOperator<GFS_XC, GFS_XC, TOP_XC, MBE, Real, Real, Real, CC_XC, CC_XC> GOTOP_XC;
-	// GOTOP_XC goTOP_xc(gfs_xc, cc_xc, gfs_xc, cc_xc, top_xc, mbe);
+	typedef Dune::PDELab::GridOperator<GFS_XC, GFS_XC, TOP_XC, MBE, Real, Real, Real, CC_XC, CC_XC> GOTOP_XC;
+	GOTOP_XC goTOP_xc(gfs_xc, cc_xc, gfs_xc, cc_xc, top_xc, mbe);
 
 	// typedef Dune::PDELab::GridOperator<GFS_XCH4, GFS_XCH4, TOP_XCH4, MBE, Real, Real, Real, CC_XCH4, CC_XCH4> GOTOP_XCH4;
 	// GOTOP_XCH4 goTOP_xch4(gfs_xch4, cc_xch4, gfs_xch4, cc_xch4, top_xch4, mbe);
@@ -368,14 +371,14 @@ void driver_Sh(const GV &gv, // GridView
 	GOTOP goTOP(gfs, cc, gfs, cc, top, mbe);
 
 
-	typedef Dune::PDELab::OneStepGridOperator<GOLOP_T, GOTOP_T> IGO_T;
-	IGO_T igo_t(goLOP_t, goTOP_t);
+	// typedef Dune::PDELab::OneStepGridOperator<GOLOP_T, GOTOP_T> IGO_T;
+	// IGO_T igo_t(goLOP_t, goTOP_t);
 
-	// typedef Dune::PDELab::OneStepGridOperator<GOLOP_XC, GOTOP_XC> IGO_XC;
-	// IGO_XC igo_xc(goLOP_xc, goTOP_xc);
+	typedef Dune::PDELab::OneStepGridOperator<GOLOP_XC, GOTOP_XC> IGO_XC;
+	IGO_XC igo_xc(goLOP_xc, goTOP_xc);
 
-	typedef Dune::PDELab::OneStepGridOperator<GOLOP_Sh, GOTOP_Sh> IGO_Sh;
-	IGO_Sh igo_sh(goLOP_sh, goTOP_sh);
+	// typedef Dune::PDELab::OneStepGridOperator<GOLOP_Sh, GOTOP_Sh> IGO_Sh;
+	// IGO_Sh igo_sh(goLOP_sh, goTOP_sh);
 
 	// typedef Dune::PDELab::OneStepGridOperator<GOLOP_Sg, GOTOP_Sg> IGO_Sg;
 	// IGO_Sg igo_sg(goLOP_sg, goTOP_sg);
@@ -398,16 +401,16 @@ void driver_Sh(const GV &gv, // GridView
 
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_Sh, CC_Sh> LS_Sh;
 	// LS_Sh ls_sh(gfs_sh, cc_sh, 100, 1);
-	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO_Sh> LS_Sh;
-	LS_Sh ls_sh(gfs_sh, 100, 1, true, true);
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO_Sh> LS_Sh;
+	// LS_Sh ls_sh(gfs_sh, 100, 1, true, true);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_Sg, CC_Sg> LS_Sg;
 	// LS_Sg ls_sg(gfs_sg, cc_sg, 100, 1);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_Pw, CC_Pw> LS_Pw;
 	// LS_Pw ls_pw(gfs_pw, cc_pw, 100, 1);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_T, CC_T> LS_T;
 	// LS_T ls_t(gfs_t, cc_t, 100, 1);
-	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO_T> LS_T;
-	LS_T ls_t(gfs_t, 100, 1, true, true);
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO_T> LS_T;
+	// LS_T ls_t(gfs_t, 100, 1, true, true);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_XC, CC_XC> LS_XC;
 	// LS_XC ls_xc(gfs_xc, cc_xc, 100, 1);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS_XCH4, CC_XCH4> LS_XCH4;
@@ -416,6 +419,9 @@ void driver_Sh(const GV &gv, // GridView
 	// LS_YH2O ls_yh2o(gfs_yh2o, cc_yh2o, 100, 1);
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS;
 	// LS ls(gfs, cc, 100, 1);
+	ypedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO_XC> LS_XC; //works
+	LS_XC ls_xc(gfs_xc, 100, 1, true, true);
+
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	LS ls(gfs, 100, 1, true, true);
@@ -457,12 +463,12 @@ void driver_Sh(const GV &gv, // GridView
 	ls.setParameters(param);
 	auto param_t = ls_t.parameters();
 	//param.setMaxLevel(3); // max number of coarsening levels
-	param_t.setCoarsenTarget(100000); // max DoF at coarsest level
-	ls_t.setParameters(param_t);
-	auto param_sh = ls_sh.parameters();
-	//param.setMaxLevel(3); // max number of coarsening levels
-	param_sh.setCoarsenTarget(100000); // max DoF at coarsest level
-	ls_sh.setParameters(param_sh);
+	// param_t.setCoarsenTarget(100000); // max DoF at coarsest level
+	// ls_t.setParameters(param_t);
+	// auto param_sh = ls_sh.parameters();
+	// //param.setMaxLevel(3); // max number of coarsening levels
+	// param_sh.setCoarsenTarget(100000); // max DoF at coarsest level
+	// ls_sh.setParameters(param_sh);
 
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 
@@ -472,25 +478,30 @@ void driver_Sh(const GV &gv, // GridView
 
 	typedef Dune::PDELab::ISTLBackend_SEQ_SuperLU LS;
 	LS ls;
+
+	typedef Dune::PDELab::ISTLBackend_SEQ_SuperLU LS_XC;
+	LS_XC ls_xc;
 	std::cout << " LS DONE ! " << std::endl;
 #endif
 
 
 	// Linear and PDESOLVER
-	using PDESOLVER_Sh = Dune::PDELab::Newton< IGO_Sh, LS, U_Sh >;
-    PDESOLVER_Sh pdesolver_sh( igo_sh, ls );
+	// using PDESOLVER_Sh = Dune::PDELab::Newton< IGO_Sh, LS, U_Sh >;
+    // PDESOLVER_Sh pdesolver_sh( igo_sh, ls );
 	// using PDESOLVER_Sg = Dune::PDELab::Newton< IGO_Sg, LS_Sg, U_Sg >;
     // PDESOLVER_Sg pdesolver_sg( igo_sg, ls_sg );
 	// using PDESOLVER_Pw = Dune::PDELab::Newton< IGO_Pw, LS_Pw, U_Pw >;
     // PDESOLVER_Pw pdesolver_pw( igo_pw, ls_pw );
-	using PDESOLVER_T = Dune::PDELab::Newton< IGO_T, LS, U_T >;
-    PDESOLVER_T pdesolver_t( igo_t, ls );
-	// using PDESOLVER_XC = Dune::PDELab::Newton< IGO_XC, LS_XC, U_XC >;
-    // PDESOLVER_XC pdesolver_xc( igo_xc, ls_xc );
+	// using PDESOLVER_T = Dune::PDELab::Newton< IGO_T, LS, U_T >;
+    // PDESOLVER_T pdesolver_t( igo_t, ls );
+	using PDESOLVER_XC = Dune::PDELab::NewtonMethod< IGO_XC, LS_XC >;
+    PDESOLVER_XC pdesolver_xc( igo_xc, ls_xc );
+	pdesolver_xc.setParameters(ptree.sub("newton"));
 	// using PDESOLVER_XCH4 = Dune::PDELab::Newton< IGO_XCH4, LS_XCH4, U_XCH4 >;
     // PDESOLVER_XCH4 pdesolver_xch4( igo_xch4, ls_xch4 );
-	using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
+	using PDESOLVER = Dune::PDELab::NewtonMethod< IGO, LS >;
     PDESOLVER pdesolver( igo, ls);
+	pdesolver.setParameters(ptree.sub("newton"));
 	
 	// Dune::PDELab::OneStepMethod<Real, IGO_Sg, PDESOLVER, U, U> osm_sg(*pmethod, igo_sg, pdesolver);
 	
@@ -510,15 +521,15 @@ void driver_Sh(const GV &gv, // GridView
     // using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
     // PDESOLVER pdesolver( igo, ls );
     // select control parameters for non-linear PDE-solver
-	pdesolver_sh.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
-    //pdesolver_sh.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
-	pdesolver_sh.setReassembleThreshold(0.0);
-    pdesolver_sh.setVerbosityLevel(2);
-    pdesolver_sh.setReduction(ptree.get("newton.reduction",(double)1e-5));
-    pdesolver_sh.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
-	pdesolver_sh.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
-    pdesolver_sh.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
-	pdesolver_sh.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
+	// pdesolver_sh.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
+    // //pdesolver_sh.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
+	// pdesolver_sh.setReassembleThreshold(0.0);
+    // pdesolver_sh.setVerbosityLevel(2);
+    // pdesolver_sh.setReduction(ptree.get("newton.reduction",(double)1e-5));
+    // pdesolver_sh.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
+	// pdesolver_sh.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    // pdesolver_sh.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
+	// pdesolver_sh.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
 	
 	// pdesolver_sg.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
     // //pdesolver_sg.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
@@ -540,15 +551,15 @@ void driver_Sh(const GV &gv, // GridView
     // pdesolver_pw.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
 	// pdesolver_pw.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
 
-	pdesolver_t.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
-    //pdesolver_t.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
-	pdesolver_t.setReassembleThreshold(0.0);
-    pdesolver_t.setVerbosityLevel(2);
-    pdesolver_t.setReduction(ptree.get("newton.reduction",(double)1e-5));
-    pdesolver_t.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
-	pdesolver_t.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
-    pdesolver_t.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
-	pdesolver_t.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
+	// pdesolver_t.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
+    // //pdesolver_t.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
+	// pdesolver_t.setReassembleThreshold(0.0);
+    // pdesolver_t.setVerbosityLevel(2);
+    // pdesolver_t.setReduction(ptree.get("newton.reduction",(double)1e-5));
+    // pdesolver_t.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
+	// pdesolver_t.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    // pdesolver_t.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
+	// pdesolver_t.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
 
 	// pdesolver_xc.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
     // //pdesolver_xc.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
@@ -570,15 +581,15 @@ void driver_Sh(const GV &gv, // GridView
     // pdesolver_xch4.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
 	// pdesolver_xch4.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
 
-	pdesolver.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
-    //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
-	pdesolver.setReassembleThreshold(0.0);
-    pdesolver.setVerbosityLevel(2);
-    pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
-    pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
-	pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
-    pdesolver.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
-	pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
+	// pdesolver.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
+    // //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
+	// pdesolver.setReassembleThreshold(0.0);
+    // pdesolver.setVerbosityLevel(2);
+    // pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
+    // pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
+	// pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
+    // pdesolver.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
+	// pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4));
 
 	//TODO: CHECK NEW NEWTON PARAMS
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
@@ -610,16 +621,16 @@ void driver_Sh(const GV &gv, // GridView
 	Dune::PDELab::TimeSteppingParameterInterface<Real> *pmethod_sh = &method1;
 	Dune::PDELab::TimeSteppingParameterInterface<Real> *pmethod_t = &method1;
 
-	Dune::PDELab::OneStepMethod<Real, IGO_Sh, PDESOLVER_Sh, U_Sh, U_Sh> osm_sh(*pmethod_sh, igo_sh, pdesolver_sh);
-	osm_sh.setVerbosityLevel(2);
+	// Dune::PDELab::OneStepMethod<Real, IGO_Sh, PDESOLVER_Sh, U_Sh, U_Sh> osm_sh(*pmethod_sh, igo_sh, pdesolver_sh);
+	// osm_sh.setVerbosityLevel(2);
 	// Dune::PDELab::OneStepMethod<Real, IGO_Sg, PDESOLVER_Sg, U_Sg, U_Sg> osm_sg(*pmethod, igo_sg, pdesolver_sg);
 	// osm_sg.setVerbosityLevel(2);
 	// Dune::PDELab::OneStepMethod<Real, IGO_Pw, PDESOLVER_Pw, U_Pw, U_Pw> osm_pw(*pmethod, igo_pw, pdesolver_pw);
 	// osm_pw.setVerbosityLevel(2);
-	Dune::PDELab::OneStepMethod<Real, IGO_T, PDESOLVER_T, U_T, U_T> osm_t(*pmethod_t, igo_t, pdesolver_t);
-	osm_t.setVerbosityLevel(2);
-	// Dune::PDELab::OneStepMethod<Real, IGO_XC, PDESOLVER_XC, U_XC, U_XC> osm_xc(*pmethod, igo_xc, pdesolver_xc);
-	// osm_xc.setVerbosityLevel(2);
+	// Dune::PDELab::OneStepMethod<Real, IGO_T, PDESOLVER_T, U_T, U_T> osm_t(*pmethod_t, igo_t, pdesolver_t);
+	// osm_t.setVerbosityLevel(2);
+	Dune::PDELab::OneStepMethod<Real, IGO_XC, PDESOLVER_XC, U_XC, U_XC> osm_xc(*pmethod, igo_xc, pdesolver_xc);
+	osm_xc.setVerbosityLevel(2);
 	// Dune::PDELab::OneStepMethod<Real, IGO_XCH4, PDESOLVER_XCH4, U_XCH4, U_XCH4> osm_xch4(*pmethod, igo_xch4, pdesolver_xch4);
 	// osm_xch4.setVerbosityLevel(2);
 	Dune::PDELab::OneStepMethod<Real, IGO, PDESOLVER, U, U> osm(*pmethod, igo, pdesolver);
@@ -632,16 +643,16 @@ void driver_Sh(const GV &gv, // GridView
 	DGF_Pw dgf_pw(subgfs_Pw, uold);	
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sg, U> DGF_Sg;
 	DGF_Sg dgf_sg(subgfs_Sg, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<GFS_Sh, U_Sh> DGF_Sh;
-	DGF_Sh dgf_sh(gfs_sh, uold_sh);
-	typedef Dune::PDELab::DiscreteGridFunction<GFS_T, U_T> DGF_T;
-	DGF_T dgf_t(gfs_t, uold_t);	
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
+	DGF_Sh dgf_sh(subgfs_Sh, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
+	DGF_T dgf_t(subgfs_T, uold);	
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XCH4, U> DGF_XCH4;
 	DGF_XCH4 dgf_xch4(subgfs_XCH4, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
 	DGF_YH2O dgf_yh2o(subgfs_YH2O, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XC, U> DGF_XC;
-	DGF_XC dgf_xc(subgfs_XC, uold);
+	typedef Dune::PDELab::DiscreteGridFunction<GFS_XC, U_XC> DGF_XC;
+	DGF_XC dgf_xc(gfs_xc, uold_xc);
 	//Dune::FieldVector<double, 1> y=0.;
 
 	// for ( const auto & e : elements ( gv )) {
@@ -663,14 +674,27 @@ void driver_Sh(const GV &gv, // GridView
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
 	std::string pathName = ptree.get("output.path_name",(std::string)"test");
-	pathName += "outputs/" ; 
+	pathName += "outputs/";
 	pathName += fileName ;
-	//if(helper.rank()==0){
-		//std::filesystem::create_directory(pathName);
-	//}
-	pathName += "/" ;
-	const std::string str = "";
-	//Dune::PDELab::FilenameHelper fn(pathName + fileName);
+	std::string fileNameDefects = fileName;
+	std::string pathNameDefects = pathName+"/"+fileName;
+	std::time_t now = std::time(0);
+	struct tm *tstruct;
+	char buf [80];
+	std::time(&now);
+	tstruct = std::localtime(&now);
+	strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S", tstruct );
+	std::string timeStr(buf); 
+	pathNameDefects.append("_"+timeStr);
+    std::string jacPath = pathNameDefects;
+		jacPath +="/";
+		jacPath +=fileName;
+
+	if(helper.rank()==0){
+		
+		std::filesystem::create_directory(pathNameDefects);
+	}
+
 
 	int subsampling = 1;
 	Dune::RefinementIntervals RefInt(subsampling);
@@ -701,23 +725,30 @@ void driver_Sh(const GV &gv, // GridView
 	double dissCoeff = property.parameter.HydrateDissociationRateConstant();
 	double formCoeff = property.parameter.HydrateFormationRateConstant();
 	if(helper.rank()==0){
-		std::string parameters_file = pathName;
+		std::string parameters_file = pathNameDefects;
+		parameters_file +="/";
 		parameters_file +=fileName;
 		parameters_file +="_parameters";
 		parameters_file += ".txt";
 		property.ReportParameters( 	parameters_file,
 									dgmethod_g, dgmethod_w, dgmethod_T, dgmethod_x, dgmethod_y,
-									alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y, dissCoeff, formCoeff);
+									alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y, dissCoeff, formCoeff,
+									property.characteristicValue.permeability_c,
+									property.characteristicValue.X_gravity,
+									property.characteristicValue.X_source_mass,
+									property.characteristicValue.X_source_heat,
+									property.characteristicValue.dispersivity_c,
+									property.characteristicValue.specificheat_c);
 	}
 
 	//	INITIALIZE
-	unew_sh = uold_sh;
+	// unew_sh = uold_sh;
 	// unew_sg = uold_sg;
 	// unew_pw = uold_pw;
-	unew_t = uold_t;
+	// unew_t = uold_t;
 	// unew_xch4 = uold_xch4;
 	unew = uold;
-	// unew_xc = uold_xc;
+	unew_xc = uold_xc;
 	int opcount = 1;
 	double timecount = time;
 	double dtLast = dtstart;
@@ -728,13 +759,13 @@ void driver_Sh(const GV &gv, // GridView
 	int newton_iterations = 0;
 	double newton_first_defect = 0.;
 	double newton_defect = 0.;
-	
+
 	//	BEGIN TIME LOOP
-	while ( time < (t_END - 1e-8/Xc_t))
+	while ( time < (t_END - 1e-3/Xc_t))
 	{
-		// if( exceptionCaught==false ){
-		// 		dt = std::max(dt,dt_min);
-		// }
+		if( exceptionCaught==false ){
+				dt = std::max(dt,dt_min);
+		}
 
 		if(helper.rank()==0){
 			std::cout<< "_____________________________________________________" <<std::endl;
@@ -748,62 +779,78 @@ void driver_Sh(const GV &gv, // GridView
 			std::cout<<"  CALLING osm.apply() !"	  << std::endl;
 			std::cout<<"****************************" << std::endl;
 			}
-			auto current_time = time;
-			auto current_dt = dt;
-			osm_sh.apply( time, dt, uold_sh, unew_sh );
-			newton_iterations = osm_sh.getPDESolver().result().iterations;
+			// auto current_time = time;
+			// auto current_dt = dt;
+			// osm_sh.apply( time, dt, uold_sh, unew_sh );
+			// newton_iterations = osm_sh.getPDESolver().result().iterations;
 		
-			uold_sh = unew_sh;
-			// time = current_time;
-			// dt = current_dt; 
+			// uold_sh = unew_sh;
+			// // time = current_time;
+			// // dt = current_dt; 
 			
-			DGF_Sh dgf_sh(gfs_sh, unew_sh);
+			// DGF_Sh dgf_sh(gfs_sh, unew_sh);
 			
 			
-			if(helper.rank()==0){
-				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
-				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
-				std::cout << "========== Sh DONE!" <<  " ======== " << std::endl;
-			}
+			// if(helper.rank()==0){
+			// 	// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+			// 	// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+			// 	std::cout << "========== Sh DONE!" <<  " ======== " << std::endl;
+			// }
 
 
-			osm_t.apply( time, dt, uold_t, unew_t );
-			newton_iterations = osm_t.getPDESolver().result().iterations;
+			// osm_t.apply( time, dt, uold_t, unew_t );
+			// newton_iterations = osm_t.getPDESolver().result().iterations;
 
-			uold_t = unew_t;
-			// time = current_time;
-			// dt = current_dt; 
-			DGF_T dgf_t(gfs_t, unew_t);
+			// uold_t = unew_t;
+			// // time = current_time;
+			// // dt = current_dt; 
+			// DGF_T dgf_t(gfs_t, unew_t);
 			
-			if(helper.rank()==0){
-				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
-				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
-				std::cout << "========== T DONE!" <<  " ======== " << std::endl;
-			}
+			// if(helper.rank()==0){
+			// 	// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
+			// 	// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
+			// 	std::cout << "========== T DONE!" <<  " ======== " << std::endl;
+			// }
 			
 			osm.apply( time, dt, uold, unew );
 			newton_iterations = osm.getPDESolver().result().iterations;
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
-		
-			uold = unew;
-			// time = current_time;
-			// dt = current_dt; 
-			// DGF_Pw dgf_pw(subgfs_Pw, unew);
-			// DGF_Sg dgf_sg(subgfs_Sg, unew);
-			// DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
-			// DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
-			// DGF_XC dgf_xc(subgfs_XC, unew);
+
+			newton_iterations = osm.getPDESolver().result().iterations;
+			newton_first_defect = osm.getPDESolver().result().first_defect;
+			newton_defect = osm.getPDESolver().result().defect;
+            auto jacobian = osm.getPDESolver().getJacobian();
+			if(helper.rank()==0 &&  (opcount%10==0)){
+			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
+			Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
+			}
+			auto newton_defects = osm.getPDESolver().result().defects;
+			auto u_norm_two = unew.two_norm();
+			auto u_norm_one = unew.one_norm();
+			auto u_norm_infinity = unew.infinity_norm();
+			if(helper.rank()==0 &&  (newton_iterations>1)){//((time+dt )/(t_OP * opcount) > (1.-1.e-6)) and ((time+dt ) / (t_OP * opcount)< (1. + 1.e-6))
+				std::string s_OP = std::__cxx11::to_string(time);
+				std::string parameters_file = pathNameDefects;
+				parameters_file +="/";
+				parameters_file +=fileNameDefects;
+				parameters_file +="_";
+				parameters_file +=s_OP;
+				parameters_file += ".txt";
+				property.ReportNewton( parameters_file,
+							time /*s*/,
+							dt /*s*/,
+							newton_iterations, newton_defects,
+							u_norm_two, u_norm_one,  u_norm_infinity);
+			}
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
 				std::cout << "========== 3 Comps DONE!" <<  " ======== " << std::endl;
 			}
-			// osm_xc.apply( time, dt, uold_xc, unew_xc );
+			osm_xc.apply( time, dt, uold_xc, unew_xc );
 			// newton_iterations = osm_xc.getPDESolver().result().iterations;
-			// uold_xc = unew_xc;
-			// time = current_time;
-			// dt = current_dt; 
+			
 
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
@@ -828,19 +875,19 @@ void driver_Sh(const GV &gv, // GridView
 
 		}catch ( Dune::Exception &e ) {
 			exceptionCaught = true;
-			if( (dt) > (1e-8/Xc_t) ){
+			if( (dt) > (1e-3/Xc_t) ){
 
 				if(helper.rank()==0){
 					std::cout << "Catched Error, Dune reported error: " << e << std::endl;
 				}
 
-				unew_sh = uold_sh;
+				// unew_sh = uold_sh;
 				// unew_sg = uold_sg;
 				// unew_pw = uold_pw;
-				unew_t = uold_t;
+				// unew_t = uold_t;
 				// unew_xch4 = uold_xch4;
 				unew = uold;
-				// unew_xc = uold_xc;
+				unew_xc = uold_xc;
 
 				newton_iterations = 0;
 
@@ -875,13 +922,14 @@ void driver_Sh(const GV &gv, // GridView
 		 * total newton iterations
 		 */
 		if(helper.rank()==0){
-			std::string statistics_file = pathName;
+			std::string statistics_file = pathNameDefects;
+			statistics_file +="/";
 			statistics_file +=fileName;
 			statistics_file +="_statistics";
 			statistics_file += ".txt";
 			property.ReportStatistics( 	statistics_file,
-										time*Xc_t,
-										dt*Xc_t,
+										time,
+										dt,
 										newton_iterations,
 										newton_first_defect,
 										newton_defect,
@@ -891,11 +939,11 @@ void driver_Sh(const GV &gv, // GridView
 		// primary variables
 		DGF_Pw dgf_pw(subgfs_Pw, unew);
 		DGF_Sg dgf_sg(subgfs_Sg, unew);
-		DGF_Sh dgf_sh(gfs_sh, unew_sh);
-		DGF_T dgf_t(gfs_t, unew_t);
+		DGF_Sh dgf_sh(subgfs_Sh, unew);
+		DGF_T dgf_t(subgfs_T, unew);
 		DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
 		DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
-		DGF_XC dgf_xc(subgfs_XC, unew);
+		DGF_XC dgf_xc(subgfs_XC, unew_xc);
 
 		/*********************************************************************************************
 			 * OUTPUT 
@@ -925,15 +973,14 @@ void driver_Sh(const GV &gv, // GridView
 
 		//		PREPARE FOR NEXT TIME INTEGRATION
 		//		1. ASSIGN THE 'NEXT' VALUE TO 'OLD' VARIABLE
-		unew_sh = uold_sh;
-		unew_t = uold_t;
+		// unew_sh = uold_sh;
+		// unew_t = uold_t;
 		unew = uold;
-		// unew_xc = uold_xc;
+		unew_xc = uold_xc;
 		//		2. ADVANCE TIME:
 		time += dt;
 		if(helper.rank()==0){
-			std::cout<<" "
-			<< std::setw(12) << std::setprecision(8) << std::scientific
+			std::cout<<" "<< std::endl;
 			<< " time = " << time ;
 			std::cout<< std::flush;
 		}
@@ -958,32 +1005,25 @@ void driver_Sh(const GV &gv, // GridView
 			dt = dtstart;
 		}
 		if(helper.rank()==0){
-			std::cout << " , time+dt = " 
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< (time + dt) * Xc_t
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< " , opTime = "  << (t_OP * opcount)* Xc_t  ;
+			std::cout << " , time+dt = " << (time + dt)*Xc_t
+					  << " , opTime = "  << t_OP * opcount * Xc_t ;
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-		if ((time + dt) * Xc_t > (t_OP * opcount * Xc_t + 1.e-6) )
+		if ((time + dt) > (t_OP * opcount + 1.e-6) and time < (t_OP * opcount - 1.e-6) )
 		{
 			
 			dt = t_OP * opcount - time;
 
 			if(helper.rank()==0){
-				std::cout<< " , because timeNext > opNext , dt set to : " 
-				<< std::setw(12) << std::setprecision(8) << std::scientific
-				<< dt * Xc_t << std::endl;
+				std::cout<< " , because timeNext > opNext , dt set to : " << dt*Xc_t << std::endl;
 				std::cout<< std::flush;
 			}
 			dtFlag = -1;
 		}
  
 		if(helper.rank()==0){
-			std::cout<< " , dt  : "  
-			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< dt * Xc_t << std::endl;
+			std::cout<< " , dt  : " << dt*Xc_t << std::endl;
 			std::cout<<" "<< std::endl;
 			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
 			std::cout<< std::flush;

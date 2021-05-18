@@ -1,6 +1,7 @@
 #ifndef BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
 #define BM_PHASECHANGE_0d_INCLUDE_PROBLEM_HH_
 
+// #define PARALLEL
 #include "../extras/ParameterTraits.hh"
 #include "../extras/Evaluation.hh"
 

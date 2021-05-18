@@ -36,12 +36,13 @@ public:
 	static const int PVId_YH2O	= 5 ;
 	static const int PVId_C   	= 6;
 
-	static const int numOfVs 	 = 5 ;
+	static const int numOfVs 	 = 6 ;
 	static const int VId_Pw  	= 0;
 	static const int VId_Sg  	= 1;
-	static const int VId_XCH4	= 2 ;
-	static const int VId_YH2O	= 3 ;
-	static const int VId_XC   	= 4;
+	static const int VId_Sh		= 2;
+	static const int VId_T 		= 3;
+	static const int VId_XCH4	= 4 ;
+	static const int VId_YH2O	= 5 ;
 
 	static const unsigned int numOfSVs 	= 16;
 	static const unsigned int SVId_Pg	= 0;  // gas phase pressure

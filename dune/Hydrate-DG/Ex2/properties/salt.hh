@@ -12,7 +12,7 @@ public:
 
 	double DiffCoeff( double T, double Pw ) const {
 
-		double D = 1.*1.0e-9;	/* m^2/s */
+		double D = 1.e0*1.0e-9;	/* m^2/s */
 
 		return D/characteristicValue.dispersivity_c ;
 	}

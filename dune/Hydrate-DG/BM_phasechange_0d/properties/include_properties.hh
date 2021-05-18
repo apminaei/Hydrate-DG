@@ -29,11 +29,12 @@ public:
   	MeshParameters<PTree> mesh;
   	Parameters<PTree> parameter;
   	Methane<PTree> gas;
-#ifdef STATEINDEPENDENTPROPERTIES
-  	BaseEoS eos;
-#elif defined(PENG_ROBINSON_EOS)
-  	PengRobinson eos;
-#endif
+	BaseEoS eos;
+// #ifdef STATEINDEPENDENTPROPERTIES
+//   	BaseEoS eos;
+// #elif defined(PENG_ROBINSON_EOS)
+//   	PengRobinson eos;
+// #endif
   	Water<PTree> water;
   	Salt salt;
   	Mixture<PTree> mixture;

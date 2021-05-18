@@ -23,7 +23,7 @@ public:
 
 		auto prop_L = parameter.layer_properties();
 
-		double por = prop_L[0][0];;
+		double por = prop_L[0][0];
 		if( parameter.mesh.isLenz(xglobal) and parameter.num_materials() > 1){
 			por = prop_L[1][0];
 		}

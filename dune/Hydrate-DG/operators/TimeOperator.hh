@@ -182,7 +182,7 @@ public:
 
 
 			// evaluate Pg
-			auto por = property.soil.SedimentPorosity(cell, ip_local);
+			auto por = property.soil.SedimentPorosity(cell, ip_local)  ;
       		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
       
 			RF Pg = Pw + Pc ;
@@ -208,9 +208,10 @@ public:
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
+			auto mass = por * (rho_g * Sg + rho_w * Sw );
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (H_CH4_w * YH2O * XCH4 /(zCH4*P_H_satu*(1. - XC - XCH4))) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);//(1. - YH2O)
+				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. - YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);//
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{

@@ -80,13 +80,13 @@ public:
 			prop = std::vector<std::vector<double> > (numMaterials,std::vector<double>(numProps, 0.));
 			for(int n_mat=0; n_mat<numMaterials; n_mat++ ){
 				std::string name = "sediment.material"+std::to_string(n_mat);
-				prop[n_mat][0] = ptree.get(name+".por",	(double)0.3);
-				prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-12);
+				prop[n_mat][0] = ptree.get(name+".por",	(double)0.5);
+				prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-15);
 				prop[n_mat][2] = ptree.get(name+".pentry",(double)5.e4);
 				prop[n_mat][3] = ptree.get(name+".lambda",(double)1.2);
 				prop[n_mat][4] = ptree.get(name+".swr",	(double)0.);
 				prop[n_mat][5] = ptree.get(name+".sgr",	(double)0.);
-				prop[n_mat][6] = ptree.get(name+".m",	(double)3.);
+				prop[n_mat][6] = ptree.get(name+".m",	(double)1.);
 				prop[n_mat][7] = ptree.get(name+".beta",(double)1.);
 			}
 			
@@ -98,8 +98,8 @@ public:
 			ref_pressure = ptree.get("reference_state.pressure",(double)1.01e5);
 
 
-			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
-			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
+			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-17);/*mol/m².Pa.s*/
+			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			
 			
 

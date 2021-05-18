@@ -69,7 +69,7 @@ void driver(const GV &gv, // GridView
 
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
 	int minAllowableIterations = ptree.get("adaptive_time_control.min_newton_steps",(int)4);
-	int max_linear_iteration = ptree.get("newton.maxLinearIteration",(int)10);
+	int max_linear_iteration = ptree.get("newton.MaxLinearIteration",(int)10);
 	const int degree_Sg = 1;
 	const int degree_P = 1;
 	const int degree_Sh = 1;
@@ -87,10 +87,10 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_P;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_X; 
 
@@ -213,7 +213,7 @@ void driver(const GV &gv, // GridView
 	// };
 	// auto Sh = Dune::PDELab::makeGridFunctionFromCallable(gv, Sh_Initiallamda);
 	// auto T_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){
-	// 	return (4. + 273.15 - 0.035 * x[1]*property.characteristicValue.x_c)/property.characteristicValue.T_c;};
+	// 	return (4.65 + 273.15 - 0.035 * x[1]*property.characteristicValue.x_c)/property.characteristicValue.T_c;};
 	// auto T = Dune::PDELab::makeGridFunctionFromCallable(gv, T_Initiallamda);
 	// auto XCH4_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 0.;};
 	// auto XCH4 = Dune::PDELab::makeGridFunctionFromCallable(gv, XCH4_Initiallamda);
@@ -249,7 +249,7 @@ void driver(const GV &gv, // GridView
 	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
-	TLOP tlop(gv, property);
+	TLOP tlop(gv, property, intorder);
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
 	MBE mbe(100);

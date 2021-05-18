@@ -11,22 +11,21 @@ using namespace Dune::PDELab;
 
 
 template <typename GV, typename Params, class BC, typename U, class GFS, 
-          typename U_Sh, class GFS_Sh,
-          typename U_T, class GFS_T,
-          class FEM_P, class FEM_S, class FEM_X, class FEM_Y, class FEM_XC>
+          typename U_XC, class GFS_XC,
+          class FEM_P, class FEM_Sg, class FEM_Sh, class FEM_T, class FEM_X, class FEM_Y>
 class LocalOperator_2comps : 
-                      public Dune::PDELab::NumericalJacobianApplyVolume<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S, FEM_X, FEM_Y, FEM_XC>>,
-                      public Dune::PDELab::NumericalJacobianVolume<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S,  FEM_X, FEM_Y, FEM_XC>>,
-                      public Dune::PDELab::NumericalJacobianApplySkeleton<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S,  FEM_X, FEM_Y, FEM_XC>>,
-                      public Dune::PDELab::NumericalJacobianSkeleton<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S,  FEM_X, FEM_Y, FEM_XC>>,  
-                      public Dune::PDELab::NumericalJacobianApplyBoundary<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S,  FEM_X, FEM_Y, FEM_XC>>,
-                      public Dune::PDELab::NumericalJacobianBoundary<LocalOperator_2comps<GV, Params, BC, U, GFS, U_Sh, GFS_Sh,
-                      U_T, GFS_T, FEM_P, FEM_S,  FEM_X, FEM_Y, FEM_XC>>,
+                      public Dune::PDELab::NumericalJacobianApplyVolume<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,
+                      public Dune::PDELab::NumericalJacobianVolume<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,
+                      public Dune::PDELab::NumericalJacobianApplySkeleton<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,
+                      public Dune::PDELab::NumericalJacobianSkeleton<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,  
+                      public Dune::PDELab::NumericalJacobianApplyBoundary<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,
+                      public Dune::PDELab::NumericalJacobianBoundary<LocalOperator_2comps<GV, Params, BC, U, GFS, U_XC, GFS_XC,
+                      FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y>>,
                       public Dune::PDELab::FullSkeletonPattern, // matrix entries skeleton
                       public Dune::PDELab::FullVolumePattern,
                       public Dune::PDELab::LocalOperatorDefaultFlags,
@@ -41,12 +40,12 @@ private:
 
   U *unew;
   GFS gfs;
-  U_Sh unew_Sh;
-  GFS_Sh gfs_Sh;
-  U_T unew_T;
-  GFS_T gfs_T;
-  // U_XC unew_XC;
-  // GFS_XC gfs_XC;
+  // U_Sh unew_Sh;
+  // GFS_Sh gfs_Sh;
+  // U_T unew_T;
+  // GFS_T gfs_T;
+  U_XC unew_XC;
+  GFS_XC gfs_XC;
 
   double *time;
   double *dt;
@@ -110,21 +109,21 @@ public:
 
   using LocalBasisType_Pw = typename FEM_P::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_Pw = Dune::PDELab::LocalBasisCache<LocalBasisType_Pw>;
-  using LocalBasisType_Sg = typename FEM_S::Traits::FiniteElementType::Traits::LocalBasisType;
+  using LocalBasisType_Sg = typename FEM_Sg::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_Sg = Dune::PDELab::LocalBasisCache<LocalBasisType_Sg>;
-  // using LocalBasisType_Sh = typename FEM_S::Traits::FiniteElementType::Traits::LocalBasisType;
-  // using Cache_Sh = Dune::PDELab::LocalBasisCache<LocalBasisType_Sh>;
-  // using LocalBasisType_T = typename FEM_T::Traits::FiniteElementType::Traits::LocalBasisType;
-  // using Cache_T = Dune::PDELab::LocalBasisCache<LocalBasisType_T>;
+  using LocalBasisType_Sh = typename FEM_Sh::Traits::FiniteElementType::Traits::LocalBasisType;
+  using Cache_Sh = Dune::PDELab::LocalBasisCache<LocalBasisType_Sh>;
+  using LocalBasisType_T = typename FEM_T::Traits::FiniteElementType::Traits::LocalBasisType;
+  using Cache_T = Dune::PDELab::LocalBasisCache<LocalBasisType_T>;
   using LocalBasisType_XCH4 = typename FEM_X::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_XCH4 = Dune::PDELab::LocalBasisCache<LocalBasisType_XCH4>;
   using LocalBasisType_YH2O = typename FEM_Y::Traits::FiniteElementType::Traits::LocalBasisType;
   using Cache_YH2O = Dune::PDELab::LocalBasisCache<LocalBasisType_YH2O>;
-  using LocalBasisType_XC = typename FEM_XC::Traits::FiniteElementType::Traits::LocalBasisType;
-  using Cache_XC = Dune::PDELab::LocalBasisCache<LocalBasisType_XC>;
+  // using LocalBasisType_XC = typename FEM_XC::Traits::FiniteElementType::Traits::LocalBasisType;
+  // using Cache_XC = Dune::PDELab::LocalBasisCache<LocalBasisType_XC>;
   
-  using DGF_Sh = typename Dune::PDELab::DiscreteGridFunction<GFS_Sh, U_Sh> ;
-	using DGF_T = typename Dune::PDELab::DiscreteGridFunction<GFS_T, U_T> ;
+  using DGF_XC = typename Dune::PDELab::DiscreteGridFunction<GFS_XC, U_XC> ;
+	// using DGF_T = typename Dune::PDELab::DiscreteGridFunction<GFS_T, U_T> ;
 	// using DGF_XC = typename Dune::PDELab::DiscreteGridFunction<GFS_XC, U_XC> ;
 
   // In theory it is possible that one and the same local operator is
@@ -142,16 +141,17 @@ public:
 
   std::vector<Cache_Pw> cache_Pw;
   std::vector<Cache_Sg> cache_Sg;
+  std::vector<Cache_Sh> cache_Sh;
+  std::vector<Cache_T> cache_T;
   std::vector<Cache_XCH4> cache_XCH4;
   std::vector<Cache_YH2O> cache_YH2O;
-  std::vector<Cache_XC> cache_XC;
+  // std::vector<Cache_XC> cache_XC;
 
   // constructor stores parameters
   LocalOperator_2comps(const GV &gv_, const Params&	 property_,
 					      const BC& 	 	 bc_,
                 U *unew_,
-                GFS gfs_, const U_Sh &unew_Sh_, GFS_Sh gfs_Sh_,
-                const U_T &unew_T_, GFS_T gfs_T_,
+                GFS gfs_, const U_XC &unew_xc_, GFS_XC gfs_xc_,
                 double *time_,
                 double *dt_,
                 unsigned int intorder_ = 4,
@@ -163,8 +163,7 @@ public:
       : gv(gv_), property( property_ ),
 		    bc( bc_ ),
         unew(unew_),
-        gfs(gfs_), unew_Sh(unew_Sh_), gfs_Sh(gfs_Sh_), 
-        unew_T(unew_T_), gfs_T(gfs_T_),
+        gfs(gfs_), unew_XC(unew_xc_), gfs_XC(gfs_xc_), 
         time(time_),
         dt(dt_),
         intorder(intorder_),
@@ -197,7 +196,7 @@ public:
     Xc_T = property.characteristicValue.T_c;
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;/* ndim*/
-    gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
+    gravity = property.parameter.g() / Xc_grav  ; /* ndim */
     // #ifdef STATEINDEPENDENTPROPERTIES
     //   		T_ref = property.parameter.RefT()/Xc_T;
     // #endif
@@ -216,6 +215,15 @@ public:
     const auto &lfsv_Sg = lfsv.template child<Indices::VId_Sg>();
     const auto &lfsu_Sg = lfsu.template child<Indices::VId_Sg>();
 
+    //gas Saturation
+    const auto &lfsv_Sh = lfsv.template child<Indices::VId_Sh>();
+    const auto &lfsu_Sh = lfsu.template child<Indices::VId_Sh>();
+
+    //gas Saturation
+    const auto &lfsv_T = lfsv.template child<Indices::VId_T>();
+    const auto &lfsu_T = lfsu.template child<Indices::VId_T>();
+
+
     //Methane (diss.) mole fraction
     const auto &lfsv_XCH4 = lfsv.template child<Indices::VId_XCH4>();
     const auto &lfsu_XCH4 = lfsu.template child<Indices::VId_XCH4>();
@@ -224,13 +232,13 @@ public:
     const auto &lfsv_YH2O = lfsv.template child<Indices::VId_YH2O>();
     const auto &lfsu_YH2O = lfsu.template child<Indices::VId_YH2O>();
 
-    //Salt (diss.) mole fraction
-    const auto &lfsv_XC = lfsv.template child<Indices::VId_XC>();
-    const auto &lfsu_XC = lfsu.template child<Indices::VId_XC>();
+    // //Salt (diss.) mole fraction
+    // const auto &lfsv_XC = lfsv.template child<Indices::VId_XC>();
+    // const auto &lfsu_XC = lfsu.template child<Indices::VId_XC>();
     
     
-    DGF_Sh dgf_Sh(gfs_Sh, unew_Sh);
-    DGF_T dgf_T(gfs_T, unew_T);
+    DGF_XC dgf_xc(gfs_XC, unew_XC);
+    // DGF_T dgf_T(gfs_T, unew_T);
 
     // dimensions
     const int dim = EG::Entity::dimension;
@@ -240,6 +248,8 @@ public:
                                lfsv_XCH4.finiteElement().localBasis().order());
     const int order_s = std::max(lfsu_Sg.finiteElement().localBasis().order(),
                                lfsv_Sg.finiteElement().localBasis().order());
+    const int order_t = std::max(lfsu_T.finiteElement().localBasis().order(),
+                               lfsv_T.finiteElement().localBasis().order());
     // Reference to cell
 	  const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
@@ -253,16 +263,16 @@ public:
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_Pw(lfsv_Pw.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Sg(lfsu_Sg.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sg(lfsv_Sg.size());
-    // std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh(lfsu_Sh.size());
-    // std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh(lfsv_Sh.size());
-    // std::vector<Dune::FieldVector<RF, dim>> gradphi_T(lfsu_T.size());
-    // std::vector<Dune::FieldVector<RF, dim>> gradpsi_T(lfsv_T.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_Sh(lfsu_Sh.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_Sh(lfsv_Sh.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradphi_T(lfsu_T.size());
+    std::vector<Dune::FieldVector<RF, dim>> gradpsi_T(lfsv_T.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_XCH4(lfsu_XCH4.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_XCH4(lfsv_XCH4.size());
     std::vector<Dune::FieldVector<RF, dim>> gradphi_YH2O(lfsu_YH2O.size());
     std::vector<Dune::FieldVector<RF, dim>> gradpsi_YH2O(lfsv_YH2O.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradphi_XC(lfsu_XC.size());
-    std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC(lfsv_XC.size());
+    // std::vector<Dune::FieldVector<RF, dim>> gradphi_XC(lfsu_XC.size());
+    // std::vector<Dune::FieldVector<RF, dim>> gradpsi_XC(lfsv_XC.size());
 
     Dune::FieldVector<RF, dim> gradu_Pw(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Pw(0.0);
@@ -270,8 +280,8 @@ public:
     Dune::FieldVector<RF, dim> Kgradu_Sg(0.0);
     Dune::FieldVector<RF, dim> gradu_Sh(0.0);
     Dune::FieldVector<RF, dim> Kgradu_Sh(0.0);
-    // Dune::FieldVector<RF, dim> gradu_T(0.0);
-    // Dune::FieldVector<RF, dim> Ktgradu_T(0.0);
+    Dune::FieldVector<RF, dim> gradu_T(0.0);
+    Dune::FieldVector<RF, dim> Ktgradu_T(0.0);
     Dune::FieldVector<RF, dim> gradu_XCH4(0.0);
     Dune::FieldVector<RF, dim> gradu_YH2O(0.0);
     Dune::FieldVector<RF, dim> gradu_XC(0.0);
@@ -299,16 +309,16 @@ public:
       auto &psi_Pw = cache_Pw[order_p].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
       auto &phi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
       auto &psi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
-      // auto &phi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
-      // auto &psi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
-      // auto &phi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
-      // auto &psi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
+      auto &phi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &psi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
+      auto &phi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
+      auto &psi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
       auto &phi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsu_XCH4.finiteElement().localBasis());
       auto &psi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsv_XCH4.finiteElement().localBasis());
       auto &phi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsu_YH2O.finiteElement().localBasis());
       auto &psi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
-      auto &phi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
-      auto &psi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
+      // auto &phi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
+      // auto &psi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       auto qp_x = ip.position() + delta_x;
       auto qp_y = ip.position() + delta_y;
@@ -335,21 +345,30 @@ public:
         Sg += x(lfsu_Sg, i) * phi_Sg[i];
       }
       
+      // evaluate Sg
+      RF Sh = 0.0;
+      for (int i = 0; i < lfsu_Sh.size(); i++){
+        Sh += x(lfsu_Sh, i) * phi_Sh[i];
+      }
       // evaluate Sh
-      RFT Sh0 = 0.0;
-      dgf_Sh.evaluate(cell, ip.position(), Sh0);
-      RF Sh = Sh0[0];
-      RFT Sh_x0 = 0.0;
-      dgf_Sh.evaluate(cell, qp_x, Sh_x0);
-      RF Sh_x = Sh_x0[0];
-      RFT Sh_y0 = 0.0;
-      dgf_Sh.evaluate(cell, qp_y, Sh_y0);
-      RF Sh_y = Sh_y0[0];
+      // RFT Sh0 = 0.0;
+      // dgf_Sh.evaluate(cell, ip.position(), Sh0);
+      // RF Sh = Sh0[0];
+      // RFT Sh_x0 = 0.0;
+      // dgf_Sh.evaluate(cell, qp_x, Sh_x0);
+      // RF Sh_x = Sh_x0[0];
+      // RFT Sh_y0 = 0.0;
+      // dgf_Sh.evaluate(cell, qp_y, Sh_y0);
+      // RF Sh_y = Sh_y0[0];
 
       // // evaluate T
-      RFT T0 = 0.0;
-      dgf_T.evaluate(cell, ip.position(), T0);
-      RF T =T0[0];
+      RF T = 0.0;
+      for (int i = 0; i < lfsu_T.size(); i++){
+        T += x(lfsu_T, i) * phi_T[i];
+      }
+      // RFT T0 = 0.0;
+      // dgf_T.evaluate(cell, ip.position(), T0);
+      // RF T =T0[0];
       
       // evaluate XCH4
       RF XCH4 = 0.0;
@@ -361,10 +380,13 @@ public:
       for (int i = 0; i < lfsu_YH2O.size(); i++)
         YH2O += x(lfsu_YH2O, i) * phi_YH2O[i];
 
-      // evaluate XCH4
-      RF XC = 0.0;
-      for (int i = 0; i < lfsu_XC.size(); i++)
-        XC += x(lfsu_XC, i) * phi_XC[i];
+      // evaluate XC
+      RFT XC0 = 0.0;
+      dgf_XC.evaluate(cell, ip.position(), XC0);
+      RF XC =XC0[0];
+      // RF XC = 0.0;
+      // for (int i = 0; i < lfsu_XC.size(); i++)
+      //   XC += x(lfsu_XC, i) * phi_XC[i];
 
       // evaluate Sw
       RF Sw = 1. - Sg - Sh;
