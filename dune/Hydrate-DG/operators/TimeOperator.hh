@@ -167,6 +167,8 @@ public:
       		RF XCH4 = 0.0;
       		for (size_type i = 0; i < lfsu_XCH4.size(); i++)
         		XCH4 += x(lfsu_XCH4, i) * phi_XCH4[i];
+			// if (XCH4 < 0.)
+			// 	XCH4 = 0.;
 
       		// evaluate YH2O
       		RF YH2O = 0.0;
@@ -178,7 +180,9 @@ public:
       		for (size_type i = 0; i < lfsu_XC.size(); i++)
         		XC += x(lfsu_XC, i) * phi_XC[i];
 
-			RF Sw = std::max(0., std::min(1., (1. - Sg - Sh)));
+			// Sg = std::max(0., Sg);
+			// Sh = std::max(0., Sh);
+			RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
 
 
 			// evaluate Pg
@@ -215,7 +219,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
-				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
+				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{

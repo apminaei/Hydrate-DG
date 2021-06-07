@@ -106,7 +106,7 @@ public:
 		//S  = S_ref;
 #endif
 
-		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );// 0.0245650
+		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.024565*S );// 0.29
 		// std::cout << kth << std::endl;
 		// exit(0);
 		return kth/characteristicValue.thermalconductivity_c ;
@@ -137,8 +137,8 @@ public:
 		double psat;   /* [Pa] */
 
 // #ifdef STATEINDEPENDENTPROPERTIES
-// 		double T_ref = parameter.RefT();
-// 		T = T_ref;
+		// double T_ref = 10. + 273.15;//parameter.ReferenceTemperature();
+		// T = T_ref;
 // #endif
 
 		// REF: SUGAR TOOLBOX

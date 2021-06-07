@@ -127,7 +127,11 @@ public:
 	}
 
 	double InitialPw(Dune::FieldVector< double,dim > xglobal) const {
-		double Pw = Pw_t0 + 1030.21 * 9.81 * (0.-xglobal[1])*X_c.x_c;
+		double Pw = Pw_t0 + 1000. * 10. * (0.-xglobal[1])*X_c.x_c;
+		if (dim == 1)
+		{
+			Pw = Pw_t0 + 1000. * 10. * (0.-xglobal[0])*X_c.x_c;
+		}
 		return Pw; /* Pa */
 	}
 
@@ -143,6 +147,10 @@ public:
 
 	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
 		double T = T_t0 + ref_temperature - gradTz * xglobal[1]*X_c.x_c ; /*K*/
+		if (dim == 1)
+		{
+			T = T_t0 + ref_temperature - gradTz * xglobal[0]*X_c.x_c ; /*K*/
+		}
 		return T; /* K */
 	}
 	
@@ -151,7 +159,10 @@ public:
 		double Sh = 0.0 ;
 		double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
 		
-		if( mesh.isGHSZ(xglobal)){
+		if( dim == 1 && mesh.isGHSZ(xglobal)){
+			Sh = 1.2 * (xglobal[0]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[0]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
+		}
+		if( dim == 2 && mesh.isGHSZ(xglobal)){
 			Sh = 1.2 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
 		}
 		return Sh;
@@ -251,8 +262,9 @@ public:
 		Dune::FieldVector<double,dim> gravity( 0. );
 		double g = 0.;
 		if(gravity_flag) g = -g_magnitude;
-		gravity[dim-1] = g;
+		
 		gravity[0] = 0.;
+		gravity[dim-1] = g;
 		return gravity; /*N/kg*/
 	}
 

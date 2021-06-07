@@ -72,7 +72,7 @@ public:
 
 		double A_s;
 
- 		double M_base = 1.e5;
+ 		double M_base = 1.e5;//pow( 2.*permeability, -1/2. );//
 		//double sh = std::max(0., std::min(1., Sh));
  		double M_SF = pow( porosity*(1.-Sh), 3./2. );
  		A_s = M_base * M_SF ;
@@ -87,7 +87,7 @@ public:
 							   double zCH4, double S, double porosity, double permeability ) const {
 
 		double gas_gen = 0.0;
-		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//4.4824;//14.543;//5.03;//
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//14.543;//4.4824;//5.03;//
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
 		double Peq = P_eq;//EquilibriumPressure( T,S );
 
@@ -98,7 +98,8 @@ public:
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
 					  * DissociationLimitFactor( Sh, Sw, porosity )
-					  * (P_eq - Pg)
+					  * Pg
+					  * potential_P
 					  ;
 					
 		}
@@ -107,7 +108,8 @@ public:
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
 					  * FormationLimitFactor( Sh, Sw, porosity )
-					  * (P_eq - Pg)
+					  * Pg
+					  * potential_P
 					  ;
 		}
 		// if(gas_gen > 1.e-9 ){

@@ -78,6 +78,8 @@ void driver(const GV &gv, // GridView
 	const int degree_C = 1;
 	const int degree_Y = 1;
 
+	// const int degree_pen = 1;
+
 	//	GFS
 #ifdef PARALLEL
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
@@ -88,7 +90,7 @@ void driver(const GV &gv, // GridView
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sg;
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	
@@ -96,19 +98,26 @@ void driver(const GV &gv, // GridView
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Y;
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sh; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sh; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_C;  
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_C;  
 
-	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_P;
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_pen, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_pen; 
+
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_P;
 	
-	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_S, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_S;
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_Sg;
 	
-	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_T; 
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_Sh;
 	
-	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_X; 
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_T; 
 	
-	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::l2orthonormal> FEM_Y; 
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_X; 
+	
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_Y;
+	
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lobatto> FEM_C; 
+
 	FEM_X fem_x;
 	FEM_T fem_T;
 	FEM_Sg fem_Sg;
@@ -116,6 +125,7 @@ void driver(const GV &gv, // GridView
 	FEM_Y fem_y;
 	FEM_C fem_c;
 	FEM_Sh fem_Sh;
+	// FEM_pen fem_pen;
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_Sg, CON0, VBE0> GFS_Sg; // gfs
@@ -130,6 +140,8 @@ void driver(const GV &gv, // GridView
 	GFS_Y gfs_y(gv, fem_y);
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_C, CON0, VBE0> GFS_C; // gfs
 	GFS_C gfs_c(gv, fem_c);
+	// typedef Dune::PDELab::GridFunctionSpace<GV, FEM_pen, CON0, VBE0> GFS_pen; // gfs
+	// GFS_pen gfs_pen(gv, fem_pen);
 	//	COMPOSITE GFS
 	using VBE = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>;//  block size -> numOfPVs
 
@@ -166,6 +178,10 @@ void driver(const GV &gv, // GridView
     using SUBGFS_XC = Dune::PDELab::GridFunctionSubSpace<GFS,Pathc>;
     SUBGFS_XC    subgfs_XC(gfs);
 
+	// using Pathp = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_pen>>;
+    // using SUBGFS_pen = Dune::PDELab::GridFunctionSubSpace<GFS,Pathp>;
+    // SUBGFS_pen    subgfs_pen(gfs);
+
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
 	U uold(gfs, 0.0);
@@ -186,6 +202,8 @@ void driver(const GV &gv, // GridView
 	YH2O_InitialType YH2O_initial(gv,property);
 	typedef XC_Initial<GV,Properties,Real> XC_InitialType;
 	XC_InitialType XC_initial(gv,property);
+	// auto pen_Initiallamda = [&](const Dune::FieldVector<double,dim>& x){return 1.;};
+	// auto pen = Dune::PDELab::makeGridFunctionFromCallable(gv, pen_Initiallamda);
 	typedef Dune::PDELab::CompositeGridFunction<Pw_InitialType,
 												Sg_InitialType,
 												Sh_InitialType,
@@ -240,7 +258,7 @@ void driver(const GV &gv, // GridView
 	double alpha_T = 1.e0;//* property.characteristicValue.T_c;
 	double alpha_x = 1.e0 ;//* property.characteristicValue.X_source_mass;
 	double alpha_y = 1.e0;
-	double intorder=4; 
+	double intorder=2; 
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;
@@ -418,6 +436,8 @@ void driver(const GV &gv, // GridView
 	DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
 	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XC, U> DGF_XC;
 	DGF_XC dgf_XC(subgfs_XC, uold);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_pen, U> DGF_pen;
+	// DGF_pen dgf_pen(subgfs_pen, uold);
 
 	 
 	//	VTK
@@ -449,24 +469,34 @@ void driver(const GV &gv, // GridView
 
 	int subsampling = 1;
 	Dune::RefinementIntervals RefInt(subsampling);
+	using VTKWRITER = Dune::VTKWriter<GV>;
+	VTKWRITER vtkwriter(gv,Dune::VTK::nonconforming);
+	using VTKSEQUENCEWRITER = Dune::VTKSequenceWriter<GV>;
+//	VTKSEQUENCEWRITER vtkSequenceWriter( gv,fileName,pathName,"",Dune::VTK::nonconforming);
+	VTKSEQUENCEWRITER vtkSequenceWriter(std::make_shared<VTKWRITER>(vtkwriter),fileName,pathName,"");
+	
 
-	using VTKWRITER = Dune::SubsamplingVTKWriter<GV> ;
-	VTKWRITER vtkwriter(gv, RefInt, false, Dune::VTK::Precision::float32); // vtk nonconforming
-	using VTKSEQUENCEWRITER = Dune::VTKSequenceWriter<GV> ;
-	VTKSEQUENCEWRITER vtkSequenceWriter(std::make_shared<VTKWRITER>(vtkwriter), fileName, pathName, "");
+	// using VTKWRITER = Dune::SubsamplingVTKWriter<GV> ;
+	// VTKWRITER vtkwriter(gv, RefInt, false, Dune::VTK::Precision::float32); // vtk nonconforming
+	// using VTKSEQUENCEWRITER = Dune::VTKSequenceWriter<GV> ;
+	// VTKSEQUENCEWRITER vtkSequenceWriter(std::make_shared<VTKWRITER>(vtkwriter), fileName, pathName, "");
 
 	// add data field for all components of the space to the VTK writer
 	// primary variables
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+	// Dune::PDELab::addSolutionToVTKWriter(vtkSequenceWriter,gfs,uold,Dune::PDELab::vtk::DefaultFunctionNameGenerator("u"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+	// vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_pen>>(dgf_pen, "pen"));
+
+
 
 	vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
-	vtkSequenceWriter.clear();
+	// vtkSequenceWriter.clear();
 	
 	std::string dgmethod_g = std::__cxx11::to_string(method_g);
 	std::string dgmethod_w = std::__cxx11::to_string(method_w);
@@ -628,15 +658,22 @@ void driver(const GV &gv, // GridView
 										newton_defect,
 										clock_time_elapsed );
 		}
+
+		auto uoldtmp = uold;
+		uoldtmp =0.;
+		uoldtmp.axpy(1,  unew);
+		uoldtmp.axpy(0.,  uold);
+		uold = uoldtmp;
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
-		DGF_Pw dgf_Pw(subgfs_Pw, unew);
-		DGF_Sg dgf_Sg(subgfs_Sg, unew);
-		DGF_Sh dgf_Sh(subgfs_Sh, unew);
-		DGF_T dgf_T(subgfs_T, unew);
-		DGF_XCH4 dgf_XCH4(subgfs_XCH4, unew);
-		DGF_YH2O dgf_YH2O(subgfs_YH2O, unew);
-		DGF_XC dgf_XC(subgfs_XC, unew);
+		DGF_Pw dgf_Pw(subgfs_Pw, uold);
+		DGF_Sg dgf_Sg(subgfs_Sg, uold);
+		DGF_Sh dgf_Sh(subgfs_Sh, uold);
+		DGF_T dgf_T(subgfs_T, uold);
+		DGF_XCH4 dgf_XCH4(subgfs_XCH4, uold);
+		DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
+		DGF_XC dgf_XC(subgfs_XC, uold);
+		// DGF_pen dgf_pen(subgfs_pen, unew);
 
 
 		/*********************************************************************************************
@@ -645,16 +682,17 @@ void driver(const GV &gv, // GridView
 		if (((time + dt)/(t_OP * opcount) > (1.-1.e-3)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-3)))
 		{
 			// primary variables
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
-			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+			// vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_pen>>(dgf_pen, "pen"));
 
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
-			vtkSequenceWriter.clear();
+			// vtkSequenceWriter.clear();
 			if(helper.rank()==0){
 				std::cout<< " ******************************************************************* " << std::endl;
 				std::cout<< " OUTPUT WRITTEN " << opcount << " ----processor: " << helper.rank() << std::endl;
@@ -667,7 +705,7 @@ void driver(const GV &gv, // GridView
 
 		//		PREPARE FOR NEXT TIME INTEGRATION
 		//		1. ASSIGN THE 'NEXT' VALUE TO 'OLD' VARIABLE
-		uold = unew;
+		
 		//		2. ADVANCE TIME:
 		time += dt;
 		if(helper.rank()==0){

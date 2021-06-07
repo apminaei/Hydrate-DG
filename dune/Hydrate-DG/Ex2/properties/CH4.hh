@@ -221,16 +221,16 @@ public:
 
 		double kHenry; // [Pa]
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		T = T_ref;
+// #ifdef STATEINDEPENDENTPROPERTIES
+		// double T_ref = 10.+273.15;//parameter.RefT();
+		// T = T_ref;
 // #elif P1_CASE2
 
 // #else
 // 		std::cout<< "Error thrown from " << __FILE__ << " , line: " << __LINE__  << std::endl;
 // 		std::cout<< "Problem case in problem_NCPvsPVS_p1 is not defined. Check 'problem_NCPvsPVS_p1/include_problem_files.hh'." << std::endl;
 // 		exit(0);
-#endif
+// #endif
 
 		// REF: SUGAR TOOLBOX
 

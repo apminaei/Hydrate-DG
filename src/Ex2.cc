@@ -103,11 +103,20 @@ int main(int argc, char **argv)
 
 #elif defined(ALUGRID)
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
-		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
-		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
 		std::array<unsigned int, dim> elements;
-		elements[0] = N[0];
-		elements[1] = N[1];
+		/*
+			ALUGRID can be used for 2D and 3D
+		*/
+		if (dim == 2)
+		{
+			auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+			auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+			
+			elements[0] = N[0];
+			elements[1] = N[1];
+		}
+		
+		
 		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
 		// std::string filename = ptree.get("grid.alugrid.name",

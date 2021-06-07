@@ -9,8 +9,8 @@
 #define INCLUDESDUNE_HH_
 // (options: PVS, NCP, CGP)
 #define NCP
-#define ALUGRID
-#define PARALLEL
+#define YASP
+// #define PARALLEL
 
 #include<dune/common/parametertreeparser.hh>
 #include<dune/common/parallel/mpihelper.hh>

@@ -40,7 +40,7 @@ public:
 	 * 
 	 */
 
-	const static int dimension = 2;//ptree.get("grid.worlddim",(int)2);
+	const static int dimension = 1;//ptree.get("grid.worlddim",(int)2);
 	constexpr static double origin = 0.;
 
 	const double Z_length = ptree.get("grid.LZ",(double)1.)/Xc.x_c; //m 
@@ -117,7 +117,7 @@ public:
 
 	bool isBottomBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
 		if( dimension == 1 ){
-			if( globalPos[0] < Z_length + eps ){
+			if( globalPos[0] == Z_length  ){
 				return true;
 			}
 			else
@@ -191,7 +191,7 @@ public:
 	bool isGHSZ( Dune::FieldVector< double, dimension > globalPos ) const{
 		
 		if( dimension == 1 ){
-			if((Z_GHSZ_bottom - eps) < globalPos[0] and globalPos[0]< (Z_GHSZ_top + eps))
+			if((Z_GHSZ_bottom ) <= globalPos[0] and globalPos[0]<= (Z_GHSZ_top ))
 				return true;
 			else
 				return false;

@@ -35,6 +35,7 @@ public:
 	static const int PVId_XCH4	= 4 ;
 	static const int PVId_YH2O	= 5 ;
 	static const int PVId_C   	= 6;
+	// static const int PVId_pen   = 7;
 
 	static const int numOfVs 	 = 6 ;
 	static const int VId_Pw  	= 0;

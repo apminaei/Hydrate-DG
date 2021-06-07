@@ -58,23 +58,26 @@ public :
 			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
 
 		}
-		if( property.mesh.isLeftBoundary(globalPos)){
-			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
-			//bctype[indices.PVId_Pw] = indices.BCId_neumann;
-			bctype[indices.PVId_T] = indices.BCId_neumann;
-			bctype[indices.PVId_C] = indices.BCId_neumann;
+		if (dim != 1)
+		{
+			if( property.mesh.isLeftBoundary(globalPos)){
+				//bctype[indices.PVId_Sg] = indices.BCId_neumann;
+				// bctype[indices.PVId_Pw] = indices.BCId_neumann;
+				bctype[indices.PVId_T] = indices.BCId_neumann;
+				bctype[indices.PVId_C] = indices.BCId_neumann;
 
-			// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
-		}
-		if( property.mesh.isRightBoundary(globalPos)){
-			//bctype[indices.PVId_Sg] = indices.BCId_neumann;
-			//bctype[indices.PVId_Pw] = indices.BCId_neumann;
-			bctype[indices.PVId_T] = indices.BCId_neumann;
-			bctype[indices.PVId_C] = indices.BCId_neumann;
+				// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+				// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+			}
+			if( property.mesh.isRightBoundary(globalPos)){
+				//bctype[indices.PVId_Sg] = indices.BCId_neumann;
+				//bctype[indices.PVId_Pw] = indices.BCId_neumann;
+				bctype[indices.PVId_T] = indices.BCId_neumann;
+				bctype[indices.PVId_C] = indices.BCId_neumann;
 
-			// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
-			// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+				// bctype[indices.PVId_XCH4] = indices.BCId_neumann;
+				// bctype[indices.PVId_YH2O] = indices.BCId_neumann;
+			}
 		}
 		return bctype;
 	}
@@ -93,16 +96,19 @@ public :
 		const auto &cell_inside = intersection.inside();
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
 	   	auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
+		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.water.MolarMass();
+		auto T = icv[Indices::PVId_T] * property.characteristicValue.T_c;
+		auto P = icv[Indices::PVId_Pw] * property.characteristicValue.P_c;
 		if( property.mesh.isTopBoundary(globalPos)){
 			//auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
-			double Pw_top = icv[Indices::PVId_Pw] - (property.hydrate.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt)) /*should increase */
-												/ (property.characteristicValue.P_c);
+			double Pw_top = icv[Indices::PVId_Pw] + (property.hydrate.Density()* 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+												* property.characteristicValue.density_c/ (property.characteristicValue.P_c);
 							
 			// std::cout << Pw_top << "  " << dt << std::endl;
 			// exit(0);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
-			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) * 1.)/ property.characteristicValue.T_c;
 			bcvalue[indices.PVId_Sg] = Sg_top;//property.parameter.InitialSg(globalPos);
 			bcvalue[indices.PVId_Pw] = Pw_top ;//property.parameter.InitialPw(globalPos) + 1000 * 9.81 * 0.01 * Xc_time * (time+dt);//0.01 is the burial velocity m/year
 			bcvalue[indices.PVId_T] = T_top;//property.parameter.InitialT(globalPos) ;//;//+ (2/(100*365*24*3600))*time - 3/2/1000 * globalPos[0]* time;
@@ -110,10 +116,10 @@ public :
 		}
 		
 		if( property.mesh.isBottomBoundary(globalPos)){
-			bcvalue[indices.PVId_T] = 0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
-			// bcvalue[indices.PVId_Pw] = -1030.21* property.parameter.g()[dim-1]/(property.characteristicValue.P_c);//*property.characteristicValue.density_c);
-			// 			 - 2600.* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt) /*should increase */
-			// 									/ (property.characteristicValue.density_c* property.characteristicValue.X_gravity * property.characteristicValue.x_c);
+			bcvalue[indices.PVId_T] = -0.035 * 1. * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			// bcvalue[indices.PVId_Pw] =   -(property.water.Density(T, P, S)+1.e-9)* 9.81 * property.characteristicValue.density_c  * property.characteristicValue.x_c /*should increase */
+			// 									/ (property.characteristicValue.P_c);
+			// bcvalue[indices.PVId_C] = icv[Indices::PVId_C];
 		}
 		// if( property.mesh.isWell(globalPos)){
 		// 	bcvalue[indices.PVId_Pw] = 8.e6/property.characteristicValue.P_c;
@@ -146,17 +152,20 @@ public :
 			bctype[indices.BCId_salt] = indices.BCId_neumann;
 			bctype[indices.BCId_gas] = indices.BCId_neumann;
 		}
-		if( property.mesh.isLeftBoundary(globalPos)){
-			bctype[indices.BCId_water] = indices.BCId_neumann;
-			bctype[indices.BCId_heat] = indices.BCId_neumann;
-			bctype[indices.BCId_salt] = indices.BCId_neumann;
-			bctype[indices.BCId_gas] = indices.BCId_neumann;
-		}
-		if( property.mesh.isRightBoundary(globalPos)){
-			bctype[indices.BCId_water] = indices.BCId_neumann;
-			bctype[indices.BCId_heat] = indices.BCId_neumann;
-			bctype[indices.BCId_salt] = indices.BCId_neumann;
-			bctype[indices.BCId_gas] = indices.BCId_neumann;
+		if (dim != 1)
+		{
+			if( property.mesh.isLeftBoundary(globalPos)){
+				bctype[indices.BCId_water] = indices.BCId_neumann;
+				bctype[indices.BCId_heat] = indices.BCId_neumann;
+				bctype[indices.BCId_salt] = indices.BCId_neumann;
+				bctype[indices.BCId_gas] = indices.BCId_neumann;
+			}
+			if( property.mesh.isRightBoundary(globalPos)){
+				bctype[indices.BCId_water] = indices.BCId_neumann;
+				bctype[indices.BCId_heat] = indices.BCId_neumann;
+				bctype[indices.BCId_salt] = indices.BCId_neumann;
+				bctype[indices.BCId_gas] = indices.BCId_neumann;
+			}
 		}
 		
 		return bctype;
@@ -175,13 +184,16 @@ public :
 		const auto &cell_inside = intersection.inside();
 		auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
+		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.water.MolarMass();
+		auto T = icv[Indices::PVId_T] * property.characteristicValue.T_c;
+		auto P = icv[Indices::PVId_Pw] * property.characteristicValue.P_c;
 		if( property.mesh.isTopBoundary(globalPos) ){
 			
-			double Pw_top =  icv[Indices::PVId_Pw] - (property.hydrate.Density( )* property.parameter.g()[dim-1] * press_rate * Xc_time * (time+dt))
-												/ (property.characteristicValue.P_c);
+			double Pw_top =  icv[Indices::PVId_Pw] + (property.hydrate.Density()* 9.81 * press_rate * Xc_time * (time+dt))
+												* property.characteristicValue.density_c/ (property.characteristicValue.P_c);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
-			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) * 1.  )/ property.characteristicValue.T_c;
 
 			bcvalue[Indices::BCId_water] = Pw_top ;
 			bcvalue[Indices::BCId_salt ] = xc_top ;
@@ -190,7 +202,9 @@ public :
 
 		}
 		if( property.mesh.isBottomBoundary(globalPos) ){
-			bcvalue[Indices::BCId_heat ] =  0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			
+			bcvalue[Indices::BCId_heat ] =  -0.035 * 1. * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			
 			// bcvalue[Indices::BCId_water] = 0.;//icv[Indices::PVId_Pw];//- 0.06 * 1000. * property.parameter.g()[dim-1]/property.characteristicValue.P_c;
 		}
 		// if( property.mesh.isWell(globalPos) ){
