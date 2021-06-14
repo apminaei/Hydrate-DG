@@ -50,8 +50,8 @@ public:
 			//exit(0);
 			/******************************************************************************/
 			// MOLE FRACTIONS
-			double sal = 0.03115;//0.035; /*kg/kg*/
-		  	double XC = sal * (property.water.MolarMass()/property.salt.MolarMass()) ;
+			double sal = 0.035;//0.035; /*kg/kg*/
+		  	double XC = sal * (property.gas.MolarMass()/property.salt.MolarMass()) ;
 			// double XC = property.parameter.InitialXC(xglobal);//0.02 * (property.gas.MolarMass()/property.salt.MolarMass());
 			auto z_CH4 = property.eos.EvaluateCompressibilityFactor( T,Pg );
 		

@@ -89,18 +89,18 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sg;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_P;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_T; 
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_X; 
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Y;
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_Sh; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sh; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_C;  
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_C;  
 
 	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_pen, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_pen; 
 
@@ -350,7 +350,7 @@ void driver(const GV &gv, // GridView
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 
 #else
-	// typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;
+	// typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;//doesn't work
 	// LS ls(100, true);
 
 	// using LS = Dune::PDELab::ISTLBackend_SEQ_AMG_4_DG<IGO,GFS,Dune::PDELab::CG2DGProlongation,Dune::SeqSSOR,Dune::BiCGSTABSolver>; //works
@@ -563,7 +563,7 @@ void driver(const GV &gv, // GridView
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
             auto jacobian = osm.getPDESolver().getJacobian();
-			if(helper.rank()==0 &&  (opcount%10==0)){
+			if(helper.rank()==0 &&  (opcount%100==0)){
 			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
 			Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
 			}
@@ -663,7 +663,7 @@ void driver(const GV &gv, // GridView
 		uoldtmp =0.;
 		uoldtmp.axpy(1,  unew);
 		uoldtmp.axpy(0.,  uold);
-		uold = uoldtmp;
+		uold = unew;
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
 		DGF_Pw dgf_Pw(subgfs_Pw, uold);

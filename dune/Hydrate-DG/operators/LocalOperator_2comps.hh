@@ -510,7 +510,7 @@ public:
       auto DCH4_w = tau * por * property.mixture.DiffCoeffCH4InLiquid(T * Xc_T, Pw * Xc_P); /*ndim D from mixture.hh*/
       auto DC_w = tau * por * property.salt.DiffCoeff(T * Xc_T, Pw * Xc_P); /*ndim D from salt.hh*/
       
-      double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+      double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
       auto YCH4 =  property.mixture.YCH4(XCH4, T * Xc_T, Pg * Xc_P, XC, zCH4);
       auto XH2O =  property.mixture.XH2O(YH2O, T * Xc_T, Pg * Xc_P, XC);
@@ -1096,7 +1096,7 @@ public:
       K_s.mv(gravity, Kg_s);
       K_n.mv(gravity, Kg_n);
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s * Xc_T, Pw_s * Xc_P, S_s) ); /* ndim */
       auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.gas.DynamicViscosity(T_s * Xc_T, Pg_s * Xc_P) ); /* ndim */
       
@@ -1111,7 +1111,7 @@ public:
       auto rho_w_s = property.water.Density(T_s * Xc_T, Pw_s * Xc_P, S_s) ; /* ndim */
       
      
-      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
       auto krW_n = property.hydraulicProperty.krw(cell_outside, iplocal_n, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n * Xc_T, Pw_n * Xc_P, S_n) ); /* ndim */
       auto krN_n = property.hydraulicProperty.krg(cell_outside, iplocal_n, Sw_n, Sh_n) / (property.gas.DynamicViscosity(T_n * Xc_T, Pg_n * Xc_P) ); /* ndim */
       
@@ -1632,7 +1632,7 @@ public:
       auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, BrooksCParams[2], BrooksCParams[3]);
       auto coeff_grad_Sh_s = dPcSF1_dSh_s + dPc_dSwe_s * dSwe_dSh_s ;
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
       auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.gas.DynamicViscosity(T_s_dim, Pg_s_dim) );
       
@@ -1667,7 +1667,7 @@ public:
       auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, BrooksCParams[2], BrooksCParams[3]);
       auto coeff_grad_Sh_n = dPcSF1_dSh_n + dPc_dSwe_n * dSwe_dSh_s ;
 
-      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
       auto krW_n = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n_dim, Pw_n_dim, S_n));
       auto krN_n = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.gas.DynamicViscosity(T_n_dim, Pg_n_dim) );
       

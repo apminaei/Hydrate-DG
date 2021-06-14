@@ -96,13 +96,13 @@ public :
 		const auto &cell_inside = intersection.inside();
 		std::vector< double > bcvalue(Indices::numOfPVs,0.);
 	   	auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
-		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.water.MolarMass();
+		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.gas.MolarMass();
 		auto T = icv[Indices::PVId_T] * property.characteristicValue.T_c;
 		auto P = icv[Indices::PVId_Pw] * property.characteristicValue.P_c;
 		if( property.mesh.isTopBoundary(globalPos)){
-			//auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
-			double Pw_top = icv[Indices::PVId_Pw] + (property.hydrate.Density()* 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
-												* property.characteristicValue.density_c/ (property.characteristicValue.P_c);
+			//auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal); 
+			double Pw_top = icv[Indices::PVId_Pw] + (920. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+												/ (property.characteristicValue.P_c);
 							
 			// std::cout << Pw_top << "  " << dt << std::endl;
 			// exit(0);
@@ -116,8 +116,8 @@ public :
 		}
 		
 		if( property.mesh.isBottomBoundary(globalPos)){
-			bcvalue[indices.PVId_T] = -0.035 * 1. * (property.characteristicValue.x_c/property.characteristicValue.T_c);
-			// bcvalue[indices.PVId_Pw] =   -(property.water.Density(T, P, S)+1.e-9)* 9.81 * property.characteristicValue.density_c  * property.characteristicValue.x_c /*should increase */
+			bcvalue[indices.PVId_T] = -0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			// bcvalue[indices.PVId_Pw] =   -(property.water.Density(T, P, S)-1.e-6)* 9.81 * property.characteristicValue.density_c  * property.characteristicValue.x_c /*should increase */
 			// 									/ (property.characteristicValue.P_c);
 			// bcvalue[indices.PVId_C] = icv[Indices::PVId_C];
 		}
@@ -184,13 +184,13 @@ public :
 		const auto &cell_inside = intersection.inside();
 		auto icv /*ndim*/ = icvalue.evaluate(cell_inside,iplocal);
 		std::vector< double > bcvalue(Indices::numOfVelBCs,0.);
-		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.water.MolarMass();
+		auto S = icv[Indices::PVId_C] * property.salt.MolarMass()/property.gas.MolarMass();
 		auto T = icv[Indices::PVId_T] * property.characteristicValue.T_c;
 		auto P = icv[Indices::PVId_Pw] * property.characteristicValue.P_c;
 		if( property.mesh.isTopBoundary(globalPos) ){
 			
-			double Pw_top =  icv[Indices::PVId_Pw] + (property.hydrate.Density()* 9.81 * press_rate * Xc_time * (time+dt))
-												* property.characteristicValue.density_c/ (property.characteristicValue.P_c);
+			double Pw_top =  icv[Indices::PVId_Pw]+ (920.* 9.81 * press_rate * Xc_time * (time+dt))
+												/ (property.characteristicValue.P_c);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
 			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) * 1.  )/ property.characteristicValue.T_c;
@@ -203,7 +203,7 @@ public :
 		}
 		if( property.mesh.isBottomBoundary(globalPos) ){
 			
-			bcvalue[Indices::BCId_heat ] =  -0.035 * 1. * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			bcvalue[Indices::BCId_heat ] =  -0.035 * (property.characteristicValue.x_c/property.characteristicValue.T_c);
 			
 			// bcvalue[Indices::BCId_water] = 0.;//icv[Indices::PVId_Pw];//- 0.06 * 1000. * property.parameter.g()[dim-1]/property.characteristicValue.P_c;
 		}

@@ -196,7 +196,7 @@ public:
       		auto Pg_dim = Pg * Xc_P;
       		auto T_dim = T * Xc_T;
 
-			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 			auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
 			auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */  
@@ -219,7 +219,7 @@ public:
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
-				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
