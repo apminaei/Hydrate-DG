@@ -373,7 +373,7 @@ public:
 	// 		RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 			
 	// 		//auto por = property.soil.SedimentPorosity(cell, ip_local);
-	// 		double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+	// 		double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
     //   	auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 	// 		auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
 	// 		auto rho_w = property.water.Density(T_dim, Pw * Xc_P, S);

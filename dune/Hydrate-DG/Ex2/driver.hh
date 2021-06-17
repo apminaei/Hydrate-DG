@@ -401,6 +401,8 @@ void driver(const GV &gv, // GridView
 	// pdesolver.setReduction(ptree.get("newton.Reduction",(double)1e-5));
     // // pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
 	// pdesolver.setAbsoluteLimit(ptree.get("newton.AbsoluteLimit",(double)1.e-4)); 
+	auto reduction = ptree.get("newton.Reduction",(double)1e-5);
+	auto absolutlimit = ptree.get("newton.AbsoluteLimit",(double)1e-5);
 	
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 
@@ -535,7 +537,8 @@ void driver(const GV &gv, // GridView
 	double newton_first_defect = 0.;
 	double newton_defect = 0.;
 	//Dune::BlockVector<Dune::FieldVector<Real, 1>> newton_defects;
-	
+	auto time_in_year = time * Xc_t / t_day_sec;
+	auto dt_in_year = dt * Xc_t / t_day_sec;
 	
 	//	BEGIN TIME LOOP
 	while ( time < (t_END - 1e-3/Xc_t))
@@ -556,12 +559,14 @@ void driver(const GV &gv, // GridView
 			std::cout<<"  CALLING osm.apply() !"	  << std::endl;
 			std::cout<<"****************************" << std::endl;
 			}
-
+			time_in_year = time * Xc_t / t_day_sec;
+			dt_in_year = dt * Xc_t / t_day_sec;
 			osm.apply( time, dt, uold, unew );
 			
 			newton_iterations = osm.getPDESolver().result().iterations;
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
+			
             auto jacobian = osm.getPDESolver().getJacobian();
 			if(helper.rank()==0 &&  (opcount%100==0)){
 			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
@@ -572,7 +577,7 @@ void driver(const GV &gv, // GridView
 			auto u_norm_one = unew.one_norm();
 			auto u_norm_infinity = unew.infinity_norm();
 			if(helper.rank()==0 &&  (newton_iterations>1)){//((time+dt )/(t_OP * opcount) > (1.-1.e-6)) and ((time+dt ) / (t_OP * opcount)< (1. + 1.e-6))
-				std::string s_OP = std::__cxx11::to_string(time);
+				std::string s_OP = std::__cxx11::to_string(time_in_year);
 				std::string parameters_file = pathNameDefects;
 				parameters_file +="/";
 				parameters_file +=fileNameDefects;
@@ -580,8 +585,8 @@ void driver(const GV &gv, // GridView
 				parameters_file +=s_OP;
 				parameters_file += ".txt";
 				property.ReportNewton( parameters_file,
-							time /*s*/,
-							dt /*s*/,
+							time_in_year /*s*/,
+							dt_in_year /*s*/,
 							newton_iterations, newton_defects,
 							u_norm_two, u_norm_one,  u_norm_infinity);
 			}
@@ -603,17 +608,17 @@ void driver(const GV &gv, // GridView
 
 		}catch ( Dune::Exception &e ) {
 			exceptionCaught = true;
-			if( (dt) > (1e-3/Xc_t) ){
+			if( dt > (2. * dt_min) ){
 
 				if(helper.rank()==0){
 					std::cout << "Catched Error, Dune reported error: " << e << std::endl;
 				}
 
 				unew = uold;
-
+				
+				dt = 0.5 * dt;
+				
 				newton_iterations = 0;
-
-				dt *= 0.5;
 				dtLast = dt;
 					continue;
 			}
@@ -628,6 +633,21 @@ void driver(const GV &gv, // GridView
 		clock_t end = clock();
 		double clock_time_this_step = (double) (end-start) / CLOCKS_PER_SEC;
 		clock_time_elapsed += clock_time_this_step;
+		if(helper.rank()==0 ){//&& newton_defect >  absolutlimit && newton_defect > (newton_first_defect * reduction)
+			std::string statistics_file = pathNameDefects;
+			statistics_file +="/";
+			statistics_file +=fileName;
+			statistics_file +="_statistics";
+			statistics_file += ".txt";
+					
+			property.ReportStatistics( 	statistics_file,
+											time_in_year,
+											dt_in_year,
+											newton_iterations,
+											newton_first_defect,
+											newton_defect,
+											clock_time_elapsed );
+		}
 
 		if(helper.rank()==0){
 			std::cout<<"DONE"<<std::endl;
@@ -643,21 +663,23 @@ void driver(const GV &gv, // GridView
 		 * newton iterations per fixed point iteration,
 		 * total newton iterations
 		 */
-		
-		if(helper.rank()==0){
-			std::string statistics_file = pathNameDefects;
-			statistics_file +="/";
-			statistics_file +=fileName;
-			statistics_file +="_statistics";
-			statistics_file += ".txt";
-			property.ReportStatistics( 	statistics_file,
-										time,
-										dt,
-										newton_iterations,
-										newton_first_defect,
-										newton_defect,
-										clock_time_elapsed );
-		}
+		// time_in_year = time * Xc_t / t_day_sec;
+		// dt_in_year = dt * Xc_t / t_day_sec;
+		// if(helper.rank()==0){
+		// 	std::string statistics_file = pathNameDefects;
+		// 	statistics_file +="/";
+		// 	statistics_file +=fileName;
+		// 	statistics_file +="_statistics";
+		// 	statistics_file += ".txt";
+			
+		// 	property.ReportStatistics( 	statistics_file,
+		// 								time_in_year,
+		// 								dt_in_year,
+		// 								newton_iterations,
+		// 								newton_first_defect,
+		// 								newton_defect,
+		// 								clock_time_elapsed );
+		// }
 
 		auto uoldtmp = uold;
 		uoldtmp =0.;

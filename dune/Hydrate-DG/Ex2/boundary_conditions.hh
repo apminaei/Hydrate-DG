@@ -189,7 +189,7 @@ public :
 		auto P = icv[Indices::PVId_Pw] * property.characteristicValue.P_c;
 		if( property.mesh.isTopBoundary(globalPos) ){
 			
-			double Pw_top =  icv[Indices::PVId_Pw]+ (920.* 9.81 * press_rate * Xc_time * (time+dt))
+			double Pw_top =  icv[Indices::PVId_Pw] + (920.* 9.81 * press_rate * Xc_time * (time+dt))
 												/ (property.characteristicValue.P_c);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
