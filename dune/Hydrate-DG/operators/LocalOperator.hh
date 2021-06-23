@@ -506,7 +506,7 @@ public:
       auto DCH4_w = tau * por * property.mixture.DiffCoeffCH4InLiquid(T_dim, Pw_dim); /*ndim D from mixture.hh*/
       auto DC_w = tau * por * property.salt.DiffCoeff(T_dim, Pw_dim); /*ndim D from salt.hh*/
 
-      double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+      double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
       auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
       auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */
@@ -583,9 +583,9 @@ public:
       //   j_CH4_w = 0.;
       // }
 
-      auto convectiveflux_CH4 = -convectiveflux_CH4_g + convectiveflux_CH4_w;
-      auto convectiveflux_H2O = -convectiveflux_H2O_g + convectiveflux_H2O_w;
-      auto convectiveflux_Heat = -convectiveflux_Heat_g + convectiveflux_Heat_w;
+      auto convectiveflux_CH4 = convectiveflux_CH4_g + convectiveflux_CH4_w;
+      auto convectiveflux_H2O = convectiveflux_H2O_g + convectiveflux_H2O_w;
+      auto convectiveflux_Heat = convectiveflux_Heat_g + convectiveflux_Heat_w;
 
       auto diffusiveflux_CH4 = j_CH4_g + j_CH4_w;
       auto diffusiveflux_H2O = j_H2O_g + j_H2O_w;
@@ -1340,8 +1340,8 @@ public:
       // K_s.mv(gravity, Kg_s);
       // K_n.mv(gravity, Kg_n);
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
-      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
 
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s);
       auto mu_w_s = property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s) ; /* ndim */
@@ -1593,9 +1593,9 @@ public:
       //   j_CH4_w_s = 0.;
       // }
 
-      auto convectiveflux_CH4_s = conv_coeff_CH4_g * convectiveflux_CH4_g_s - conv_coeff_CH4_w * convectiveflux_CH4_w_s;
-      auto convectiveflux_H2O_s = conv_coeff_H2O_g * convectiveflux_H2O_g_s - conv_coeff_H2O_w * convectiveflux_H2O_w_s;
-      auto convectiveflux_Heat_s = conv_coeff_Heat_g * convectiveflux_Heat_g_s - conv_coeff_Heat_w * convectiveflux_Heat_w_s;
+      auto convectiveflux_CH4_s = -conv_coeff_CH4_g * convectiveflux_CH4_g_s - conv_coeff_CH4_w * convectiveflux_CH4_w_s;
+      auto convectiveflux_H2O_s = -conv_coeff_H2O_g * convectiveflux_H2O_g_s - conv_coeff_H2O_w * convectiveflux_H2O_w_s;
+      auto convectiveflux_Heat_s = -conv_coeff_Heat_g * convectiveflux_Heat_g_s - conv_coeff_Heat_w * convectiveflux_Heat_w_s;
 
       auto diffusiveflux_CH4_s = j_CH4_g_s + j_CH4_w_s;
       auto diffusiveflux_H2O_s = j_H2O_g_s + j_H2O_w_s;
@@ -1641,9 +1641,9 @@ public:
       //   j_CH4_w_n = 0.;
       // }
 
-      auto convectiveflux_CH4_n = conv_coeff_CH4_g * convectiveflux_CH4_g_n - conv_coeff_CH4_w * convectiveflux_CH4_w_n;
-      auto convectiveflux_H2O_n = conv_coeff_H2O_g * convectiveflux_H2O_g_n - conv_coeff_H2O_w * convectiveflux_H2O_w_n;
-      auto convectiveflux_Heat_n = conv_coeff_Heat_g * convectiveflux_Heat_g_n - conv_coeff_Heat_w * convectiveflux_Heat_w_n;
+      auto convectiveflux_CH4_n = -conv_coeff_CH4_g * convectiveflux_CH4_g_n - conv_coeff_CH4_w * convectiveflux_CH4_w_n;
+      auto convectiveflux_H2O_n = -conv_coeff_H2O_g * convectiveflux_H2O_g_n - conv_coeff_H2O_w * convectiveflux_H2O_w_n;
+      auto convectiveflux_Heat_n = -conv_coeff_Heat_g * convectiveflux_Heat_g_n - conv_coeff_Heat_w * convectiveflux_Heat_w_n;
 
       auto diffusiveflux_CH4_n = j_CH4_g_n + j_CH4_w_n;
       auto diffusiveflux_H2O_n = j_H2O_g_n + j_H2O_w_n;
@@ -2249,12 +2249,12 @@ public:
       auto T_s_dim = T_s * Xc_T;
       auto T_n_dim = T_n * Xc_T;
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
       auto H_CH4_w_s = property.gas.SolubilityCoefficient(  T_s_dim/*K*/, S_s ); /*ndim */
       auto P_H_satu_s = property.water.SaturatedVaporPressure( T_s_dim /*K*/, S_s ); /*ndim */
       auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
-      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
       auto H_CH4_w_n = property.gas.SolubilityCoefficient(  T_n_dim/*K*/, S_n ); /*ndim */
       auto P_H_satu_n = property.water.SaturatedVaporPressure( T_n_dim /*K*/, S_n ); /*ndim */
       auto YCH4_s = property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
@@ -2709,10 +2709,10 @@ public:
         convectiveflux_Heat_w =  ( rho_w_n * Cp_w_n * (T_n - T_ref)) * normalvelocity_w_n; //rho_w_s * Cp_w_s * (T_s - T_ref) +// omegaup_w_n *
       }
 
-      auto convectiveflux_CH4 = ( convectiveflux_CH4_g - convectiveflux_CH4_w);
+      auto convectiveflux_CH4 = ( -convectiveflux_CH4_g - convectiveflux_CH4_w);
       auto diffusiveflux_CH4 =  -( diffusiveflux_CH4_s +  diffusiveflux_CH4_n) ;//- 0.5 * penalty_factor_x / Xc_diff_m* (grad_XCH4_n - grad_XCH4_s);
 
-      auto convectiveflux_H2O = ( convectiveflux_H2O_g - convectiveflux_H2O_w);
+      auto convectiveflux_H2O = (- convectiveflux_H2O_g - convectiveflux_H2O_w);
       auto diffusiveflux_H2O =  -(diffusiveflux_H2O_s +  diffusiveflux_H2O_n) ;//- 0.5 * penalty_factor_x / Xc_diff_m* (grad_YH2O_n - grad_YH2O_s);
 
       auto convectiveflux_SALT = -convectiveflux_SALT_w;//(omegaup_w_s * convectiveflux_SALT_w_s + omegaup_w_n * convectiveflux_SALT_w_n);
@@ -2721,7 +2721,7 @@ public:
         diffusiveflux_SALT =    -( rho_w_n * Sw_n * DC_w_n) * grad_XC_n; //rho_w_s * Sw_s * DC_w_s +
       }
 
-      auto convectiveflux_Heat = (convectiveflux_Heat_g - convectiveflux_Heat_w);
+      auto convectiveflux_Heat = (-convectiveflux_Heat_g - convectiveflux_Heat_w);
       auto diffusiveflux_Heat =  -(diffusiveflux_Heat_s + diffusiveflux_Heat_n);
       if (veltype[Indices::BCId_heat] == Indices::BCId_neumann){
         diffusiveflux_Heat =   -(kth_eff_n * grad_T_n);

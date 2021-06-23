@@ -196,7 +196,7 @@ public:
       		auto Pg_dim = Pg * Xc_P;
       		auto T_dim = T * Xc_T;
 
-			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 			auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
 			auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */  
@@ -390,7 +390,7 @@ public:
 	// 		RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
 			
 	// 		//auto por = property.soil.SedimentPorosity(cell, ip_local);
-	// 		double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+	// 		double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
     //   	auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 	// 		auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
 	// 		auto rho_w = property.water.Density(T_dim, Pw * Xc_P, S);

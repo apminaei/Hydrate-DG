@@ -70,14 +70,14 @@ public:
 		// Sutherland Correlation:
 		// ref: http://portal.tpu.ru/SHARED/n/NATASHA/Material/Tab3/Glava_1.pdf
 		double C = 162; // empirical constant
-		double mu_0 = 1.0707e-5;
-		// ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
-		mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
-											+ 4.1719e-20 * Pg * Pg
-											- 7.3232e-28 * Pg * Pg * Pg )
-				); // Pa.s -> ref: Frauenhofer Comsol Model
+		double mu_0 = 0.;//1.0707e-5;
+		// // ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
+		// mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
+		// 									+ 4.1719e-20 * Pg * Pg
+		// 									- 7.3232e-28 * Pg * Pg * Pg )
+		// 		); // Pa.s -> ref: Frauenhofer Comsol Model
 		mu_0 = 1.0707e-5 -  4.8134e-14 * Pg - 4.1719e-20 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
-		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
+		mu = 1.4055e-5;//mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
 
 		return mu/characteristicValue.viscosity_c;
 

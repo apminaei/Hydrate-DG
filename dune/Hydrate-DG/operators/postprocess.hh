@@ -217,7 +217,7 @@ public:
 			RF K = param.soil.SedimentPermeability( cell,ip_local )
 				 * param.hydraulicProperty.PermeabilityScalingFactor( cell,ip_local, Sh, porosity );
 
-			RF S = XC * (param.salt.MolarMass()/param.water.MolarMass());
+			RF S = XC * (param.salt.MolarMass()/param.gas.MolarMass());
 			// RF Xc = param.parameter.ReferenceSaltConcentration();
 			RF T_ref = param.parameter.ReferenceTemperature()/Xc_T; /*ndim*/
 			RF Sw = 1.- Sg - Sh;
