@@ -506,7 +506,7 @@ public:
       auto DCH4_w = tau * por * property.mixture.DiffCoeffCH4InLiquid(T_dim, Pw_dim); /*ndim D from mixture.hh*/
       auto DC_w = tau * por * property.salt.DiffCoeff(T_dim, Pw_dim); /*ndim D from salt.hh*/
 
-      double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
       auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
       auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */
@@ -1340,8 +1340,8 @@ public:
       // K_s.mv(gravity, Kg_s);
       // K_n.mv(gravity, Kg_n);
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
-      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
 
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s);
       auto mu_w_s = property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s) ; /* ndim */
@@ -2249,12 +2249,12 @@ public:
       auto T_s_dim = T_s * Xc_T;
       auto T_n_dim = T_n * Xc_T;
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_s = XC_s * (property.salt.MolarMass()/property.water.MolarMass());
       auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
       auto H_CH4_w_s = property.gas.SolubilityCoefficient(  T_s_dim/*K*/, S_s ); /*ndim */
       auto P_H_satu_s = property.water.SaturatedVaporPressure( T_s_dim /*K*/, S_s ); /*ndim */
       auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
-      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_n = XC_n * (property.salt.MolarMass()/property.water.MolarMass());
       auto H_CH4_w_n = property.gas.SolubilityCoefficient(  T_n_dim/*K*/, S_n ); /*ndim */
       auto P_H_satu_n = property.water.SaturatedVaporPressure( T_n_dim /*K*/, S_n ); /*ndim */
       auto YCH4_s = property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);

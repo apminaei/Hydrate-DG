@@ -45,14 +45,14 @@ public:
 	static const int VId_XCH4	= 4 ;
 	static const int VId_YH2O	= 5 ;
 
-	const static int numOfSVs 	= 27;
+	const static int numOfSVs 	= 28;
 	const static int SVId_Pg	= 0;  // gas phase pressure
 	const static int SVId_Pw	= 1;  // water phase pressure
 	const static int SVId_Pc	= 2;  // capillary pressure
 	const static int SVId_Sg	= 3;  // gas saturation
 	const static int SVId_Sh	= 4;  // hydrate saturation
 	const static int SVId_Sw	= 5;  // water saturation
-	const static int SVId_T		= 6;  // water saturation
+	const static int SVId_T		= 6;  // Temp
 	const static int SVId_XCH4	= 7;  // CH4 mole fraction in water
 	const static int SVId_XC	= 8;  // CH4 mole fraction in water
 	const static int SVId_XH2O	= 9;  // H2O mole fraction in water
@@ -72,7 +72,9 @@ public:
  	const static int SVId_Pwsat = 23; // Saturation pressure for water vapor
  	const static int SVId_HCH4 	= 24; // Henry's constant
  	const static int SVId_tau	= 25; // tortuosity
- 	const static int SVId_Peq	= 26; // tortuosity
+ 	const static int SVId_Peq	= 26; // Equi. Pressure
+ 	const static int SVId_HS	= 27; // Hydrate Stability zone
+
 
 	/* SECONDARY VARIABLES FOR POST PROCESS AND O/P */
 	static const unsigned int numOfFlowPPvars = 11 ;

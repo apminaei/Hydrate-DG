@@ -76,6 +76,7 @@ public:
 											+ 4.1719e-20 * Pg * Pg
 											- 7.3232e-28 * Pg * Pg * Pg )
 				); // Pa.s -> ref: Frauenhofer Comsol Model
+		mu_0 = 1.0707e-5 -  4.8134e-14 * Pg - 4.1719e-20 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
 		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
 
 		return mu/characteristicValue.viscosity_c;

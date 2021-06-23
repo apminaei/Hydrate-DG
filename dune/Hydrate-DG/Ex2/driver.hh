@@ -143,8 +143,8 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_C, CON0, VBE0> GFS_C; // gfs
 	GFS_C gfs_c(gv, fem_c);
 
-	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_CC; // gfs
-	GFS_CC gfs_cc(gv, fem_P);
+	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_PP, CON0, VBE0> GFS_CC; // gfs
+	GFS_CC gfs_cc(gv, fem_PP);
 	// typedef Dune::PDELab::GridFunctionSpace<GV, FEM_pen, CON0, VBE0> GFS_pen; // gfs
 	// GFS_pen gfs_pen(gv, fem_pen);
 	//	COMPOSITE GFS
@@ -454,11 +454,11 @@ void driver(const GV &gv, // GridView
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
-													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC>  GFS_PP;
+													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC>  GFS_PP;
 		GFS_PP gfs_pp(	gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
-						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc);
+						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc);
 		
 		typedef typename GFS_PP::template ConstraintsContainer<Real>::Type CC_PP;
 		CC_PP cc_pp;
@@ -518,6 +518,8 @@ void driver(const GV &gv, // GridView
 		SUBPP_tau 	subpp_tau(gfs_pp);
 		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Peq	  > >> SUBPP_Peq;
 		SUBPP_Peq 	subpp_Peq(gfs_pp);
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_HS	  > >> SUBPP_HS;
+		SUBPP_HS 	subpp_HS(gfs_pp);
 
 		
 		using U_PP = Dune::PDELab::Backend::Vector<GFS_PP,double>;
@@ -617,6 +619,8 @@ void driver(const GV &gv, // GridView
 		DGF_tau dgf_tau( subpp_tau, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Peq, U_PP > DGF_Peq;
 		DGF_Peq dgf_Peq( subpp_Peq, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_HS, U_PP > DGF_HS;
+		DGF_HS dgf_HS( subpp_HS, u_pp );
 		
 
 	 
@@ -691,6 +695,7 @@ void driver(const GV &gv, // GridView
 	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HCH4  > >( dgf_HCH4  , "HCH4" ));
 	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_tau   > >( dgf_tau   , "tau"  ));
 	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Peq   > >( dgf_Peq   , "Peq"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HS   > >( dgf_HS   , "HS"  ));
 
 
 

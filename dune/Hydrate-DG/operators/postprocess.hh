@@ -149,6 +149,9 @@ public:
 
 		typedef typename LFS_PP::template Child<Indices::SVId_Peq>::Type LFS_PP_Peq;
 		const LFS_PP_Peq& lfs_pp_Peq = lfs_pp.template child<Indices::SVId_Peq>();
+
+		typedef typename LFS_PP::template Child<Indices::SVId_HS>::Type LFS_PP_HS;
+		const LFS_PP_HS& lfs_pp_HS = lfs_pp.template child<Indices::SVId_HS>();
 		
 		
 
@@ -214,7 +217,7 @@ public:
 			RF K = param.soil.SedimentPermeability( cell,ip_local )
 				 * param.hydraulicProperty.PermeabilityScalingFactor( cell,ip_local, Sh, porosity );
 
-			RF S = XC * (param.salt.MolarMass()/param.gas.MolarMass());
+			RF S = XC * (param.salt.MolarMass()/param.water.MolarMass());
 			// RF Xc = param.parameter.ReferenceSaltConcentration();
 			RF T_ref = param.parameter.ReferenceTemperature()/Xc_T; /*ndim*/
 			RF Sw = 1.- Sg - Sh;
@@ -243,7 +246,9 @@ public:
 			RF Hch4 = param.gas.SolubilityCoefficient(T*Xc_T,S);
 
 			RF Coeff = 16.32;//4.4824;//14.543;//
-			RF Peq = 1.e3 * exp( 38.592 - (8533.8/ (T * Xc_T) ) + Coeff*S ); 
+			RF Peq = 1.e3 * exp( 38.592 - (8533.8/ (T * Xc_T) ) + Coeff*S );
+			
+			RF HS = (15.e6 * (Peq-Pg* Xc_P)/abs(Peq-Pg* Xc_P)+15.e6 ) ;
 
 			ul_pp[lfs_pp_Pg.localIndex(0)]	  = Pg*Xc_P ;
 	        ul_pp[lfs_pp_Pw.localIndex(0)] 	  = Pw*Xc_P ;
@@ -272,6 +277,9 @@ public:
 	        ul_pp[lfs_pp_HCH4.localIndex(0)]  = Hch4*Xc_P ;
 	        ul_pp[lfs_pp_tau.localIndex(0)]   = tau ;
 	        ul_pp[lfs_pp_Peq.localIndex(0)]   = Peq ;
+	        ul_pp[lfs_pp_HS.localIndex(0)]   = HS ;
+
+			
 
 			u_pp_view.write( ul_pp );
 			u_pp_view.commit();
