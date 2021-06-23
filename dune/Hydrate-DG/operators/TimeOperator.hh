@@ -209,21 +209,38 @@ public:
 			auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
 			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			
+			auto H2O_g = rho_g * por * YH2O * Sg;
+			auto CH4_w = rho_w * por * XCH4 * Sw;
+			auto SALT_w = rho_w * por * XC * Sw;
+			auto H2O_w = rho_w * por * (1. -XC - XCH4) * Sw;
+			auto CH4_g = rho_g * por * (1. - YH2O) * Sg;
+
+			// if(Sg <= 0.){
+			// 	H2O_g = 0.;
+			// 	CH4_g = 0.;
+			// }
+			// if(Sw <= 0.){
+			// 	H2O_w = 0.;
+			// 	CH4_w = 0.;
+			// 	SALT_w = 0.;
+			// }
+
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
 			auto mass = por * (rho_g * Sg + rho_w * Sw );
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. - YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);//
+				r.accumulate(lfsv_Sg, i, ((CH4_g + CH4_w) * psi_Sg[i]) * factor);//
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
-				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
+				r.accumulate(lfsv_XC, i, (SALT_w * psi_XC[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. -XC - XCH4) * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((H2O_g + H2O_w) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{

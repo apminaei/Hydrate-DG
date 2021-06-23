@@ -32,11 +32,11 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 4.4824;//14.543;//16.32;//
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//4.4824;//14.543;//
 		//auto s = 0.03115;//S * water.MolarMass()/methane.MolarMass();
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
-		std::cout << P_eq <<"  " << S << std::endl;
-		return P_eq;
+		// std::cout << P_eq <<"  " << S << std::endl;
+		// return P_eq;
 	}
 
 	//rate constant for hydrate dissociation; base 1.e-14 for t_end = 2.16e6
@@ -134,7 +134,7 @@ public:
 	double HeatOfDissociation( double gasGenRate, double T ) const {
       double Q_decomp/*[W/m³]*/= - ( gasGenRate  / methane.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
-								 * 1.;
+								 * 6.;
  
       return Q_decomp ;
 	}

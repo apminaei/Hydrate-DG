@@ -108,7 +108,7 @@ public :
 			// exit(0);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
-			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) * 1.)/ property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 			bcvalue[indices.PVId_Sg] = Sg_top;//property.parameter.InitialSg(globalPos);
 			bcvalue[indices.PVId_Pw] = Pw_top ;//property.parameter.InitialPw(globalPos) + 1000 * 9.81 * 0.01 * Xc_time * (time+dt);//0.01 is the burial velocity m/year
 			bcvalue[indices.PVId_T] = T_top;//property.parameter.InitialT(globalPos) ;//;//+ (2/(100*365*24*3600))*time - 3/2/1000 * globalPos[0]* time;
@@ -193,7 +193,7 @@ public :
 												/ (property.characteristicValue.P_c);
 			double Sg_top = icv[Indices::PVId_Sg];//property.parameter.InitialSg(globalPos);
 			double xc_top = icv[Indices::PVId_C];//property.parameter.InitialXC(globalPos);
-			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) * 1.  )/ property.characteristicValue.T_c;
+			double T_top  = icv[Indices::PVId_T]+( 0.035 * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 
 			bcvalue[Indices::BCId_water] = Pw_top ;
 			bcvalue[Indices::BCId_salt ] = xc_top ;

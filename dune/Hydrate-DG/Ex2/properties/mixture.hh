@@ -131,7 +131,7 @@ public:
 #endif
 
 		double A = 0.003475 ; 	/* K */
-		double B = 1.e1*1.57e-5;		/* cm^2/s */
+		double B = 1.e0*1.57e-5;		/* cm^2/s */
 
 		D =  B * exp(-A/T) * 1.0e-6; //  pow((Pw/1.0135e5),1.) * B * exp(-A/T) * 1.0e-6;//
 
