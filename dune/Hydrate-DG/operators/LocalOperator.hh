@@ -1654,7 +1654,7 @@ public:
       auto convectiveflux_CH4 = ( convectiveflux_CH4_s + convectiveflux_CH4_n) * n_F_local;
       auto convectiveflux_H2O = ( convectiveflux_H2O_s + convectiveflux_H2O_n) * n_F_local;
       auto convectiveflux_SALT = -conv_coeff_SALT_w * ( convectiveflux_SALT_w_s + convectiveflux_SALT_w_n) * n_F_local;
-      auto convectiveflux_Heat = -( convectiveflux_Heat_s + convectiveflux_Heat_n) * n_F_local;
+      auto convectiveflux_Heat = ( convectiveflux_Heat_s + convectiveflux_Heat_n) * n_F_local;
 
       auto diffusiveflux_CH4 = -(omegaup_xch4_s * diffusiveflux_CH4_s +  omegaup_xch4_n * diffusiveflux_CH4_n );// - 0.5 * penalty_factor_x * (gradu_XCH4_n - gradu_XCH4_s)* n_F_local;
       auto diffusiveflux_H2O = -(omegaup_yh2o_s * diffusiveflux_H2O_s  + omegaup_yh2o_n * diffusiveflux_H2O_n) ;//- 0.5 * penalty_factor_x * (gradu_YH2O_n - gradu_YH2O_s)* n_F_local;
@@ -1693,7 +1693,7 @@ public:
       // CH4-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
 
-      double term_nipg_g = theta_g * (Sg_s - Sg_n);
+      double term_nipg_g = -theta_g * (Sg_s - Sg_n);
       double term_penalty_sg =  penalty_factor_g * (Sg_s - Sg_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
@@ -1707,12 +1707,12 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Sg_s, i,  - term_nipg_g * krN_s * omegaup_g_s * Xc_conv_m * rho_g_s *Xc_P/Xc_x
+        r_s.accumulate(lfsv_Sg_s, i,   term_nipg_g * krN_s * omegaup_g_s * Xc_conv_m * rho_g_s *Xc_P/Xc_x
                                     * (1. - YH2O_s) * (- coeff_grad_Sw_s) * Kn_F_s * gradpsi_Sg_s[i] * factor);
       }
       for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Sg_n, i, - term_nipg_g * krN_n * omegaup_g_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
+        r_n.accumulate(lfsv_Sg_n, i,  term_nipg_g * krN_n * omegaup_g_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
                                     * (1. - YH2O_n) * (- coeff_grad_Sw_n) * Kn_F_n * gradpsi_Sg_n[i] * factor);
       }
       // standard IP term integral
@@ -1729,7 +1729,7 @@ public:
       // SALT-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
 
-      double term_nipg_c_x = theta_x * (XC_s - XC_n);
+      double term_nipg_c_x = -theta_x * (XC_s - XC_n);
 
       double term_penalty_c =  penalty_factor_x * (XC_s-XC_n);//(diffusiveflux_SALT_n - diffusiveflux_SALT_s); //  0.5 * (rho_w_s * Sw_s * DC_w_s + rho_w_n * Sw_n * DC_w_n )*
       // // diffusion term
@@ -1765,7 +1765,7 @@ public:
       // H2O-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
 
-      double term_nipg_w = theta_w * (Pw_s - Pw_n);
+      double term_nipg_w = -theta_w * (Pw_s - Pw_n);
       double term_penalty_w =  penalty_factor_w * (Pw_s - Pw_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
@@ -1781,12 +1781,12 @@ public:
 
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pw_s, i, - term_nipg_w * (omegaup_w_s * krW_s * Xc_conv_m * rho_w_s * (1. - XC_s - XCH4_s) * Xc_P/Xc_x
+        r_s.accumulate(lfsv_Pw_s, i,  term_nipg_w * (omegaup_w_s * krW_s * Xc_conv_m * rho_w_s * (1. - XC_s - XCH4_s) * Xc_P/Xc_x
                                                                    * n_F_local * gradpsi_Pw_n[i] ) * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s  - Xc_rho * rho_w_s * gravity
       }
       for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pw_n, i, - term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x
+        r_n.accumulate(lfsv_Pw_n, i,  term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x
                                                                    * n_F_local * gradpsi_Pw_n[i] ) * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n - Xc_rho * rho_w_n * gravity
       }
       //standard IP term integral
@@ -1838,7 +1838,7 @@ public:
 
       // ENERGY balance
       tmp =  Xc_conv_h * convectiveflux_Heat +  Xc_diff_h * diffusiveflux_Heat;
-      double term_nipg_T = theta_T * (T_s - T_n);
+      double term_nipg_T = -theta_T * (T_s - T_n);
       double term_penalty_T =  penalty_factor_T * (T_s - T_n) ;
       // diffusion term
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
@@ -1852,11 +1852,11 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
-        r_s.accumulate(lfsv_T_s, i, -omegaup_T_s *  term_nipg_T * Xc_diff_h * kth_eff_s * n_F_local * gradpsi_T_s[i] * factor);
+        r_s.accumulate(lfsv_T_s, i, omegaup_T_s *  term_nipg_T * Xc_diff_h * kth_eff_s * n_F_local * gradpsi_T_s[i] * factor);
       }
       for (size_type i = 0; i < lfsv_T_n.size(); i++)
       {
-        r_n.accumulate(lfsv_T_n, i, -omegaup_T_n *  term_nipg_T * Xc_diff_h * kth_eff_n * n_F_local * gradpsi_T_n[i] * factor);
+        r_n.accumulate(lfsv_T_n, i, omegaup_T_n *  term_nipg_T * Xc_diff_h * kth_eff_n * n_F_local * gradpsi_T_n[i] * factor);
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
@@ -2744,7 +2744,7 @@ public:
 
       // CH4-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
-      double term_nipg_g = method_g * (Sg_s - Sg_n);
+      double term_nipg_g = -method_g * (Sg_s - Sg_n);
       double term_penalty_sg = penalty_factor_g * (Sg_s - Sg_n);
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
@@ -2752,7 +2752,7 @@ public:
       }
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r.accumulate(lfsv_Sg_s, i, - term_nipg_g * K * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
+        r.accumulate(lfsv_Sg_s, i,  term_nipg_g * permeability * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
                                         * (1. - YH2O_n) * (- coeff_grad_Sw_n)) * n_F_local * gradpsi_Sg_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
       }
       // standard IP term integral
@@ -2763,7 +2763,7 @@ public:
 
       // SALT-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
-      double term_nipg_c_x = method_x * (XC_s  - XC_n  );
+      double term_nipg_c_x = -method_x * (XC_s  - XC_n  );
       double term_penalty_c =   penalty_factor_x *  (XC_s-XC_n);//(diffusiveflux_SALT_n - diffusiveflux_SALT_s); //  0.5 * (rho_w_s * Sw_s * DC_w_s + rho_w_n * Sw_n * DC_w_n )*
       // diffusion term
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
@@ -2786,7 +2786,7 @@ public:
 
       // H2O-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
-      double term_nipg_w = method_w * (Pw_s - Pw_n);
+      double term_nipg_w = -method_w * (Pw_s - Pw_n);
       double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n) ;
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
@@ -2796,7 +2796,7 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r.accumulate(lfsv_Pw_s, i, - term_nipg_w * K * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
+        r.accumulate(lfsv_Pw_s, i, term_nipg_w * permeability * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
                                                                    * n_F_local * (gradpsi_Pw_s[i]) * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
 
       }
@@ -2829,7 +2829,7 @@ public:
 
       // ENERGY balance
       tmp =  Xc_conv_h * convectiveflux_Heat +  Xc_diff_h * diffusiveflux_Heat;
-      double term_nipg_T = method_T * (T_s - T_n);
+      double term_nipg_T = -method_T * (T_s - T_n);
       double term_penalty_T =  penalty_factor_T * (T_s - T_n) ;
 
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
@@ -2840,7 +2840,7 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_T_s.size(); i++)
       {
-        r.accumulate(lfsv_T_s, i, - Xc_diff_h * kth_eff_s * term_nipg_T * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
+        r.accumulate(lfsv_T_s, i,  Xc_diff_h * kth_eff_s * term_nipg_T * n_F_local * gradpsi_T_s[i] * factor); // in the run testAveragingXC-T there is no upwinding for sym terms
       }
 
       // standard IP term integral

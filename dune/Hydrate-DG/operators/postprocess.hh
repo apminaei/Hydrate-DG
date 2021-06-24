@@ -239,8 +239,8 @@ public:
 			RF muw = param.water.DynamicViscosity( T*Xc_T, Pw*Xc_P, S );
 			
 			RF tau = param.soil.Tortuosity( porosity );
-			RF DH2O_g	= tau * porosity * Sg * param.mixture.DiffCoeffH2OInGas( T*Xc_T,Pg*Xc_P );
-			RF DCH4_w	= tau * porosity * Sw * param.mixture.DiffCoeffCH4InLiquid( T*Xc_T,Pw*Xc_P );
+			RF DH2O_g	= param.mixture.DiffCoeffH2OInGas( T*Xc_T,Pg*Xc_P );
+			RF DCH4_w	= param.mixture.DiffCoeffCH4InLiquid( T*Xc_T,Pw*Xc_P );
 
 			RF Pwsat = param.water.SaturatedVaporPressure( T*Xc_T,S );
 			RF Hch4 = param.gas.SolubilityCoefficient(T*Xc_T,S);

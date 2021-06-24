@@ -134,7 +134,7 @@ public:
 	double HeatOfDissociation( double gasGenRate, double T ) const {
       double Q_decomp/*[W/m³]*/= - ( gasGenRate  / methane.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
-								 * 6.;
+								 * 1.;
  
       return Q_decomp ;
 	}

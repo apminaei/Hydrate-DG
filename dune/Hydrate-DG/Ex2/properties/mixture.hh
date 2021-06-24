@@ -113,7 +113,7 @@ public:
 		double a1 = 2.26e-9;
 		double a2 = 0.002554;
 
-		D = ( a0 + a1*T + a2/Pg ) ;
+		D = 0.638e-6;//( a0 + a1*T + a2/Pg ) ;
 
 		return D/X_c.dispersivity_c ;
 

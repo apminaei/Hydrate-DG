@@ -3,7 +3,7 @@ class CharacteristicValues{
 public:
 
 	constexpr static double x_c = 1.e2; 
-	constexpr static double t_c = 1.e1 * 12.*3.*24.*36.; //31104 t_end Characteristic value for time
+	constexpr static double t_c = 1.e3 * 12.*3.*24.*36.; //31104 t_end Characteristic value for time
 	constexpr static double thermalconductivity_c = 1.e0;// 
 	constexpr static double T_c = 1.e2;//t_c/(density_c*specificheat_c);//1.e0; // T_ref Characteristic value for Temperature
 	constexpr static double P_c = 1.e6;//viscosity_c * x_c * x_c / (t_c  * permeability_c);//5.e4; // Pentry Characteristic value for Pressure
