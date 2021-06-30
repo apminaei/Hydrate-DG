@@ -42,18 +42,18 @@ public:
 
 		double rho_0 = 1027.0;
 		double T_0 = 10.;
-		double S_0 = 0.03115;
+		double S_0 = 0.035;
 		double alpha_T = -0.15;
-		double alpha_S = 0.78*1e3;//0.96706917808*1e2;//108.524;//
+		double alpha_S = 0.96706917808*1e2;//0.78*1e3;//108.524;//
 		double alpha_P = 0.0045;
 
 // #ifdef STATEINDEPENDENTPROPERTIES
-// 		double T_ref = parameter.RefT();
-// 		double P_ref = parameter.RefP();
-// 		double S_ref = parameter.RefSal();
-// 		T  = T_ref;
-// 		Pw = P_ref;
-// 		S  = S_ref;
+		double T_ref = parameter.ReferenceTemperature();
+		double P_ref = parameter.ReferencePressure();
+		double S_ref = parameter.ReferenceSalinity();
+		T  = T_ref;
+		Pw = P_ref;
+		S  = S_ref;
 // #endif
 
 		rho = rho_0

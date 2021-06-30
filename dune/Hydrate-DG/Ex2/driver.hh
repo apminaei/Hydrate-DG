@@ -89,10 +89,10 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_P;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_X; 
 
@@ -666,34 +666,34 @@ void driver(const GV &gv, // GridView
 	// add data field for all components of the space to the VTK writer
 	// primary variables
 	// Dune::PDELab::addSolutionToVTKWriter(vtkSequenceWriter,gfs,uold,Dune::PDELab::vtk::DefaultFunctionNameGenerator("u"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pg>>(dgf_Pg, "Pg"));
-	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Sw    > >( dgf_Sw    , "Sw"   ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_XH2O  > >( dgf_XH2O  , "XH2O" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_YCH4  > >( dgf_YCH4  , "YCH4" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_rhow  > >( dgf_rhow  , "rhow" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_rhog  > >( dgf_rhog  , "rhog" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_K     > >( dgf_K     , "K"    ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_krw   > >( dgf_krw   , "krw"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_krg   > >( dgf_krg   , "krg"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_muw   > >( dgf_muw   , "muw"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_mug   > >( dgf_mug   , "mug"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_zCH4  > >( dgf_zCH4  , "z"    ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_por   > >( dgf_por   , "porosity"));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_DH2O  > >( dgf_DH2O  , "DH2O" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_DCH4  > >( dgf_DCH4  , "DCH4" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Pwsat > >( dgf_Pwsat , "Pwsat"));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HCH4  > >( dgf_HCH4  , "HCH4" ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_tau   > >( dgf_tau   , "tau"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Peq   > >( dgf_Peq   , "Peq"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HS   > >( dgf_HS   , "HS"  ));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pg>>(dgf_Pg, "Pg"));
+	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Sw    > >( dgf_Sw    , "Sw"   ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_XH2O  > >( dgf_XH2O  , "XH2O" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_YCH4  > >( dgf_YCH4  , "YCH4" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_rhow  > >( dgf_rhow  , "rhow" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_rhog  > >( dgf_rhog  , "rhog" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_K     > >( dgf_K     , "K"    ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_krw   > >( dgf_krw   , "krw"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_krg   > >( dgf_krg   , "krg"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_muw   > >( dgf_muw   , "muw"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_mug   > >( dgf_mug   , "mug"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_zCH4  > >( dgf_zCH4  , "z"    ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_por   > >( dgf_por   , "porosity"));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_DH2O  > >( dgf_DH2O  , "DH2O" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_DCH4  > >( dgf_DCH4  , "DCH4" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Pwsat > >( dgf_Pwsat , "Pwsat"));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HCH4  > >( dgf_HCH4  , "HCH4" ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_tau   > >( dgf_tau   , "tau"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Peq   > >( dgf_Peq   , "Peq"  ));
+	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HS   > >( dgf_HS   , "HS"  ));
 
 
 
@@ -881,7 +881,7 @@ void driver(const GV &gv, // GridView
 		// 								clock_time_elapsed );
 		// }
 
-		postprocess.evalProjectedSolution();
+		postprocess.evalProjectedSolution(); 
 		auto uoldtmp = uold;
 		uoldtmp =0.;
 		uoldtmp.axpy(1,  unew);

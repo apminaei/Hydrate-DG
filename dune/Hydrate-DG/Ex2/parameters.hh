@@ -130,7 +130,7 @@ public:
 		double Pw = Pw_t0 + 1030.21 * 9.81 * (0.-xglobal[1])*X_c.x_c;
 		if (dim == 1)
 		{
-			Pw = Pw_t0 + 1030.21 * 9.81 * (0.-xglobal[0])*X_c.x_c;
+			Pw = Pw_t0 + 1000. * 10. * (0.-xglobal[0])*X_c.x_c;
 		}
 		return Pw; /* Pa */
 	}

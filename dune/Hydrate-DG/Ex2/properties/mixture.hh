@@ -45,23 +45,7 @@ public:
 		double Y_CH4 = (1.-Y_H2O);//std::max(0., std::min(1., ));
 		double X_H2O = Y_H2O * f_H2O;
 		double X_CH4 = (1. - Xc - X_H2O);//std::max(0., std::min(1., ));
-		// if(Y_CH4 < 0.)
-		// Y_CH4 = 0.;
-		// if(Y_CH4 > 1.)
-		// Y_CH4 = 1.;
-		// if(Y_H2O < 0.)
-		// Y_H2O = 0.;
-		// if(Y_H2O > 1.)
-		// Y_H2O = 1.;
-		// if(X_H2O < 0.)
-		// X_H2O = 0.;
-		// if(X_H2O > 1.)
-		// X_H2O = 1.;
-		// if(X_CH4 < 0.)
-		// X_CH4 = 0.;
-		// if(X_CH4 > 1.)
-		// X_CH4 = 1.;
-		// ;
+		
 		
 		std::vector<double> X(Indices::numOfComps,0.);
 		X[Indices::compId_XCH4] = X_CH4;
@@ -77,10 +61,7 @@ public:
 		// NOTE: it is not necessary to check case1,2 for fncs f_CH4 and f_H2O because the cases are already determined within classes CH4 and H2O.
 		double S = Xc * (salt.MolarMass()/water.MolarMass());
 		double Y_CH4 = X_CH4 * (methane.SolubilityCoefficient(T,S)*X_c.P_c) / ( z * Pg ) ;
-		// if(Y_CH4 < 0.)
-		// Y_CH4 = 0.;
-		// if(Y_CH4 > 1.)
-		// Y_CH4 = 1.;
+		
 		return Y_CH4;
 	}
 
@@ -89,10 +70,7 @@ public:
 		// NOTE: it is not necessary to check case1,2 for fncs f_CH4 and f_H2O because the cases are already determined within classes CH4 and H2O.
 		double S = Xc * (salt.MolarMass()/water.MolarMass());
 		double X_H2O = Y_H2O * Pg / (water.SaturatedVaporPressure( T,S )*X_c.P_c);
-		// if(X_H2O < 0.)
-		// X_H2O = 0.;
-		// if(X_H2O > 1.)
-		// X_H2O = 1.;
+		
 		return X_H2O;
 	}
 

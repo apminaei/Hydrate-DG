@@ -30,9 +30,9 @@ public:
   	Parameters<PTree> parameter;
   	Methane<PTree> gas;
 // #ifdef STATEINDEPENDENTPROPERTIES
-//   	BaseEoS<PTree> eos;
+  	BaseEoS<PTree> eos;
 // #elif defined(PENG_ROBINSON_EOS)
-  	PengRobinson<PTree> eos;
+  	// PengRobinson<PTree> eos;
 // #endif
   	Water<PTree> water;
   	Salt salt;
