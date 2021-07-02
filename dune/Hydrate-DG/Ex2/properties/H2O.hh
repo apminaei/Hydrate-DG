@@ -48,12 +48,12 @@ public:
 		double alpha_P = 0.0045;
 
 // #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.ReferenceTemperature();
-		double P_ref = parameter.ReferencePressure();
-		double S_ref = parameter.ReferenceSalinity();
-		T  = T_ref;
-		Pw = P_ref;
-		S  = S_ref;
+		// double T_ref = parameter.ReferenceTemperature();
+		// double P_ref = 10.*parameter.ReferencePressure();
+		// double S_ref = parameter.ReferenceSalinity();
+		// T  = T_ref;
+		// Pw = P_ref;
+		// S  = S_ref;
 // #endif
 
 		rho = rho_0
@@ -62,7 +62,7 @@ public:
 				+ alpha_S*(S-S_0)
 			  );
 
-		return rho/characteristicValue.density_c;
+		return 1030.21/characteristicValue.density_c;
 	}
 
 	double MolarDensity(double T, double Pw, double S)const{

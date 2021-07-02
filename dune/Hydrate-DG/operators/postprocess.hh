@@ -179,6 +179,10 @@ public:
 			// dimension
 			const auto dim = geo.mydimension;
 
+			lfs_pp.bind(*self);
+			lfs_cache_pp.update();
+			u_pp_view.bind(lfs_cache_pp);
+	        std::vector<double> ul_pp(lfs_pp.size());
 			
 	        // cell geometry
 	        auto ref_el = referenceElement(geo);
@@ -186,7 +190,12 @@ public:
 	        auto cell_volume = geo.volume();
 			auto ip_global = geo.global(cell_center_local);
       		auto ip_local = geo.local(ip_global);
-
+			// auto cornervalue = ip_local;
+			// for (int i=0; i <  geo.corners(); i++){
+			// 	cornervalue = geo.corner(i);
+			// 	ip_local = geo.local(cornervalue);
+				
+			
 	        RF Pw=0.;
 	        evaluation_Pw->evalFunction(cell, ip_local, &Pw);
 	        RF Sg=0.;
@@ -201,14 +210,10 @@ public:
 	        evaluation_XCH4->evalFunction(cell,ip_local,&XCH4);
 	        RF XC=0.;
 	        evaluation_XC->evalFunction(cell,ip_local,&XC);
-			
-			//   std::cout << Sg << "   "  << Sh << "   " << T<< std::endl;
-			//   exit(0);
-
-	        lfs_pp.bind(*self);
-			lfs_cache_pp.update();
-			u_pp_view.bind(lfs_cache_pp);
-	        std::vector<double> ul_pp(lfs_pp.size());
+			// std::cout << "lfs_pp_Pg.localIndex(i)  ----------------   "<< std::endl;
+			// std::cout << i << "  " << Pw << std::endl;
+			// std::cout << "cornervalue  ----------------   "<< std::endl;
+	        
 	        for(int i = 0. ; i < lfs_pp.size() ; i++){
 	        	ul_pp[i] = 0.;
 	        }
@@ -280,13 +285,15 @@ public:
 	        ul_pp[lfs_pp_HS.localIndex(0)]   = HS ;
 
 			
-
 			u_pp_view.write( ul_pp );
 			u_pp_view.commit();
 			u_pp_view.unbind();
+			// }
+			// exit(0);
+			
 
 		}//END:iterate over each volume
-
+		
 	}
 	void evalProjectedSolution() {
 

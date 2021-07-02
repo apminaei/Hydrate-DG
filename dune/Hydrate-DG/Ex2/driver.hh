@@ -102,9 +102,9 @@ void driver(const GV &gv, // GridView
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_C;  
 
-	// typedef Dune::PDELab::QkLocalFiniteElementMap<GV, Coord, Real, degree_pen, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_pen; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 0, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP; 
 
-	typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_PP;
+	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_PP;
 	
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_Sg> FEM_Sg;
 	
@@ -126,7 +126,7 @@ void driver(const GV &gv, // GridView
 	FEM_C fem_c;
 	FEM_Sh fem_Sh;
 	
-	FEM_PP fem_PP(gv);
+	FEM_PP fem_PP;//(gv)
 
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
