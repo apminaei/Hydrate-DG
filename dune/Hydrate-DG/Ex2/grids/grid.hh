@@ -40,7 +40,7 @@ public:
 	 * 
 	 */
 
-	const static int dimension = 1;//ptree.get("grid.worlddim",(int)2);
+	const static int dimension = 2;//ptree.get("grid.worlddim",(int)2);
 	constexpr static double origin = 0.;
 
 	const double Z_length = ptree.get("grid.LZ",(double)1.)/Xc.x_c; //m 

@@ -238,9 +238,6 @@ public:
     const auto &lfsv_XC = lfsv.template child<Indices::PVId_C>();
     const auto &lfsu_XC = lfsu.template child<Indices::PVId_C>();
 
-    // //Salt (diss.) mole fraction
-    // const auto &lfsv_pen = lfsv.template child<Indices::PVId_pen>();
-    // const auto &lfsu_pen = lfsu.template child<Indices::PVId_pen>();
 
 
     // define types
@@ -260,11 +257,7 @@ public:
                                lfsv_Sg.finiteElement().localBasis().order());
     const int order_t = std::max(lfsu_T.finiteElement().localBasis().order(),
                                lfsv_T.finiteElement().localBasis().order());
-    // const int order_pen = std::max(lfsu_pen.finiteElement().localBasis().order(),
-    //                            lfsv_pen.finiteElement().localBasis().order());
 
-    // std::cout << order_p << "  " << order_x << "  " << order_s << "  " << order_t << std::endl;
-    // exit(0);
     // Reference to cell
 	  const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
@@ -301,7 +294,6 @@ public:
     Dune::FieldVector<RF, dim> gradu_YH2O(0.0);
     Dune::FieldVector<RF, dim> gradu_XC(0.0);
     Dune::FieldVector<RF, dim> Kg(0.0);
-    // auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */
 
 
     // Transformation matrix
@@ -326,8 +318,6 @@ public:
       auto &psi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
       auto &phi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
       auto &psi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
-      // auto &phi_pen = cache_pen[order_pen].evaluateFunction(ip.position(), lfsu_pen.finiteElement().localBasis());
-      // auto &psi_pen = cache_pen[order_pen].evaluateFunction(ip.position(), lfsv_pen.finiteElement().localBasis());
 
       auto ip_global = geo.global(ip.position());
       auto ip_local = geo.local(ip_global);
@@ -370,16 +360,7 @@ public:
       for (size_type i = 0; i < lfsu_XC.size(); i++)
         XC += x(lfsu_XC, i) * phi_XC[i];
 
-      // // evaluate XC
-      // RF pen = 0.0;
-      // for (size_type i = 0; i < lfsu_pen.size(); i++)
-      //   pen += x(lfsu_pen, i) * phi_pen[i];
-
-      // Sg = std::max(0., Sg);
-			// Sh = std::max(0., Sh);
-      RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
-
-
+      RF Sw = (1. - Sg - Sh);
 
 
       // evaluate Pg
@@ -547,17 +528,17 @@ public:
       auto kth_eff = (1. - por) * kth_s + por * (Sg * kth_g + Sw * kth_w + Sh * kth_h); /* ndim */
 
       auto gradu_Pg = gradu_Pw  - coeff_grad_Sw * gradu_Sg + (coeff_grad_Sh ) * gradu_Sh;
-      // auto Kgradu_Pg = Kgradu_Pw - coeff_grad_Sw * Kgradu_Sg + (coeff_grad_Sh - coeff_grad_Sw) * Kgradu_Sh;
+      auto Kgradu_Pg = Kgradu_Pw - coeff_grad_Sw * Kgradu_Sg + (coeff_grad_Sh ) * Kgradu_Sh;
 
 
 
-      auto convectiveflux_CH4_g = rho_g * (1. - YH2O) * krN * permeability * ( Xc_P/Xc_x * gradu_Pg - Xc_rho * rho_g * gravity); //(1. - YH2O)
-      auto convectiveflux_CH4_w = rho_w * (XCH4) * krW * permeability * ( Xc_P/Xc_x * gradu_Pw - Xc_rho * rho_w * gravity);
-      auto convectiveflux_H2O_g = rho_g * YH2O * krN * permeability * ( Xc_P/Xc_x * gradu_Pg - Xc_rho * rho_g * gravity);
-      auto convectiveflux_H2O_w = rho_w * (1. - XC - XCH4) * krW * permeability * ( Xc_P/Xc_x * gradu_Pw - Xc_rho * rho_w * gravity);
-      auto convectiveflux_SALT_w = rho_w * (XC) * krW * permeability * ( Xc_P/Xc_x * gradu_Pw - Xc_rho * rho_w * gravity);
-      auto convectiveflux_Heat_w = rho_w * Cp_w * (T - T_ref) * krW * permeability * ( Xc_P/Xc_x * gradu_Pw - Xc_rho * rho_w * gravity);
-      auto convectiveflux_Heat_g = rho_g * Cp_g * (T - T_ref) * krN * permeability * ( Xc_P/Xc_x * gradu_Pg - Xc_rho * rho_g * gravity);
+      auto convectiveflux_CH4_g = rho_g * (1. - YH2O) * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg); //(1. - YH2O)
+      auto convectiveflux_CH4_w = rho_w * (XCH4) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
+      auto convectiveflux_H2O_g = rho_g * YH2O * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg);
+      auto convectiveflux_H2O_w = rho_w * (1. - XC - XCH4) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
+      auto convectiveflux_SALT_w = rho_w * (XC) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
+      auto convectiveflux_Heat_w = rho_w * Cp_w * (T - T_ref) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
+      auto convectiveflux_Heat_g = rho_g * Cp_g * (T - T_ref) * krN *( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg);
 
       auto j_H2O_g = rho_g * Sg * DH2O_g * gradu_YH2O;
       auto j_CH4_w = rho_w * Sw * DCH4_w * gradu_XCH4;
@@ -576,18 +557,8 @@ public:
 
       
       RF factor = ip.weight() * geo.integrationElement(ip.position());
-
-    //   if ((*time) > 1.e9 && ip_global[0]>=-4. ){//&& ip_global[1]<=-397.
-
-    //   std::cout << ip_global << "   " << convectiveflux_CH4 << "  " << diffusiveflux_CH4 << "  "<< convectiveflux_SALT_w << "  " <<  diffusiveflux_SALT<< std::endl;
-    //   std::cout << gradu_Pw << "   " << gradu_Pg << "  " << convectiveflux_Heat << "  "<<diffusiveflux_Heat << std::endl;
-    //   std::cout << q_g << "   " << q_s << "  " << q_w << "  "<< q_h << "  " << rho_w << "  " << rho_g<< std::endl;
-    //   std::cout << Sg << "   " << Sh << "  " << XC << "  "<< Pg   << "  " << Pg_dim << std::endl;
-    //   std::cout << convectiveflux_CH4_w << "   " << convectiveflux_CH4_g << "  " << convectiveflux_H2O_w << "  "<<convectiveflux_H2O_g <<  std::endl;
-    //   exit(0);
-    //  }
+      double tmp = 0.;
       // integrate (A grad u - bu)*grad phi_i + a*u*phi_i
-
       for (size_type i = 0; i < lfsv_Sg.size(); i++)
       {
         r.accumulate(lfsv_Sg, i, (( Xc_conv_m * convectiveflux_CH4
@@ -632,13 +603,7 @@ public:
 			// 	r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
 			// }
 
-      // Integrals regarding the NCP2
-			// RF max3 = std::max(0., ( pen - XCH4 ));
-			// for (size_type i=0; i<lfsv_pen.size(); i++){
-			// 	r.accumulate(lfsv_pen,i,((pen - max3) * psi_pen[i]  *factor));
-			// }
-
-      double tmp = 0.;
+      
       // for (size_type i = 0; i < lfsv_XCH4.size(); i++)
       // {
       //   auto &phi_Pw0 = cache_Pw[order_p].evaluateFunction(geo.local(geo.corner(i)), lfsu_Pw.finiteElement().localBasis());
@@ -715,8 +680,7 @@ public:
       // }
 
       // NCP -> water phase
-			// double tmp = 0.;
-
+			tmp = 0.;
 			//auto XH2O_alg = property.mixture.XH2O(YH2O,T_dim,Pg_dim,S);
 			if( Sw - ( 1. - XCH4 - XH2O - XC ) > eps_ap ){//active set.std::max(0., std::min(1. ,  )
 				tmp +=  1. - XCH4 - XH2O - XC ;//Active => phase is present => summation condition holds
@@ -802,11 +766,6 @@ public:
     const auto &lfsv_XC_n = lfsv_n.template child<Indices::PVId_C>();
     const auto &lfsu_XC_n = lfsu_n.template child<Indices::PVId_C>();
 
-    // //Salt mole fraction
-    // const auto &lfsv_pen_s = lfsv_s.template child<Indices::PVId_pen>();
-    // const auto &lfsu_pen_s = lfsu_s.template child<Indices::PVId_pen>();
-    // const auto &lfsv_pen_n = lfsv_n.template child<Indices::PVId_pen>();
-    // const auto &lfsu_pen_n = lfsu_n.template child<Indices::PVId_pen>();
 
     // define types
     using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
@@ -814,7 +773,7 @@ public:
     using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
-    const int dim= IG::Entity::dimension;
+    const int dim= IG::Entity::dimension; // = GV::dimension
     const int dimension = GV::dimension;
 
     const int order_p = std::max(lfsu_Pw_s.finiteElement().localBasis().order(),
@@ -825,8 +784,6 @@ public:
                                lfsv_Sg_s.finiteElement().localBasis().order());
     const int order_t = std::max(lfsu_T_s.finiteElement().localBasis().order(),
                                lfsv_T_s.finiteElement().localBasis().order());
-    // const int order_pen = std::max(lfsu_pen_s.finiteElement().localBasis().order(),
-    //                            lfsv_pen_s.finiteElement().localBasis().order());
 
 
     // References to inside and outside cells
@@ -885,8 +842,7 @@ public:
     auto penalty_factor_x = (alpha_x / h_F) * harmonic_average * degree * (degree + dim - 1);
     auto penalty_factor_y = (alpha_y / h_F) * harmonic_average * degree * (degree + dim - 1);
 
-    // std::cout << geo_inside.volume() << "  " <<  geo_outside.volume()<< "  " << geo.volume() << "  "<< penalty_factor_g << std::endl;
-    // exit(0);
+    
 
     // Initialize vectors outside for loop
     std::vector<Dune::FieldVector<RF, dim>> gradphi_Pw_s(lfsu_Pw_s.size());
@@ -947,11 +903,12 @@ public:
     Dune::FieldVector<RF, dim> Kg_s(0.0);
     Dune::FieldVector<RF, dim> Kg_n(0.0);
 
+    
     // Transformation matrix
     typename IG::Entity::Geometry::JacobianInverseTransposed jac;
 
     // loop over quadrature points
-    auto intorder1 = 1;//intorder;
+    auto intorder1 = intorder;
     for (const auto &ip : quadratureRule(geo, intorder1))
     {
       // exact normal
@@ -979,8 +936,6 @@ public:
       auto &psi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
       auto &phi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
       auto &psi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
-      // auto &phi_pen_s = cache_pen[order_pen].evaluateFunction(iplocal_s, lfsu_pen_s.finiteElement().localBasis());
-      // auto &psi_pen_s = cache_pen[order_pen].evaluateFunction(iplocal_s, lfsv_pen_s.finiteElement().localBasis());
 
       auto &phi_Pw_n = cache_Pw[order_p].evaluateFunction(iplocal_n, lfsu_Pw_n.finiteElement().localBasis());
       auto &psi_Pw_n = cache_Pw[order_p].evaluateFunction(iplocal_n, lfsv_Pw_n.finiteElement().localBasis());
@@ -996,8 +951,6 @@ public:
       auto &psi_YH2O_n = cache_YH2O[order_x].evaluateFunction(iplocal_n, lfsv_YH2O_n.finiteElement().localBasis());
       auto &phi_XC_n = cache_XC[order_x].evaluateFunction(iplocal_n, lfsu_XC_n.finiteElement().localBasis());
       auto &psi_XC_n = cache_XC[order_x].evaluateFunction(iplocal_n, lfsv_XC_n.finiteElement().localBasis());
-      // auto &phi_pen_n = cache_pen[order_pen].evaluateFunction(iplocal_n, lfsu_pen_n.finiteElement().localBasis());
-      // auto &psi_pen_n = cache_pen[order_pen].evaluateFunction(iplocal_n, lfsv_pen_n.finiteElement().localBasis());
 
 
 
@@ -1057,20 +1010,8 @@ public:
       for (size_type i = 0; i < lfsu_XC_n.size(); i++)
         XC_n += x_n(lfsu_XC_n, i) * phi_XC_n[i];
 
-      // evaluate XC
-      // RF pen_s = 0.0;
-      // for (size_type i = 0; i < lfsu_pen_s.size(); i++)
-      //   pen_s += x_s(lfsu_pen_s, i) * phi_pen_s[i];
-      // RF pen_n = 0.0;
-      // for (size_type i = 0; i < lfsu_pen_n.size(); i++)
-      //   pen_n += x_n(lfsu_pen_n, i) * phi_pen_n[i];
-
-      // Sg_s = std::max(0., Sg_s);
-			// Sh_s = std::max(0., Sh_s);
-      // Sg_n = std::max(0., Sg_n);
-			// Sh_n = std::max(0., Sh_n);
-      RF Sw_s = (1. - Sg_s - Sh_s);//std::max(0., std::min(1.,  ));
-      RF Sw_n = (1. - Sg_n - Sh_n);//std::max(0., std::min(1., ));
+      RF Sw_s = (1. - Sg_s - Sh_s);
+      RF Sw_n = (1. - Sg_n - Sh_n);
 
 
       // evaluate Pw
@@ -1269,6 +1210,8 @@ public:
       // // K_s[1][1] = 2. * (K_s[1][1]*K_n[1][1])/(K_s[1][1]+K_n[1][1]);//
       // permeability_n = permeability_s;//
 
+      K_s.mv(gravity, Kg_s);
+      K_n.mv(gravity, Kg_n);
 
       // compute K * gradient of Pw
       K_s.mv(gradu_Pw_s, Kgradu_Pw_s);
@@ -1314,9 +1257,7 @@ public:
       auto Kgradu_Pg_n = Kgradu_Pw_n - coeff_grad_Sw_n * Kgradu_Sg_n + (coeff_grad_Sh_n ) * Kgradu_Sh_n;
       auto gradu_Pg_n = gradu_Pw_n - coeff_grad_Sw_n * gradu_Sg_n + (coeff_grad_Sh_n ) * gradu_Sh_n;
 
-      // auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */;
-      // K_s.mv(gravity, Kg_s);
-      // K_n.mv(gravity, Kg_n);
+      
 
       double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
       double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
@@ -1435,17 +1376,17 @@ public:
       auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
 
 			for(int i = 0;i<dim;i++){
-        v_g[i] = -(omega_s * krN_s * permeability_s * ( Xc_P/Xc_x * gradu_Pg_s[i] - Xc_rho * rho_g_s * gravity[i])
-                  +omega_n * krN_n * permeability_n * ( Xc_P/Xc_x * gradu_Pg_n[i] - Xc_rho *  rho_g_n * gravity[i]));
+        v_g[i] = -(omega_s * krN_s * ( Xc_P/Xc_x * Kgradu_Pg_s[i] - Xc_rho * rho_g_s * Kg_s[i])
+                  +omega_n * krN_n * ( Xc_P/Xc_x * Kgradu_Pg_n[i] - Xc_rho *  rho_g_n * Kg_n[i]));
 
-        v_w[i] = -(omega_s * krW_s * permeability_s * ( Xc_P/Xc_x * gradu_Pw_s[i] - Xc_rho *  rho_w_s * gravity[i])
-                  +omega_n * krW_n * permeability_n * ( Xc_P/Xc_x * gradu_Pw_n[i] - Xc_rho *  rho_w_n * gravity[i]));
+        v_w[i] = -(omega_s * krW_s * ( Xc_P/Xc_x * Kgradu_Pw_s[i] - Xc_rho *  rho_w_s * Kg_s[i])
+                  +omega_n * krW_n * ( Xc_P/Xc_x * Kgradu_Pw_n[i] - Xc_rho *  rho_w_n * Kg_n[i]));
       }
-      auto velocity_g_s = krN_s * permeability_s * ( Xc_P/Xc_x * gradu_Pg_s - Xc_rho * rho_g_s * gravity);
-      auto velocity_w_s = krW_s * permeability_s * ( Xc_P/Xc_x * gradu_Pw_s - Xc_rho * rho_w_s * gravity);
+      auto velocity_g_s = krN_s * ( Xc_P/Xc_x * Kgradu_Pg_s - Xc_rho * rho_g_s * Kg_s);
+      auto velocity_w_s = krW_s * ( Xc_P/Xc_x * Kgradu_Pw_s - Xc_rho * rho_w_s * Kg_s);
 
-      auto velocity_g_n = krN_n * permeability_n * ( Xc_P/Xc_x * gradu_Pg_n - Xc_rho * rho_g_n * gravity);
-      auto velocity_w_n = krW_n * permeability_n * ( Xc_P/Xc_x * gradu_Pw_n - Xc_rho * rho_w_n * gravity);
+      auto velocity_g_n = krN_n * ( Xc_P/Xc_x * Kgradu_Pg_n - Xc_rho * rho_g_n * Kg_n);
+      auto velocity_w_n = krW_n * ( Xc_P/Xc_x * Kgradu_Pw_n - Xc_rho * rho_w_n * Kg_n);
 
       double normalflux_g = (v_g ) * n_F_local;
       double normalflux_w = (v_w) * n_F_local;
@@ -1723,7 +1664,6 @@ public:
 
 
       // double term_penalty_sh = penalty_factor_s * (Sh_s - Sh_n);
-      // // standard IP term integral
       // for (size_type i = 0; i < lfsv_Sh_s.size(); i++)
       // {
       //   r_s.accumulate(lfsv_Sh_s, i, term_penalty_sh * psi_Sh_s[i] * factor);
@@ -1734,8 +1674,7 @@ public:
       // }
 
 
-      // double term_penalty_XCH4 =   penalty_factor_g *  (XCH4_s-XCH4_n);//(diffusiveflux_CH4_n - diffusiveflux_CH4_s); // 0.5 * (rho_w_s * Sw_s * DCH4_w_s + rho_w_n * Sw_n * DCH4_w_n )*
-      // // standard IP term integral
+      // double term_penalty_XCH4 =   penalty_factor_g *  (XCH4_s-XCH4_n);
       // for (size_type i = 0; i < lfsv_XCH4_s.size(); i++)
       // {
       //   r_s.accumulate(lfsv_XCH4_s, i, term_penalty_XCH4 * psi_XCH4_s[i] * factor);
@@ -1745,8 +1684,7 @@ public:
       //   r_n.accumulate(lfsv_XCH4_n, i,   term_penalty_XCH4 * -psi_XCH4_n[i] * factor);
       // }
 
-      // double term_penalty_YH2O =  penalty_factor_y *  (YH2O_s-YH2O_n);//(diffusiveflux_H2O_n - diffusiveflux_H2O_s); // 0.5 * (rho_g_s * Sg_s * DH2O_g_s + rho_g_n * Sg_n * DH2O_g_n)*
-      // // standard IP term integral
+      // double term_penalty_YH2O =  penalty_factor_y *  (YH2O_s-YH2O_n);
       // for (size_type i = 0; i < lfsv_YH2O_s.size(); i++)
       // {
       //   r_s.accumulate(lfsv_YH2O_s, i,  term_penalty_YH2O * psi_YH2O_s[i] * factor);
@@ -1832,7 +1770,6 @@ public:
         Traits::LocalBasisType::Traits::RangeFieldType;
     using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
-    // auto T_ref = property.parameter.ReferenceTemperature()/Xc_T;
     // dimensions
     const int dimension = GV::dimension;
     const int dim = IG::Entity::dimension;
@@ -1922,7 +1859,7 @@ public:
 
     auto intorder1 = 1;//intorder;
     // loop over quadrature points
-    for (const auto &ip : quadratureRule(geo, intorder1))
+    for (const auto &ip : quadratureRule(geo, intorder))
     {
       // integration factor
       auto factor = ip.weight() * geo.integrationElement(ip.position());
