@@ -90,7 +90,6 @@ public:
 				prop[n_mat][7] = ptree.get(name+".beta",(double)1.);
 			}
 			
-
 			//reference state
 			ref_salinity = ptree.get("reference_state.salinity",(double)0.);
 			ref_saltconcentration = ref_salinity * (18.0/58.4); /*MolarMass_H2O/MolarMass_salt*/

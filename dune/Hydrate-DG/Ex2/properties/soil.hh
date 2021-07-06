@@ -22,10 +22,12 @@ public:
 		Dune::FieldVector<double,dim> xglobal = element.geometry().global(xlocal);
 
 		auto prop_L = parameter.layer_properties();
-
-		double por = prop_L[0][0];
-		if( parameter.mesh.isLenz(xglobal) and parameter.num_materials() > 1){
+		double por = 0.;
+		
+		por = prop_L[0][0];
+		if( parameter.mesh.isLenz(xglobal) && parameter.num_materials() > 1){
 			por = prop_L[1][0];
+			
 		}
 		return por;
 	}
@@ -38,8 +40,9 @@ public:
 		
 		auto prop_L = parameter.layer_properties();
 		double K = prop_L[0][1];/*m^2*/
-		if( parameter.mesh.isLenz(xglobal) and parameter.num_materials() > 1){
-			K = prop_L[1][1];
+		
+		if( parameter.mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+			K = prop_L[1][1];		
 		}
 
 		return K/characteristicValue.permeability_c; /*ndim*/
@@ -52,6 +55,7 @@ public:
 	 const Dune::FieldVector<double,dim>& xlocal) const {
 
 		double K_xx = SedimentPermeability(element,xlocal);
+		
 		double K_yy = K_xx;
 		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor;
 		

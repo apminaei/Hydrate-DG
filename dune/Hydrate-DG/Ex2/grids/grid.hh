@@ -191,29 +191,28 @@ public:
 	bool isGHSZ( Dune::FieldVector< double, dimension > globalPos ) const{
 		
 		if( dimension == 1 ){
-			if((Z_GHSZ_bottom ) <= globalPos[0] and globalPos[0]<= (Z_GHSZ_top ))
+			if((Z_GHSZ_bottom ) <= globalPos[0] && globalPos[0]<= (Z_GHSZ_top ))
 				return true;
 			else
 				return false;
 		}
 		else if( dimension == 2 ){
-			if(Z_GHSZ_bottom <= globalPos[1] and globalPos[1] <= Z_GHSZ_top)
+			if(Z_GHSZ_bottom <= globalPos[1] && globalPos[1] <= Z_GHSZ_top)
 				return true;
 			else
 				return false;
 		}
 		else if( dimension == 3 ){
-			if((Z_GHSZ_bottom - eps) < globalPos[2] and globalPos[2]< (Z_GHSZ_top + eps))
+			if((Z_GHSZ_bottom - eps) < globalPos[2] && globalPos[2]< (Z_GHSZ_top + eps))
 				return true;
 			else
 				return false;
 		}
 	}
-
+		// 
 	//##################################################################################
 	bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( Xmin_lenz  <= globalPos[0]  and globalPos[0] <= Xmax_lenz  
-			and Zmin_lenz <= globalPos[1] and globalPos[1]<= Zmax_lenz  ){
+		if( Xmin_lenz  <= globalPos[0] && globalPos[0] <= Xmax_lenz && Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz   ){
 			return true;
 		}
 		else
@@ -221,7 +220,7 @@ public:
 	}
 	//##################################################################################
 	bool isWell( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( (globalPos[0] < origin + eps) and (globalPos[1] > Z_GHSZ_bottom - eps)  ){
+		if( (globalPos[0] < origin + eps) && (globalPos[1] > Z_GHSZ_bottom - eps)  ){
 			return true;
 		}
 		else

@@ -70,7 +70,7 @@ public:
 		// Sutherland Correlation:
 		// ref: http://portal.tpu.ru/SHARED/n/NATASHA/Material/Tab3/Glava_1.pdf
 		double C = 162; // empirical constant
-		double mu_0 = 0.;//1.0707e-5;
+		double mu_0 = 0.;//1.0707e-5;  
 		// // ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
 		// mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
 		// 									+ 4.1719e-20 * Pg * Pg

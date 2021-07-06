@@ -529,9 +529,10 @@ public:
 
       auto gradu_Pg = gradu_Pw  - coeff_grad_Sw * gradu_Sg + (coeff_grad_Sh ) * gradu_Sh;
       auto Kgradu_Pg = Kgradu_Pw - coeff_grad_Sw * Kgradu_Sg + (coeff_grad_Sh ) * Kgradu_Sh;
-
-
-
+      // if( !property.mesh.isLenz(ip_global) ){
+      //   std::cout << K << "  " << ip_global << std::endl;
+      //   exit(0)	;
+      // }
       auto convectiveflux_CH4_g = rho_g * (1. - YH2O) * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg); //(1. - YH2O)
       auto convectiveflux_CH4_w = rho_w * (XCH4) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
       auto convectiveflux_H2O_g = rho_g * YH2O * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg);
@@ -909,6 +910,8 @@ public:
 
     // loop over quadrature points
     auto intorder1 = intorder;
+    if( dim == 1 )
+      intorder1 = 1;
     for (const auto &ip : quadratureRule(geo, intorder1))
     {
       // exact normal
@@ -1850,6 +1853,17 @@ public:
     Dune::FieldVector<RF, dim> gradu_YH2O_s(0.0);
     Dune::FieldVector<RF, dim> gradu_XC_s(0.0);
 
+    Dune::FieldVector<RF, dim> gradu_Pw_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Pw_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sg_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sg_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_Sh_n(0.0);
+    Dune::FieldVector<RF, dim> Kgradu_Sh_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_T_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_XCH4_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_YH2O_n(0.0);
+    Dune::FieldVector<RF, dim> gradu_XC_n(0.0);
+
     Dune::FieldVector<RF, dim> v_g(0.0);
     Dune::FieldVector<RF, dim> v_w(0.0);
     Dune::FieldVector<RF, dim> Kg(0.0);
@@ -1857,9 +1871,11 @@ public:
     // Transformation matrix
     typename IG::Entity::Geometry::JacobianInverseTransposed jac;
 
-    auto intorder1 = 1;//intorder;
+    auto intorder1 = intorder;
+    if( dim == 1 )
+      intorder1 = 1;
     // loop over quadrature points
-    for (const auto &ip : quadratureRule(geo, intorder))
+    for (const auto &ip : quadratureRule(geo, intorder1))
     {
       // integration factor
       auto factor = ip.weight() * geo.integrationElement(ip.position());
@@ -1889,7 +1905,6 @@ public:
       auto &psi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsv_XCH4_s.finiteElement().localBasis());
       auto &psi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsv_YH2O_s.finiteElement().localBasis());
       auto &psi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsv_XC_s.finiteElement().localBasis());
-      // auto &psi_pen_s = cache_pen[order_pen].evaluateFunction(iplocal_s, lfsv_pen_s.finiteElement().localBasis());
 
       auto &phi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
       auto &phi_Sg_s = cache_Sg[order_s].evaluateFunction(iplocal_s, lfsu_Sg_s.finiteElement().localBasis());
@@ -1898,7 +1913,6 @@ public:
       auto &phi_XCH4_s = cache_XCH4[order_x].evaluateFunction(iplocal_s, lfsu_XCH4_s.finiteElement().localBasis());
       auto &phi_YH2O_s = cache_YH2O[order_x].evaluateFunction(iplocal_s, lfsu_YH2O_s.finiteElement().localBasis());
       auto &phi_XC_s = cache_XC[order_x].evaluateFunction(iplocal_s, lfsu_XC_s.finiteElement().localBasis());
-      // auto &phi_pen_s = cache_pen[order_pen].evaluateFunction(iplocal_s, lfsu_pen_s.finiteElement().localBasis());
 
       // evaluate Pw
       RF Pw_s = 0.0;
@@ -1925,24 +1939,22 @@ public:
       RF Sh_s = 0.0;
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i];
-      // Sh_s = std::max(0., Sh_s);
-      RF Sh_n = Sh_s;//std::max(0., std::min(1., ));
+      RF Sh_n = Sh_s;
 
       // evaluate Sg
       RF Sg_s = 0.0;
       for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
         Sg_s += x(lfsu_Sg_s, i) * phi_Sg_s[i];
-      // Sg_s = std::max(0., Sg_s);
 
       RF Sg_n = Sg_s ;
       if (bctype[Indices::PVId_Sg] == Indices::BCId_dirichlet)
       {
-        Sg_n = bcvalue[Indices::PVId_Sg];//std::max(0., std::min(1., )) ;
+        Sg_n = bcvalue[Indices::PVId_Sg];
       }
 
 
-      RF Sw_s = (1. - Sg_s - Sh_s);//std::max(0., std::min(1., ));
-      RF Sw_n = (1. - Sg_n - Sh_n);//std::max(0., std::min(1., ));
+      RF Sw_s = (1. - Sg_s - Sh_s);
+      RF Sw_n = (1. - Sg_n - Sh_n);
 
       // evaluate XC
       RF XC_s = 0.0;
@@ -1952,19 +1964,18 @@ public:
       RF XC_n = XC_s ;
       if (bctype[Indices::PVId_C] == Indices::BCId_dirichlet)
       {
-        XC_n = bcvalue[Indices::PVId_C];//std::max(0., std::min(1., )) ;
+        XC_n = bcvalue[Indices::PVId_C];
       }
 
       // evaluate XCH4
       RF XCH4_s = 0.0;
       for (size_type i = 0; i < lfsu_XCH4_s.size(); i++)
         XCH4_s += x(lfsu_XCH4_s, i) * phi_XCH4_s[i];
-      // XCH4_s = std::max(0., std::min(1., XCH4_s));
-      RF XCH4_n = XCH4_s;//std::max(0., std::min(1., ));
+      RF XCH4_n = XCH4_s;
 
       if (bctype[Indices::PVId_XCH4] == Indices::BCId_dirichlet)
       {
-        XCH4_n = bcvalue[Indices::PVId_XCH4];//std::max(0., std::min(1., )) ;
+        XCH4_n = bcvalue[Indices::PVId_XCH4];
       }
 
       // evaluate YH2O
@@ -1972,10 +1983,10 @@ public:
       for (size_type i = 0; i < lfsu_YH2O_s.size(); i++)
         YH2O_s += x(lfsu_YH2O_s, i) * phi_YH2O_s[i];
 
-      RF YH2O_n = YH2O_s;//std::max(0., std::min(1., ));
+      RF YH2O_n = YH2O_s;
       if (bctype[Indices::PVId_YH2O] == Indices::BCId_dirichlet)
       {
-        YH2O_n = bcvalue[Indices::PVId_YH2O];//std::max(0., std::min(1., )) ;
+        YH2O_n = bcvalue[Indices::PVId_YH2O];
       }
 
        // evaluate Pg
@@ -2013,9 +2024,7 @@ public:
       auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
 
 
-
-      // auto gravity = property.parameter.g() / Xc_grav  ; /* ndim */
-      auto K = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
+      auto K = property.soil.SedimentPermeabilityTensor(cell_inside,  iplocal_s)
       * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
       auto permeability = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
       * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
@@ -2150,45 +2159,70 @@ public:
       gradu_Pw_s = 0.0;
       for (size_type i = 0; i < lfsu_Pw_s.size(); i++)
         gradu_Pw_s.axpy(x(lfsu_Pw_s, i), gradphi_Pw_s[i]);
+      gradu_Pw_n = gradu_Pw_s;
 
       // compute gradient of Sg
       gradu_Sg_s = 0.0;
       for (size_type i = 0; i < lfsu_Sg_s.size(); i++)
         gradu_Sg_s.axpy(x(lfsu_Sg_s, i), gradphi_Sg_s[i]);
-
+      gradu_Sg_n = gradu_Sg_s;
 
       // compute gradient of Sh
       gradu_Sh_s = 0.0;
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         gradu_Sh_s.axpy(x(lfsu_Sh_s, i), gradphi_Sh_s[i]);
+      gradu_Sh_n = gradu_Sh_s;
 
       // compute gradient of T
       gradu_T_s = 0.0;
       for (size_type i = 0; i < lfsu_T_s.size(); i++)
         gradu_T_s.axpy(x(lfsu_T_s, i), gradphi_T_s[i]);
+      gradu_T_n = gradu_T_s;
 
       // compute gradient of XCH4
       gradu_XCH4_s = 0.0;
       for (size_type i = 0; i < lfsu_XCH4_s.size(); i++)
         gradu_XCH4_s.axpy(x(lfsu_XCH4_s, i), gradphi_XCH4_s[i]);
+      gradu_XCH4_n = gradu_XCH4_s;
 
       // compute gradient of YH2O
       gradu_YH2O_s = 0.0;
       for (size_type i = 0; i < lfsu_YH2O_s.size(); i++)
         gradu_YH2O_s.axpy(x(lfsu_YH2O_s, i), gradphi_YH2O_s[i]);
+      gradu_YH2O_n = gradu_YH2O_s;
 
       // compute gradient of XC
       gradu_XC_s = 0.0;
       for (size_type i = 0; i < lfsu_XC_s.size(); i++)
         gradu_XC_s.axpy(x(lfsu_XC_s, i), gradphi_XC_s[i]);
+      gradu_XC_n = gradu_XC_s;
+
+      K.mv(gravity, Kg);
+
+      // compute K * gradient of Pw
+      K.mv(gradu_Pw_s, Kgradu_Pw_s);
+      K.mv(gradu_Pw_n, Kgradu_Pw_n);
+
+      // compute K * gradient of Sg
+      K.mv(gradu_Sg_s, Kgradu_Sg_s);
+      K.mv(gradu_Sg_n, Kgradu_Sg_n);
+
+      // compute K * gradient of Sh
+      K.mv(gradu_Sh_s, Kgradu_Sh_s);
+      K.mv(gradu_Sh_n, Kgradu_Sh_n);
+
+      Dune::FieldVector<RF, dim> Kn_F_s;
+      K.mv(n_F_local, Kn_F_s);
+      Dune::FieldVector<RF, dim> Kn_F_n;
+      K.mv(n_F_local, Kn_F_n);
 
 	    // evaluate normal flux of Pw i.e. grad_Pw.n
       RF grad_Pw_s = gradu_Pw_s * n_F_local;
       RF grad_Pw_n = grad_Pw_s;
-      if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
-      {
-        grad_Pw_n = bcvalue[Indices::PVId_Pw];//(-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;//
-      }
+      // if (bctype[Indices::PVId_Pw] == Indices::BCId_neumann)
+      // {
+      //   grad_Pw_n = bcvalue[Indices::PVId_Pw];//(-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;//
+      // }
       // if (veltype[Indices::BCId_water] == Indices::BCId_neumann)
       // {
       //   grad_Pw_n = (-1./(K*krW_n)) * velvalue[Indices::BCId_water] + rho_w_n * normalgravity;//
@@ -2242,6 +2276,10 @@ public:
         grad_XC_n = velvalue[Indices::BCId_salt];
       }
 
+      auto gradu_Pg_s = gradu_Pw_s - coeff_grad_Sw_s * gradu_Sg_s + (coeff_grad_Sh_s ) * gradu_Sh_s;
+      auto gradu_Pg_n = gradu_Pw_n - coeff_grad_Sw_n * gradu_Sg_n + (coeff_grad_Sh_n) * gradu_Sh_n;
+      auto Kgradu_Pg_s = Kgradu_Pw_s - coeff_grad_Sw_s * Kgradu_Sg_s + (coeff_grad_Sh_s ) * Kgradu_Sh_s;
+      auto Kgradu_Pg_n = Kgradu_Pw_n - coeff_grad_Sw_n * Kgradu_Sg_n + (coeff_grad_Sh_n) * Kgradu_Sh_n;
       auto grad_Pg_s = grad_Pw_s - coeff_grad_Sw_s * grad_Sg_s + (coeff_grad_Sh_s ) * grad_Sh_s;
       auto grad_Pg_n = grad_Pw_n - coeff_grad_Sw_n * grad_Sg_n + (coeff_grad_Sh_n) * grad_Sh_n;
       // if (veltype[Indices::BCId_gas] == Indices::BCId_neumann)
@@ -2255,17 +2293,17 @@ public:
 
 
 			double tmp = 0.;
-      auto normalvelocity_g_s = permeability * krN_s * (Xc_P/Xc_x * grad_Pg_s - Xc_rho * rho_g_s * normalgravity);
+      auto normalvelocity_g_s = krN_s * (Xc_P/Xc_x * Kgradu_Pg_s - Xc_rho * rho_g_s * Kg) * n_F_local;
 
-      auto normalvelocity_w_s = permeability * krW_s * (Xc_P/Xc_x * grad_Pw_s - Xc_rho * rho_w_s * normalgravity);
+      auto normalvelocity_w_s = krW_s * (Xc_P/Xc_x * Kgradu_Pw_s - Xc_rho * rho_w_s * Kg) * n_F_local;
 
-      auto normalvelocity_g_n = permeability * krN_n * (Xc_P/Xc_x * grad_Pg_n - Xc_rho * rho_g_n * normalgravity);
+      auto normalvelocity_g_n = krN_n * (Xc_P/Xc_x * Kgradu_Pg_n - Xc_rho * rho_g_n * Kg) * n_F_local;
       if (veltype[Indices::BCId_gas] == Indices::BCId_neumann){
         normalvelocity_g_n = velvalue[Indices::BCId_gas];
         //std::cout << "neuman gas velocity"<< std::endl;
       }
 
-      auto normalvelocity_w_n = permeability * krW_n * (Xc_P/Xc_x * grad_Pw_n - Xc_rho * rho_w_n * normalgravity);
+      auto normalvelocity_w_n = krW_n * (Xc_P/Xc_x * Kgradu_Pw_n - Xc_rho * rho_w_n * Kg) * n_F_local;
       if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
         normalvelocity_w_n = velvalue[Indices::BCId_water];
         //std::cout << "neuman water velocity"<< std::endl;
