@@ -529,10 +529,7 @@ public:
 
       auto gradu_Pg = gradu_Pw  - coeff_grad_Sw * gradu_Sg + (coeff_grad_Sh ) * gradu_Sh;
       auto Kgradu_Pg = Kgradu_Pw - coeff_grad_Sw * Kgradu_Sg + (coeff_grad_Sh ) * Kgradu_Sh;
-      // if( !property.mesh.isLenz(ip_global) ){
-      //   std::cout << K << "  " << ip_global << std::endl;
-      //   exit(0)	;
-      // }
+      
       auto convectiveflux_CH4_g = rho_g * (1. - YH2O) * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg); //(1. - YH2O)
       auto convectiveflux_CH4_w = rho_w * (XCH4) * krW * ( Xc_P/Xc_x * Kgradu_Pw - Xc_rho * rho_w * Kg);
       auto convectiveflux_H2O_g = rho_g * YH2O * krN * ( Xc_P/Xc_x * Kgradu_Pg - Xc_rho * rho_g * Kg);

@@ -16,10 +16,10 @@ public:
   	{}
 
 	/* http://en.wikipedia.org/wiki/Gas_constant */
-	constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
+	constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */ 
 
 	double MolarMass() const {
-		return 16.04 * 1.0e-3; 	/* [kg/mol] */
+		return 16.042 * 1.0e-3; 	/* [kg/mol] */
 	}
 
 	double AccentricityFactor()const {
@@ -66,8 +66,8 @@ public:
 		T = T_ref;
 		Pg = P_ref;
 #endif
-
-		// Sutherland Correlation:
+		// when Pg = 20 mPa, then 9.6268, 16.6876,  58.5856,   
+		// Sutherland Correlation:  
 		// ref: http://portal.tpu.ru/SHARED/n/NATASHA/Material/Tab3/Glava_1.pdf
 		double C = 162; // empirical constant
 		double mu_0 = 0.;//1.0707e-5;  
@@ -76,8 +76,8 @@ public:
 		// 									+ 4.1719e-20 * Pg * Pg
 		// 									- 7.3232e-28 * Pg * Pg * Pg )
 		// 		); // Pa.s -> ref: Frauenhofer Comsol Model
-		mu_0 = 1.0707e-5 -  4.8134e-14 * Pg - 4.1719e-20 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
-		mu = 1.4055e-5;//mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
+		mu_0 = 1.0707e-5 -  4.8134e-14 * Pg - 4.1719e-21 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
+		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
 
 		return mu/characteristicValue.viscosity_c;
 

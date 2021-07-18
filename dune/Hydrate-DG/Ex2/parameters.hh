@@ -45,6 +45,7 @@ private:
 	double ref_saltconcentration;
 	double ref_temperature;
 	double ref_pressure;
+	double rotationdegree;
 
 	bool gravity_flag;
 	double g_magnitude;
@@ -100,7 +101,7 @@ public:
 			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			
-			
+			rotationdegree = ptree.get("permeability.rotation",(double)10.);
 
 			//gravity
 			gravity_flag = ptree.get("gravity.flag",(bool)true);
@@ -201,6 +202,9 @@ public:
 	//numMaterials
 	int num_materials() const {
 		return numMaterials;
+	}
+	double rotationDegree()const{
+		return rotationdegree;
 	}
 	/**********************************************************************/
 	/* REFERENCE STATE VALUES */

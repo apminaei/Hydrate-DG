@@ -1,10 +1,10 @@
-template<typename GV, typename Parameters>
+template<typename GV, typename Parameters, typename Mesh>
 class HydraulicProperties
 {
 private:
 	const GV& gv;
 	const Parameters& parameter;
-	  
+	const Mesh& mesh;  
 	const static int dim = GV::dimension;
 
 	const static int numOfParams  	= 6;
@@ -15,16 +15,16 @@ private:
 	const static int id_m			= 4;
 	const static int id_beta		= 5;
 
-	Soil<GV,Parameters> soil;
+	Soil<GV,Parameters, Mesh> soil;
 	CharacteristicValues characteristicValue;
 
 public:
 
   //! construct from grid view
-  HydraulicProperties ( const GV& gv_ , const Parameters& parameter_  )
+  HydraulicProperties ( const GV& gv_ , const Parameters& parameter_, const Mesh &mesh_  )
 : gv( gv_ ),
-  parameter(parameter_),
-  soil(gv_,parameter_)
+  parameter(parameter_), mesh(mesh_),
+  soil(gv_,parameter_,mesh_)
 {}
 
 	/* PARAMETERS FOR THE HYDRAULIC PROPERTY CONSTITUTIVE LAW (BROOKS-COREY) */

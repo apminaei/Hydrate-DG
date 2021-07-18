@@ -30,16 +30,16 @@ public:
   	Parameters<PTree> parameter;
   	Methane<PTree> gas;
 // #ifdef STATEINDEPENDENTPROPERTIES
-  	BaseEoS<PTree> eos;
+  	// BaseEoS<PTree> eos;
 // #elif defined(PENG_ROBINSON_EOS)
-  	// PengRobinson<PTree> eos;
+  	PengRobinson<PTree> eos;
 // #endif
   	Water<PTree> water;
   	Salt salt;
   	Mixture<PTree> mixture;
   	Hydrate<GV, PTree> hydrate;
-  	Soil<GV,Parameters<PTree>> soil;
-  	HydraulicProperties<GV,Parameters<PTree>> hydraulicProperty;
+  	Soil<GV,Parameters<PTree>,MeshParameters<PTree>> soil;
+  	HydraulicProperties<GV,Parameters<PTree>, MeshParameters<PTree>> hydraulicProperty;
   	HydratePhaseChangeKinetics<GV,PTree> kinetics;
   	
   	//! construct from grid view
@@ -54,8 +54,8 @@ public:
 	  water(ptree_),
 	  mixture(ptree_),
 	  hydrate(gv_,ptree_),
-	  soil(gv_,parameter),
-	  hydraulicProperty(gv_,parameter),
+	  soil(gv_,parameter,mesh),
+	  hydraulicProperty(gv_,parameter,mesh),
 	  kinetics(gv_,ptree_)
   	{}
 	

@@ -1,17 +1,18 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template<typename GV, typename Parameters>
+template<typename GV, typename Parameters, typename Mesh>
 class Soil
 {
 private:
 	const GV& gv;  
 	const Parameters& parameter;
+	const Mesh& mesh;
 	CharacteristicValues characteristicValue;
 	const static int dim = GV::dimension;
 
 public:
   //! construct from grid view
-  Soil ( const GV& gv_ , const Parameters& parameter_ )
-  : gv( gv_ ), parameter(parameter_)
+  Soil ( const GV& gv_ , const Parameters& parameter_ , const Mesh &mesh_)
+  : gv( gv_ ), parameter(parameter_), mesh(mesh_)
   {}
 
 
@@ -25,7 +26,7 @@ public:
 		double por = 0.;
 		
 		por = prop_L[0][0];
-		if( parameter.mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){//
 			por = prop_L[1][0];
 			
 		}
@@ -41,8 +42,12 @@ public:
 		auto prop_L = parameter.layer_properties();
 		double K = prop_L[0][1];/*m^2*/
 		
-		if( parameter.mesh.isLenz(xglobal) && parameter.num_materials() > 1){
-			K = prop_L[1][1];		
+		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+			K = prop_L[1][1];	
+			
+        	// std::cout << K << "  " << xglobal << std::endl;
+        	// exit(0)	;
+      	
 		}
 
 		return K/characteristicValue.permeability_c; /*ndim*/
@@ -53,6 +58,7 @@ public:
 	SedimentPermeabilityTensor
 	(const typename GV::Traits::template Codim<0>::Entity& element,
 	 const Dune::FieldVector<double,dim>& xlocal) const {
+		 Dune::FieldVector<double,dim> xglobal = element.geometry().global(xlocal);
 
 		double K_xx = SedimentPermeability(element,xlocal);
 		
@@ -63,6 +69,16 @@ public:
 		PermeabilityTensor[0][1] = 0. ;
 		PermeabilityTensor[1][0] = 0. ;
 		PermeabilityTensor[1][1] = K_yy ;
+		auto rotation = parameter.rotationDegree();
+		// rotation with 8,3439 degree counterclockwise
+		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+			
+			PermeabilityTensor[0][0] = std::cos(rotation) * K_xx ;
+			PermeabilityTensor[0][1] = -std::sin(rotation)  * K_yy ;
+			PermeabilityTensor[1][0] = std::sin(rotation) * K_xx ;
+			PermeabilityTensor[1][1] = std::cos(rotation)  * K_yy ;
+      	
+		}
 		
 		return PermeabilityTensor; /*ndim*/
 	}

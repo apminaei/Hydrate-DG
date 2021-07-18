@@ -59,6 +59,8 @@ public:
 	const double Zmax_lenz = ptree.get("grid.lenz.Zmax",(double)1.)/Xc.x_c; //m
 	const double Xmin_lenz = ptree.get("grid.lenz.Xmin",(double)1.)/Xc.x_c; //m
 	const double Xmax_lenz = ptree.get("grid.lenz.Xmax",(double)1.)/Xc.x_c; //m
+	const double X0_lenz = ptree.get("grid.lenz.X0",(double)1.)/Xc.x_c; //m
+	const double X1_lenz = ptree.get("grid.lenz.X1",(double)1.)/Xc.x_c; //m
 
 	double volumeFactor( double r /*radial component of cell center*/ ) const {
 
@@ -211,8 +213,20 @@ public:
 	}
 		// 
 	//##################################################################################
+	// bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
+	// 	if( Xmin_lenz  <= globalPos[0] && globalPos[0] <= Xmax_lenz && Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz   ){
+	// 		return true;
+	// 	}
+	// 	else
+	// 		return false;
+	// }
+
 	bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( Xmin_lenz  <= globalPos[0] && globalPos[0] <= Xmax_lenz && Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz   ){
+		if(
+			// (-2.75+(75/110/15))  <= (75/11/5*globalPos[0]+globalPos[1]) && (75/11/5*globalPos[0]+globalPos[1]) <= (-2.+(15/11/15))
+			// &&
+			 Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz
+			&& X0_lenz <= globalPos[0] && globalPos[0]<= X1_lenz   ){
 			return true;
 		}
 		else

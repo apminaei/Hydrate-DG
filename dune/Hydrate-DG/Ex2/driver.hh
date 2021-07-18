@@ -89,22 +89,22 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
 	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sg;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre > FEM_P;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre > FEM_T; 
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_X; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_X; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Y;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Y;
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_Sh; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sh; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_C;  
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_C;  
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 0, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 0, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP;//l2orthonormal 
 
-	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_PP;
+	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, 0> FEM_PP;
 	
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_Sg> FEM_Sg;
 	
@@ -310,7 +310,7 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, cc, 100, 2);
 
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SSORk<GFS,CC> LS;
-	// LS ls(gfs, cc, max_linear_iteration, 5,1);
+	// LS ls(gfs, cc, max_linear_iteration, 10,1);
 
 	typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<IGO> LS; //works
 	LS ls(gfs, max_linear_iteration, 1, true, true);
@@ -358,16 +358,17 @@ void driver(const GV &gv, // GridView
 	// if (gfs.gridView().comm().rank() == 0)
 	// 	verbose = 1;
 	// LS ls(gfs, 100, verbose);
+
 	auto param = ls.parameters();
 	//param.setMaxLevel(3); // max number of coarsening levels
-	param.setCoarsenTarget(10000000); // max DoF at coarsest level
+	param.setCoarsenTarget(100000000); // max DoF at coarsest level
 	ls.setParameters(param);
 
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
 
 #else
 	// typedef Dune::PDELab::ISTLBackend_SEQ_BCGS_SSOR LS;//doesn't work
-	// LS ls(100, true);
+	// LS ls(max_linear_iteration, true);
 
 	// using LS = Dune::PDELab::ISTLBackend_SEQ_AMG_4_DG<IGO,GFS,Dune::PDELab::CG2DGProlongation,Dune::SeqSSOR,Dune::BiCGSTABSolver>; //works
 	// LS ls(igo,gfs,max_linear_iteration,2,true,true);
@@ -652,7 +653,7 @@ void driver(const GV &gv, // GridView
 	int subsampling = 1;
 	Dune::RefinementIntervals RefInt(subsampling);
 	using VTKWRITER = Dune::VTKWriter<GV>;
-	VTKWRITER vtkwriter(gv,Dune::VTK::conforming);
+	VTKWRITER vtkwriter(gv,Dune::VTK::nonconforming);
 	using VTKSEQUENCEWRITER = Dune::VTKSequenceWriter<GV>;
 //	VTKSEQUENCEWRITER vtkSequenceWriter( gv,fileName,pathName,"",Dune::VTK::nonconforming);
 	VTKSEQUENCEWRITER vtkSequenceWriter(std::make_shared<VTKWRITER>(vtkwriter),fileName,pathName,"");
