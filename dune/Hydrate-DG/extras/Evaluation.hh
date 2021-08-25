@@ -95,7 +95,7 @@ namespace Dune {
 		// e.geometry().global(xlocal)
 
 		  for (unsigned int i=0; i<xlocal.size(); i++){
-			  if (xlocal[i]< -0.){
+			  if (xlocal[i]< 0.){
 			   xlocal[i] = 0.;
 			  }
 			  

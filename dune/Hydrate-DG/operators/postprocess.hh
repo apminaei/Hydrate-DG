@@ -253,7 +253,7 @@ public:
 			RF Coeff = 16.32;//4.4824;//14.543;//
 			RF Peq = 1.e3 * exp( 38.592 - (8533.8/ (T * Xc_T) ) + Coeff*S );
 			
-			RF HS = (15.e6 * (Peq-Pg* Xc_P)/abs(Peq-Pg* Xc_P)+15.e6 ) ;
+			RF HS = (15.e0 * (Peq/ Xc_P-Pg)/abs(Peq/ Xc_P-Pg)+15.e0 ) ;
 
 			ul_pp[lfs_pp_Pg.localIndex(0)]	  = Pg*Xc_P ;
 	        ul_pp[lfs_pp_Pw.localIndex(0)] 	  = Pw*Xc_P ;

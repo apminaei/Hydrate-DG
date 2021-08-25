@@ -223,9 +223,10 @@ public:
 
 	bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
 		if(
-			// (-2.75+(75/110/15))  <= (75/11/5*globalPos[0]+globalPos[1]) && (75/11/5*globalPos[0]+globalPos[1]) <= (-2.+(15/11/15))
+			//(-2.75+(75/110/15))  <= (75/11/5*globalPos[0]+globalPos[1]) && (75/11/5*globalPos[0]+globalPos[1]) <= (-2.25+(15/11/15))
+			(-3.2+0.01*std::sin(M_PI*globalPos[0]/X_length))  <= globalPos[1] && globalPos[1]  <= (-2.7+0.1*std::sin(M_PI*globalPos[0]/X_length))
 			// &&
-			 Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz
+			//  Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz
 			&& X0_lenz <= globalPos[0] && globalPos[0]<= X1_lenz   ){
 			return true;
 		}

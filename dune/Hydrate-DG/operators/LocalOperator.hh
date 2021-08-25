@@ -511,7 +511,7 @@ public:
       auto krW = property.hydraulicProperty.krw(cell, ip_local, Sw, Sh) / (property.water.DynamicViscosity(T_dim, Pw_dim, S) );
       auto krN = property.hydraulicProperty.krg(cell, ip_local, Sw, Sh) / (property.gas.DynamicViscosity(T_dim, Pg_dim));
 
-      auto perm_dim = permeability * Xc_K;
+      auto perm_dim = property.soil.SedimentPermeability(cell, ip_local ) * Xc_K;
       // compute source terms
 			auto q_g  = property.kinetics.GasGenerationRate( T_dim, Pg_dim, Sh, Sw, XCH4, zCH4, S, por, perm_dim); /*dim*/
 			auto q_w  = property.kinetics.WaterGenerationRate( q_g ); /*dim*/

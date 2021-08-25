@@ -69,17 +69,21 @@ public:
 		PermeabilityTensor[0][1] = 0. ;
 		PermeabilityTensor[1][0] = 0. ;
 		PermeabilityTensor[1][1] = K_yy ;
-		auto rotation = parameter.rotationDegree();
+		auto rotation = parameter.rotationDegree()/180*M_PI;// degree to radian
+		auto rotation_at_xglobal = (-2.*rotation / (mesh.X_length*characteristicValue.x_c))*xglobal[0]+rotation;
+		// std::cout << std::cos(rotation) << std::endl;
+		// std::cout << std::sin(rotation) << std::endl;
+		// exit(0);
 		// rotation with 8,3439 degree counterclockwise
 		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){
 			
-			PermeabilityTensor[0][0] = std::cos(rotation) * K_xx ;
-			PermeabilityTensor[0][1] = -std::sin(rotation)  * K_yy ;
-			PermeabilityTensor[1][0] = std::sin(rotation) * K_xx ;
-			PermeabilityTensor[1][1] = std::cos(rotation)  * K_yy ;
+			PermeabilityTensor[0][0] = std::cos(rotation_at_xglobal) * K_xx ; //
+			PermeabilityTensor[0][1] = -std::sin(rotation_at_xglobal)  * K_yy ;
+			PermeabilityTensor[1][0] = std::sin(rotation_at_xglobal) * K_xx ;
+			PermeabilityTensor[1][1] = std::cos(rotation_at_xglobal) * K_yy ;// 
       	
 		}
-		
+		  
 		return PermeabilityTensor; /*ndim*/
 	}
 
