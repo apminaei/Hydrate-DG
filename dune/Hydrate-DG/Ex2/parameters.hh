@@ -45,6 +45,7 @@ private:
 	double ref_saltconcentration;
 	double ref_temperature;
 	double ref_pressure;
+	double rotationdegree;
 
 	bool gravity_flag;
 	double g_magnitude;
@@ -53,7 +54,7 @@ public:
 
 	MeshParameters<PTree> mesh;
 	//! constructor
-	Parameters (const PTree& ptree_)
+	Parameters (const PTree& ptree_) 
 	:ptree(ptree_),
     mesh(ptree_)
 	{
@@ -80,17 +81,16 @@ public:
 			prop = std::vector<std::vector<double> > (numMaterials,std::vector<double>(numProps, 0.));
 			for(int n_mat=0; n_mat<numMaterials; n_mat++ ){
 				std::string name = "sediment.material"+std::to_string(n_mat);
-				prop[n_mat][0] = ptree.get(name+".por",	(double)0.3);
-				prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-12);
+				prop[n_mat][0] = ptree.get(name+".por",	(double)0.5);
+				prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-15);
 				prop[n_mat][2] = ptree.get(name+".pentry",(double)5.e4);
 				prop[n_mat][3] = ptree.get(name+".lambda",(double)1.2);
 				prop[n_mat][4] = ptree.get(name+".swr",	(double)0.);
 				prop[n_mat][5] = ptree.get(name+".sgr",	(double)0.);
-				prop[n_mat][6] = ptree.get(name+".m",	(double)3.);
+				prop[n_mat][6] = ptree.get(name+".m",	(double)1.);
 				prop[n_mat][7] = ptree.get(name+".beta",(double)1.);
 			}
 			
-
 			//reference state
 			ref_salinity = ptree.get("reference_state.salinity",(double)0.);
 			ref_saltconcentration = ref_salinity * (18.0/58.4); /*MolarMass_H2O/MolarMass_salt*/
@@ -98,10 +98,10 @@ public:
 			ref_pressure = ptree.get("reference_state.pressure",(double)1.01e5);
 
 
-			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
-			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
+			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-17);/*mol/m².Pa.s*/
+			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			
-			
+			rotationdegree = ptree.get("permeability.rotation",(double)10.);
 
 			//gravity
 			gravity_flag = ptree.get("gravity.flag",(bool)true);
@@ -128,6 +128,10 @@ public:
 
 	double InitialPw(Dune::FieldVector< double,dim > xglobal) const {
 		double Pw = Pw_t0 + 1030.21 * 9.81 * (0.-xglobal[1])*X_c.x_c;
+		if (dim == 1)
+		{
+			Pw = Pw_t0 + 1000. * 10. * (0.-xglobal[0])*X_c.x_c;
+		}
 		return Pw; /* Pa */
 	}
 
@@ -143,6 +147,10 @@ public:
 
 	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
 		double T = T_t0 + ref_temperature - gradTz * xglobal[1]*X_c.x_c ; /*K*/
+		if (dim == 1)
+		{
+			T = T_t0 + ref_temperature - gradTz * xglobal[0]*X_c.x_c ; /*K*/
+		}
 		return T; /* K */
 	}
 	
@@ -151,7 +159,10 @@ public:
 		double Sh = 0.0 ;
 		double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
 		
-		if( mesh.isGHSZ(xglobal)){
+		if( dim == 1 && mesh.isGHSZ(xglobal)){
+			Sh = 1.2 * (xglobal[0]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[0]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
+		}
+		if( dim == 2 && mesh.isGHSZ(xglobal)){
 			Sh = 1.2 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
 		}
 		return Sh;
@@ -188,7 +199,13 @@ public:
 	std::vector< std::vector<double> > layer_properties() const {
 		return prop;
 	}
-
+	//numMaterials
+	int num_materials() const {
+		return numMaterials;
+	}
+	double rotationDegree()const{
+		return rotationdegree;
+	}
 	/**********************************************************************/
 	/* REFERENCE STATE VALUES */
 	double ReferenceSalinity() const {
@@ -225,20 +242,20 @@ public:
 		return T_end;
 	}
 
-// #ifdef STATEINDEPENDENTPROPERTIES
-// 	// (P,T,sal) reference state for CASE1
-// 	double RefP() const {
-// 		return 20.*ReferencePressure(); /*Pa*/
-// 	}
+#ifdef STATEINDEPENDENTPROPERTIES
+	// (P,T,sal) reference state for CASE1
+	double RefP() const {
+		return 10.* ReferencePressure(); /*Pa*/
+	}
 
-// 	double ReferenceTemperature() const {
-// 		return ReferenceTemperature() + 8.0; /*K*/
-// 	}
+	double RefT() const {
+		return ReferenceTemperature() + 9.0; /*K*/
+	}
 
-// 	double RefSal() const {
-// 		return 0.02; /*kg/kg*/;
-// 	}
-// #endif
+	double RefSal() const {
+		return 0.035; /*kg/kg*/;
+	}
+#endif
 
     /**********************************************************************/
 	Dune::FieldVector<double,dim>
@@ -257,8 +274,9 @@ public:
 		Dune::FieldVector<double,dim> gravity( 0. );
 		double g = 0.;
 		if(gravity_flag) g = -g_magnitude;
-		gravity[dim-1] = g;
+		
 		gravity[0] = 0.;
+		gravity[dim-1] = g;
 		return gravity; /*N/kg*/
 	}
 

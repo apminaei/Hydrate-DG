@@ -32,7 +32,7 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;
+		double A = 38.592 , 	B = 8533.8 	,	C = 14.542897778;//16.32;
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
 
 		return P_eq;
@@ -125,7 +125,7 @@ public:
 
 	// heat of hydrate dissociation:
 	double HeatOfDissociation( double gasGenRate, double T ) const {
-      double Q_decomp/*[W/m³]*/= - ( gasGenRate / hydrate.MolarMass() )
+      double Q_decomp/*[W/m³]*/= - ( gasGenRate  / methane.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
 								 * 1.;
 

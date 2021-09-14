@@ -32,10 +32,11 @@ public:
 	//equilibrium pressure
 	double EquilibriumPressure (double T/*K*/,double S) const {
 
-		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//4.4824;//14.543;//
+		//auto s = 0.03115;//S * water.MolarMass()/methane.MolarMass();
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
-
-		return P_eq;
+		// std::cout << P_eq <<"  " << S << std::endl;
+		// return P_eq;
 	}
 
 	//rate constant for hydrate dissociation; base 1.e-14 for t_end = 2.16e6
@@ -55,14 +56,14 @@ public:
 
 	double FormationLimitFactor( double Sh , double Sw, double porosity ) const {
 
-		double term = Sw*(1.-Sw-Sh) ;
+		double term = Sw * (1. - Sw - Sh) ;//std::max(0., std::min(1., )) ;
 		return term;
 
 	}
 
 	double DissociationLimitFactor( double Sh , double Sw, double porosity ) const {
 
-		double term = Sh;
+		double term = Sh;//std::max(0., std::min(1.,  Sh));
 		return term  ;
 	}
 
@@ -71,7 +72,8 @@ public:
 
 		double A_s;
 
- 		double M_base = 1.e5;
+ 		double M_base = 1.e5;//pow( 2.*permeability, -1/2. );//
+		//double sh = std::max(0., std::min(1., Sh));
  		double M_SF = pow( porosity*(1.-Sh), 3./2. );
  		A_s = M_base * M_SF ;
 
@@ -85,12 +87,13 @@ public:
 							   double zCH4, double S, double porosity, double permeability ) const {
 
 		double gas_gen = 0.0;
+		double A = 38.592 , 	B = 8533.8 	,	C = 16.32;//14.543;//4.4824;//5.03;//
+		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
+		double Peq = P_eq;//EquilibriumPressure( T,S );
 
-		double Peq = EquilibriumPressure( T,S );
+		double potential_P = (Peq/Pg) - 1. ;
 
-		double potential_P = Peq/Pg - 1.  ;
-
-		if(potential_P > 0. ){
+		if(potential_P > 0.){
 			gas_gen =   DissociationRateConstant( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
@@ -98,8 +101,9 @@ public:
 					  * Pg
 					  * potential_P
 					  ;
+					
 		}
-		else if(potential_P < 0. ){
+		else if(potential_P < 0.  ){
 			gas_gen =   FormationRateConstant_ingas( T )
 					  * methane.MolarMass()
 					  * SpecificSurfaceArea( Sh, porosity, permeability )
@@ -108,28 +112,31 @@ public:
 					  * potential_P
 					  ;
 		}
-	    return gas_gen / characteristicValue.X_source_mass;
+		// if(gas_gen > 1.e-9 ){
+		// 	std::cout << Peq << "  " << Pg << "  " << T << "  " << S << std::endl;
+		// }
+	    return gas_gen /*[kg/m³s]*/;
 	}
 
 	// rate of water generation:
 	double WaterGenerationRate ( double gasGenRate ) const {
-      double water_gen =  gasGenRate * characteristicValue.X_source_mass * hydrate.HydrationNumber() * ( water.MolarMass() / methane.MolarMass() ) ;
-      return water_gen / characteristicValue.X_source_mass;	/*[kg/m³s]*/
+      double water_gen =  gasGenRate * hydrate.HydrationNumber() * ( water.MolarMass() / methane.MolarMass() ) ;
+      return water_gen ;	/*[kg/m³s]*/
 	}
 
 	// rate of hydrate dissociation:
 	double HydrateDissociationRate( double gasGenRate ) const {
-      double hyd_decomp= - gasGenRate * characteristicValue.X_source_mass * ( hydrate.MolarMass() / methane.MolarMass() ) ;
-      return hyd_decomp / characteristicValue.X_source_mass;/*[kg/m³s]*/
+      double hyd_decomp= - gasGenRate * ( hydrate.MolarMass() / methane.MolarMass() ) ;
+      return hyd_decomp ;/*[kg/m³s]*/
 	}
 
 	// heat of hydrate dissociation:
 	double HeatOfDissociation( double gasGenRate, double T ) const {
-      double Q_decomp/*[W/m³]*/= - ( gasGenRate * characteristicValue.X_source_mass / methane.MolarMass() )
+      double Q_decomp/*[W/m³]*/= - ( gasGenRate  / methane.MolarMass() )
       						     * ( 56599.0 - 16.744*( T ) )
 								 * 1.;
-
-      return Q_decomp / characteristicValue.X_source_heat;
+ 
+      return Q_decomp ;
 	}
   //! get a reference to the grid view
   inline const GV& getGridView () {return gv;}

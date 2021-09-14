@@ -52,7 +52,7 @@ constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
 	}
 
 	double MolarDensity(double T, double Pg, double z_CH4)const{
-		return Density( T,Pg,z_CH4)/MolarMass();
+		return Density( T,Pg,z_CH4)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity(double T, double Pg) const {
@@ -214,16 +214,18 @@ constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
 		Cv += (-1.) * Ru * nonidealfactor ;
 #endif
 
-		return Cv/characteristicValue.specificheat_c;
+		return Cv/characteristicValue.volumetricheat_c;
 	}
 
 	double SolubilityCoefficient( double T/*K*/, double S ) const {
 
 		double kHenry; // [Pa]
+		double T_ref = parameter.ReferenceTemperature();
+		
 
 #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		T = T_ref;
+		T_ref = parameter.RefT();
+		//T = T_ref;
 #elif P1_CASE2
 
 #else
@@ -231,7 +233,7 @@ constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
 		std::cout<< "Problem case in problem_NCPvsPVS_p1 is not defined. Check 'problem_NCPvsPVS_p1/include_problem_files.hh'." << std::endl;
 		exit(0);
 #endif
-
+		T = T_ref;
 		// REF: SUGAR TOOLBOX
 
 		double Tc /*[K]*/   = water.CriticalTemperature();	//critical temperature of water

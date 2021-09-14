@@ -16,10 +16,10 @@ public:
   	{}
 
 	/* http://en.wikipedia.org/wiki/Gas_constant */
-	constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */
+	constexpr static double Ru = 8.314462175; /* [J*mol^-1*K^-1] */ 
 
 	double MolarMass() const {
-		return 16.04 * 1.0e-3; 	/* [kg/mol] */
+		return 16.042 * 1.0e-3; 	/* [kg/mol] */
 	}
 
 	double AccentricityFactor()const {
@@ -39,12 +39,12 @@ public:
 		double rho;
 		/* rho: unit -> kg/m^3 */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.ReferenceTemperature();
-		double P_ref = parameter.ReferencePressure();
-		T = T_ref;
-		Pg = P_ref;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		double T_ref = parameter.RefT();
+// 		double P_ref = parameter.RefP();
+// 		T = T_ref;
+// 		Pg = P_ref;
+// #endif
 		double R_CH4 = Ru/MolarMass();
 		rho =  Pg / ( z_CH4 * R_CH4 * T);
 
@@ -52,7 +52,7 @@ public:
 	}
 
 	double MolarDensity(double T, double Pg, double z_CH4)const{
-		return Density( T,Pg,z_CH4)/MolarMass();
+		return Density( T,Pg,z_CH4)*characteristicValue.density_c/MolarMass();
 	}
 
 	double DynamicViscosity(double T, double Pg) const {
@@ -66,17 +66,18 @@ public:
 		T = T_ref;
 		Pg = P_ref;
 #endif
-
-		// Sutherland Correlation:
+		// when Pg = 20 mPa, then 9.6268, 16.6876,  58.5856,   
+		// Sutherland Correlation:  
 		// ref: http://portal.tpu.ru/SHARED/n/NATASHA/Material/Tab3/Glava_1.pdf
 		double C = 162; // empirical constant
-		double mu_0 = 1.0707e-5;
-		// ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
-		mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
-											+ 4.1719e-20 * Pg * Pg
-											- 7.3232e-28 * Pg * Pg * Pg )
-				); // Pa.s -> ref: Frauenhofer Comsol Model
-		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;
+		double mu_0 = 0.;//1.0707e-5;  
+		// // ref for mu_0 :http://www.pipeflowcalculations.com/tables/gas.php
+		// mu_0 *= (  1. - (1./(1.0707e-5)) * (  4.8134e-14 * Pg
+		// 									+ 4.1719e-20 * Pg * Pg
+		// 									- 7.3232e-28 * Pg * Pg * Pg )
+		// 		); // Pa.s -> ref: Frauenhofer Comsol Model
+		mu_0 = 1.0707e-5 -  4.8134e-14 * Pg - 4.1719e-21 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
+		mu = mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;// 1.4055e-5; //
 
 		return mu/characteristicValue.viscosity_c;
 
@@ -164,11 +165,11 @@ public:
 		// REFERENCE:
 		double Cp; /* [J/(kg*K)] */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		Cp = Cp_ideal( T, Pg );		/* [J/(kg*K)] */ // NOTE: Cases are checked in Cp_ideal function!
-#else
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		Cp = Cp_ideal( T, Pg );		/* [J/(kg*K)] */ // NOTE: Cases are checked in Cp_ideal function!
+// #else
 		Cp = Cp_ideal( T, Pg ) + Cp_res( T, Pg, z_CH4 );		/* [J/(kg*K)] */
-#endif
+// #endif
 		return Cp/characteristicValue.specificheat_c;
 	}
 
@@ -178,9 +179,9 @@ public:
 
 		Cv =   Cp( T, Pg, z_CH4 )*characteristicValue.specificheat_c; // NOTE: Cases are checked in Cp_ideal function!
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		Cv += (-1.) * Ru/MolarMass();		/* [J/(kg*K)] */
-#else
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		Cv += (-1.) * Ru/MolarMass();		/* [J/(kg*K)] */
+// #else
 		// Based on Peng Robinson's EoS
 		// REFERENCE:
 		double omega = AccentricityFactor();
@@ -211,7 +212,7 @@ public:
 		double nonidealfactor = ( pow( M-N , 2 ) ) / ( M*M - 2.*A * (z_CH4+B) );
 
 		Cv += (-1.) * Ru * nonidealfactor ;
-#endif
+// #endif
 
 
 		return Cv/characteristicValue.volumetricheat_c;
@@ -222,8 +223,8 @@ public:
 		double kHenry; // [Pa]
 
 // #ifdef STATEINDEPENDENTPROPERTIES
-// 		double T_ref = parameter.ReferenceTemperature();
-// 		T = T_ref;
+		// double T_ref = 10.+273.15;//parameter.RefT();
+		// T = T_ref;
 // #elif P1_CASE2
 
 // #else

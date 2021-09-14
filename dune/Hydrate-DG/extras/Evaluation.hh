@@ -79,6 +79,32 @@ namespace Dune {
 		  xglobal_fp=xglobal_fp_;
 	  }
 
+	  inline void updateSolution(const typename Traits::ElementType& e) const{
+
+		  LFS lfs(gfs);
+		  LFSCache lfs_cache(lfs);
+		  VectorView x_view((*xglobal));
+
+		  lfs.bind(e);
+		  lfs_cache.update();
+		  x_view.bind(lfs_cache);
+
+		  std::vector<typename Vector::ElementType> xlocal(lfs.size());
+		  x_view.read(xlocal);
+
+		// e.geometry().global(xlocal)
+
+		  for (unsigned int i=0; i<xlocal.size(); i++){
+			  if (xlocal[i]< 0.){
+			   xlocal[i] = 0.;
+			  }
+			  
+		  }
+			x_view.write( xlocal );
+			x_view.commit();
+			x_view.unbind();
+	  }
+
 
 	  inline void evalFunction(const typename Traits::ElementType& e,
 			  const typename Traits::DomainType& x,
@@ -95,11 +121,13 @@ namespace Dune {
 		  std::vector<typename Vector::ElementType> xlocal(lfs.size());
 		  x_view.read(xlocal);
 
+		// e.geometry().global(xlocal)
+
 		  std::vector<RangeType> phi(lfs.size(),0.);
 		  lfs.finiteElement().localBasis().evaluateFunction(x,phi);
 		  (*y) = 0;
 		  for (unsigned int i=0; i<xlocal.size(); i++){
-			  (*y) += xlocal[i]*phi[i];
+			  (*y) += xlocal[i] * phi[i];
 		  }
 
 	  }

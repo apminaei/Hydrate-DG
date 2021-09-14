@@ -17,7 +17,6 @@
 #include <chrono>
 #include <stdio.h>
 #include <filesystem>
-//#include <experimental/filesystem>
 #include "../dune/Hydrate-DG/IncludesDUNE.hh"
 #include "../dune/Hydrate-DG/Ex2/include_problem.hh"
 //TODO: Change problem name to: BM-phasechange-0d
@@ -33,7 +32,7 @@ int main(int argc, char **argv)
 		{
 			if (helper.rank() == 0)
 			{
-				std::cout << "usage: ./hydrateDG-Ex2 <input_file.ini> " << std::endl;
+				std::cout << "usage: ./ex2 <input_file.ini> " << std::endl;
 			}
 			return 1;
 		}
@@ -58,14 +57,21 @@ int main(int argc, char **argv)
 				std::filesystem::create_directory(pathName);
 		}
 
+		std::string fileName = ptree.get("output.file_name",(std::string)"test");
+		std::string pathName = ptree.get("output.path_name",(std::string)"test");
+		pathName += "outputs/";
+		pathName += fileName ;
+		if (helper.rank() == 0)
+		{
+				std::filesystem::create_directory(pathName);
+		}
+
 		
 		/**************************************************************************************************/
 		// MESH
 	    MeshParameters<Dune::ParameterTree> mesh(ptree);
 	    const int dim = mesh.dimension;
 
-		// std::cout << mesh.Z_GHSZ_bottom << std::endl;
-		// exit(0);
 		/*____________________________________________*/
 
 		
@@ -103,11 +109,35 @@ int main(int argc, char **argv)
 		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
 		grid->refineOptions(false); // keep overlap in cells
 
-		// typedef Grid::LeafGridView GV;
-		// const GV &gv = grid->leafGridView();
-		// grid->loadBalance();
 #elif defined(ALUGRID)
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
+		std::array<unsigned int, dim> elements;
+		/*
+			ALUGRID can be used for 2D and 3D
+		*/
+		// if (dim == 2)
+		// {
+			auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+			auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+			
+			elements[0] = N[0];
+			elements[1] = N[1];
+		// }
+		
+		
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+		// std::string filename = ptree.get("grid.name",
+        //                                  (std::string)"grid.msh");
+		// auto grid_file = PATH;
+		// grid_file += "grids/";
+		// grid_file += filename;
+        // Dune::GridFactory<Grid> factory;
+        // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
+        // std::shared_ptr<Grid> grid(factory.createGrid());
+
+#elif defined(UG) 
+		typedef  Dune::UGGrid<dim> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
 		std::array<unsigned int, dim> elements;
@@ -123,6 +153,8 @@ int main(int argc, char **argv)
         // Dune::GridFactory<Grid> factory;
         // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
         // std::shared_ptr<Grid> grid(factory.createGrid());
+
+#endif
 
 #elif defined(UG) 
 		typedef  Dune::UGGrid<dim> Grid;

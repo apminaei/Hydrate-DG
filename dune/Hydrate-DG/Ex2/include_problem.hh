@@ -2,6 +2,7 @@
 #define EX2_INCLUDE_PROBLEM_HH_
 
 
+// #define PARALLEL
 #include "../extras/ParameterTraits.hh"
 #include "../extras/Evaluation.hh"
 
@@ -22,7 +23,7 @@
 //#include "../operators/phase_velocity.hh"
 //#include "../operators/operator_l2projection.hh"
 #endif
-//#include "../operators/post_process.hh"
+#include "../operators/postprocess.hh"
 #include "../operators/Initial.hh"
 // #include "../operators/LocalOperator_Sh1.hh"
 // #include "../operators/LocalOperator_T1.hh"

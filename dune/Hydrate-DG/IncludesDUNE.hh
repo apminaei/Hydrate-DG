@@ -27,6 +27,7 @@
 #include<dune/grid/io/file/gmshreader.hh>
 #include<dune/grid/yaspgrid.hh>
 
+#include <dune/localfunctions/utility/localfiniteelement.hh>
 
 #ifdef HAVE_ALBERTA
 #include<dune/grid/albertagrid.hh>
@@ -48,9 +49,7 @@
 #include<dune/istl/io.hh>
 #include<dune/istl/superlu.hh>
 #include<dune/pdelab/function/callableadapter.hh>
-
-// #include<dune/pdelab.hh>
-
+ #include<dune/pdelab.hh>
 #include<dune/pdelab/newton/newton.hh>
 #include<dune/pdelab/common/function.hh>
 #include<dune/pdelab/common/vtkexport.hh>

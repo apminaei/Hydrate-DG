@@ -15,7 +15,7 @@
 #include <exception>
 #include <chrono>
 #include <stdio.h>
-//#include <filesystem>
+#include <filesystem>
 
 #include "dune/Hydrate-DG/IncludesDUNE.hh"
 #include "dune/Hydrate-DG/BM_phasechange_0d/include_problem.hh"
@@ -47,6 +47,15 @@ int main(int argc, char **argv)
 	    Dune::ParameterTreeParser ptreeparser;
 	    ptreeparser.readINITree(input_file,ptree);
 	    ptreeparser.readOptions(argc,argv,ptree);
+
+		std::string fileName = ptree.get("output.file_name",(std::string)"test");
+		std::string pathName = ptree.get("output.path_name",(std::string)"test");
+		pathName += "outputs/";
+		pathName += fileName ;
+		if (helper.rank() == 0)
+		{
+				std::filesystem::create_directory(pathName);
+		}
 
 		/**************************************************************************************************/
 		// MESH
@@ -83,10 +92,8 @@ int main(int argc, char **argv)
 		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
 		grid->refineOptions(false); // keep overlap in cells
 
-		typedef Grid::LeafGridView GV;
-		const GV &gv = grid->leafGridView();
-		grid->loadBalance();
 #elif defined(UG)
+
 		typedef Dune::UGGrid<dim> Grid;
 
 		// typedef std::vector<int> GmshIndexMap;
@@ -110,27 +117,27 @@ int main(int argc, char **argv)
 		elements[1] = N[1]; 
 		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-
-		typedef Grid::LeafGridView GV;
-		GV gv = grid->leafGridView();
-		grid->loadBalance();
-
-#elif defined(ALUGRID) 
 		
+		
+		
+
+#elif defined(ALUGRID)
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
+		// typedef Dune::ALUGrid<dim, dim, Dune::simplex, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
 		elements[1] = N[1];
-		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-		typedef Grid::LeafGridView GV;
-		GV gv = grid->leafGridView();
+		
   		// Transfer partitioning from ParMETIS to our grid
-  		grid->loadBalance();
 		
 #endif
+		typedef Grid::LeafGridView GV;
+		GV gv = grid->leafGridView();
+		grid->loadBalance();
 
 		driver(gv, ptree, helper);
 		// driver_Sh(gv, ptree, helper);

@@ -8,15 +8,17 @@ private :
 	const static int dim = GV::dimension;
 	Indices indices;
 	CharacteristicValues characteristicValues;
-	double time_fraction = property.parameter.time_end() / 2.16e6; 
-	double Xc_time = 100. * 3600. ;//* time_fraction ;/// characteristicValues.t_c;
+	ProblemInitialConditions<GV,Properties> icvalue;
+	// double time_fraction = property.parameter.time_end() / 2.16e6; 
+	double Xc_time = 100. * 3600. ;/// characteristicValues.t_c;
 
 public :
 
 	// ! construct from gridview
 	ProblemBoundaryConditions (const GV& gv_,const Properties& property_)
 	: gv ( gv_ ),
-	  property(property_)
+	  property(property_),
+	  icvalue(gv_, property_)
 	{}
 	
 	/* NOTE:
@@ -29,8 +31,8 @@ public :
 	std::vector< int >
 	type( I& intersection,/*const typename GV::Traits::template Codim<0>::Entity& element,*/
 			const Dune::FieldVector<double,dim-1>& xlocal,
-		  double time /*s*/,
-		  double dt /*s*/ ) const {
+		  double time /* s */,
+		  double dt /* s */ ) const {
 		auto iplocal = intersection.geometryInInside().global(xlocal);
 		auto globalPos = intersection.inside().geometry().global(iplocal);
 		
@@ -152,7 +154,7 @@ public :
 		}
 		else if (time >= (4.50*Xc_time)  )	
 		{
-			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time)  )/characteristicValues.P_c ;
+			bcvalue[indices.BCId_water] = (5.e6 + 10.*(time- 4.50*Xc_time) )/characteristicValues.P_c ;
 		}
 		return bcvalue;
 	}

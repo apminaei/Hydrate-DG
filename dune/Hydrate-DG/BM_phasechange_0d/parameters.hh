@@ -145,7 +145,7 @@ public:
 	}
 
 	double InitialXC(Dune::FieldVector< double,dim > xglobal) const {
-		double XC = XC_t0;
+		double XC = 0.02 * 16.04 / 58.4 ;
 		return XC;
 	}
 
@@ -178,10 +178,10 @@ public:
 		return ref_pressure; /*Pa*/
 	}
 	double HydrateDissociationRateConstant() const {
-		return kd * 2.16e6 / t_END;
+		return kd ;
 	}
 	double HydrateFormationRateConstant() const {
-		return kf * 2.16e6 / t_END;
+		return kf ;
 	}
 	double time_end() const {
 		return t_END;
@@ -218,7 +218,7 @@ public:
 	g( ) const {
 		Dune::FieldVector<double,dim> gravity( 0. );
 		double g = 0.;
-		if(gravity_flag) g = g_magnitude;
+		if(gravity_flag) g = -g_magnitude;
 		gravity[dim-1] = g;
 		gravity[0] = 0.;
 		return gravity; /*N/kg*/

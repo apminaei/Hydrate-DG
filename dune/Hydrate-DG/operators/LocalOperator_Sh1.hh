@@ -256,7 +256,7 @@ public:
       auto permeability = property.soil.SedimentPermeability(cell, ip_local )/*ndim K from soil.hh*/
 							  * property.hydraulicProperty.PermeabilityScalingFactor(cell, ip_local, Sh, por );
 
-      double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+      double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T * Xc_T, Pg * Xc_P);
       
       // compute source terms

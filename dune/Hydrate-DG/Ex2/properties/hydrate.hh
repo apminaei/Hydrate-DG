@@ -30,7 +30,7 @@ public:
 	}
 
 	double MolarDensity() const {
-		return Density()/MolarMass();
+		return Density()*characteristicValue.density_c/MolarMass();
 	}
 
 	double HydrationNumber() const

@@ -49,9 +49,6 @@ public:
 		Xc_X = property.characteristicValue.x_c;
 		Xc_Y = property.characteristicValue.x_c;
 		T_ref = property.parameter.ReferenceTemperature()/Xc_T;
-	// #ifdef STATEINDEPENDENTPROPERTIES
-  	// 	T_ref = property.parameter.RefT()/Xc_T;
-	// #endif
 	}
 	// volume integral depending on test and ansatz functions
 	template <typename EG, typename LFSU, typename X, typename LFSV, typename R>
@@ -170,6 +167,8 @@ public:
       		RF XCH4 = 0.0;
       		for (size_type i = 0; i < lfsu_XCH4.size(); i++)
         		XCH4 += x(lfsu_XCH4, i) * phi_XCH4[i];
+			// if (XCH4 < 0.)
+			// 	XCH4 = 0.;
 
       		// evaluate YH2O
       		RF YH2O = 0.0;
@@ -181,10 +180,13 @@ public:
       		for (size_type i = 0; i < lfsu_XC.size(); i++)
         		XC += x(lfsu_XC, i) * phi_XC[i];
 
-			RF Sw = 1. - Sg - Sh;
+			// Sg = std::max(0., Sg);
+			// Sh = std::max(0., Sh);
+			RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
+
 
 			// evaluate Pg
-			auto por = property.soil.SedimentPorosity(cell, ip_local);
+			auto por = property.soil.SedimentPorosity(cell, ip_local)  ;
       		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw, Sh, por) ; /* ndim */
       
 			RF Pg = Pw + Pc ;
@@ -194,10 +196,10 @@ public:
       		auto Pg_dim = Pg * Xc_P;
       		auto T_dim = T * Xc_T;
 
-			double S = XC * (property.salt.MolarMass()/property.water.MolarMass());
+			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
-			auto YCH4 = property.mixture.YCH4(XCH4, T_dim, Pg_dim, XC, zCH4);
-      		auto XH2O = property.mixture.XH2O(YH2O, T_dim, Pg_dim, XC);
+			auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
+			auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */  
 			auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4);
 			auto rho_w = property.water.Density(T_dim, Pw_dim, S);
 			auto rho_h = property.hydrate.Density() ;
@@ -206,21 +208,30 @@ public:
 			auto Cv_w = property.water.Cv(T_dim, Pw_dim, S) ;
 			auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
-			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * (1. - Sw - Sh) * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			
+			auto H2O_g = rho_g * por * YH2O * Sg;
+			auto CH4_w = rho_w * por * XCH4 * Sw;
+			auto SALT_w = rho_w * por * XC * Sw;
+			auto H2O_w = rho_w * por * (1. -XC - XCH4) * Sw;
+			auto CH4_g = rho_g * por * (1. - YH2O) * Sg;
+
+
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
 			RF factor = ip.weight() * geo.integrationElement(ip.position());
+			auto mass = por * (rho_g * Sg + rho_w * Sw );
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((rho_g * por * (1. - YH2O) * Sg + rho_w * por * XCH4 * Sw) * psi_Sg[i]) * factor);
+				r.accumulate(lfsv_Sg, i, ((CH4_g + CH4_w) * psi_Pw[i]) * factor);//
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
-				r.accumulate(lfsv_XC, i, (rho_w * por * XC * Sw * psi_XC[i]) * factor);
+				r.accumulate(lfsv_XC, i, (SALT_w * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{
-				r.accumulate(lfsv_Pw, i, ((rho_g * por * YH2O * Sg + rho_w * por * (1. -XC - XCH4) * Sw) * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_Pw, i, ((H2O_g + H2O_w) * psi_Pw[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Sh.size(); i++)
 			{

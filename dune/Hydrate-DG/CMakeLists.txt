@@ -3,4 +3,5 @@ install(FILES IncludesDUNE.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydra
 add_subdirectory("operators")
 add_subdirectory("BM_phasechange_0d")
 #add_subdirectory("FGP")
+add_subdirectory("Ex2")
 add_subdirectory("extras")
