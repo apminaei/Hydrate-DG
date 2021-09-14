@@ -37,10 +37,10 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/";
+		std::string PATH = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/inputs/";
+	    std::string input_file = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 

@@ -14,11 +14,11 @@ public:
 
 		double D = 1.*1.0e-9;	/* m^2/s */
 
-		return D/characteristicValue.dispersivity_c;
+		return D/characteristicValue.dispersivity_c ;
 	}
 
 	double Source( ) const {
-		return 0.;
+		return 0.;///characteristicValue.X_source_mass;
 	}
 
 };

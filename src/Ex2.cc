@@ -16,8 +16,8 @@
 #include <exception>
 #include <chrono>
 #include <stdio.h>
-//#include <filesystem>
-
+#include <filesystem>
+//#include <experimental/filesystem>
 #include "../dune/Hydrate-DG/IncludesDUNE.hh"
 #include "../dune/Hydrate-DG/Ex2/include_problem.hh"
 //TODO: Change problem name to: BM-phasechange-0d
@@ -37,17 +37,26 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-		std::string PATH = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/";
+		std::string PATH = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/inputs/";
+	    std::string input_file = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/Ex2/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 
 	    Dune::ParameterTree ptree;
 	    Dune::ParameterTreeParser ptreeparser;
 	    ptreeparser.readINITree(input_file,ptree);
-	    ptreeparser.readOptions(argc,argv,ptree);
+	    ptreeparser.readOptions(argc,argv,ptree); 
+
+		std::string fileName = ptree.get("output.file_name",(std::string)"test");
+		std::string pathName = ptree.get("output.path_name",(std::string)"test");
+		pathName += "outputs/";
+		pathName += fileName ;
+		if (helper.rank() == 0)
+		{
+				std::filesystem::create_directory(pathName);
+		}
 
 		
 		/**************************************************************************************************/
@@ -62,6 +71,10 @@ int main(int argc, char **argv)
 		
 		Dune::FieldVector<double, dim> L(0.0); // L represents the right top node of the rectangular/cuboidal domain
 		L[0] = mesh.X_length;
+		if (dim == 1)
+		{
+			L[0] = mesh.Z_length;
+		}
 		if (dim == 2)
 		{
 			L[1] = mesh.Z_length;
@@ -73,6 +86,8 @@ int main(int argc, char **argv)
 		}
 		std::array<int, dim> N(Dune::filledArray<dim, int>(1));
 		N[0] = mesh.X_cells;
+		if (dim == 1)
+			N[0] = mesh.Z_cells;
 		if (dim == 2)
 			N[1] = mesh.Z_cells;
 		else if (dim == 3)
@@ -88,24 +103,9 @@ int main(int argc, char **argv)
 		std::shared_ptr<Grid> grid = std::shared_ptr<Grid>(new Grid(L, N, periodic, overlap, Dune::MPIHelper::getCollectiveCommunication()));
 		grid->refineOptions(false); // keep overlap in cells
 
-		typedef Grid::LeafGridView GV;
-		const GV &gv = grid->leafGridView();
-		grid->loadBalance();
-#elif defined(UG)
-
-		typedef Dune::UGGrid<dim> Grid;
-		//Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
-		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, 0}};
-		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], L[1]}};
-		std::array<unsigned int, dim> elements;
-		elements[0] = N[0];
-		elements[1] = N[1];
-		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements);
-		typedef Grid::LeafGridView GV;
-		GV gv = grid->leafGridView();
-		grid->loadBalance();
-
+		// typedef Grid::LeafGridView GV;
+		// const GV &gv = grid->leafGridView();
+		// grid->loadBalance();
 #elif defined(ALUGRID)
 		typedef Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming> Grid;
 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
@@ -113,31 +113,61 @@ int main(int argc, char **argv)
 		std::array<unsigned int, dim> elements;
 		elements[0] = N[0];
 		elements[1] = N[1];
-		//std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-
 		// std::string filename = ptree.get("grid.alugrid.name",
         //                                  (std::string)"grid.msh");
 		// auto grid_file = PATH;
 		// grid_file += "grids/";
 		// grid_file += filename;
         // Dune::GridFactory<Grid> factory;
-        // Dune::GmshReader<Grid>::read(factory,grid_file,true,false);
+        // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
         // std::shared_ptr<Grid> grid(factory.createGrid());
-		 
 
+#elif defined(UG) 
+		typedef  Dune::UGGrid<dim> Grid;
+		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+		std::array<unsigned int, dim> elements;
+		elements[0] = N[0];
+		elements[1] = N[1];
+		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+#endif
+
+// #ifdef ALUGRID 
+// 		// std::string filename = ptree.get("grid.alugrid.name",
+//         //                                  (std::string)"grid.msh");
+// 		// auto grid_file = PATH;
+// 		// grid_file += "grids/";
+// 		// grid_file += filename;
+//         // Dune::GridFactory<Grid> factory;
+//         // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
+//         // std::shared_ptr<Grid> grid(factory.createGrid());
+
+// 		// Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
+		
+// 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
+// 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
+// 		std::array<unsigned int, dim> elements;
+// 		elements[0] = N[0];
+// 		elements[1] = N[1];
+// 		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
+// 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
+// #endif
+		
 		typedef Grid::LeafGridView GV;
 		GV gv = grid->leafGridView();
+		// grid->globalRefine(1);
   		// Transfer partitioning from ParMETIS to our grid
   		grid->loadBalance();
-		
-#endif
+
 		//grid->globalRefine(1);
 		// Dune::VTKWriter<GV> vtkWriter(gv);
   		// vtkWriter.write(std::string("gridviews"));
 		//exit(0);
-		// driver(gv, ptree, helper);
-		driver_Sh(gv, ptree, helper);
+		driver(gv, ptree, helper);
+		// driver_Sh(gv, ptree, helper);
 
 	}
 	catch (Dune::Exception &e)

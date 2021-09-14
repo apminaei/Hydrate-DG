@@ -48,9 +48,9 @@ public:
 		double alpha_P = 0.0045;
 
 #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		double P_ref = parameter.RefP();
-		double S_ref = parameter.RefSal();
+		double T_ref = parameter.ReferenceTemperature();
+		double P_ref = parameter.ReferencePressure();
+		double S_ref = parameter.ReferenceSalinity();
 		T  = T_ref;
 		Pw = P_ref;
 		S  = S_ref;
@@ -81,7 +81,7 @@ public:
 		double T0 = 273.15 ; // K
 
 #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
+		double T_ref = parameter.ReferenceTemperature();
 		double Tr = T0/T_ref ;
 #else
 		double Tr = T0/T ;
@@ -98,9 +98,9 @@ public:
 		/* kth: unit -> W.m^-1 K^-1 */
 
 #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
-		double P_ref = parameter.RefP();
-		double S_ref = parameter.RefSal();
+		double T_ref = parameter.ReferenceTemperature();
+		double P_ref = parameter.ReferencePressure();
+		double S_ref = parameter.ReferenceSalinity();
 		T  = T_ref;
 		Pw = P_ref;
 		S  = S_ref;
@@ -108,7 +108,7 @@ public:
 
 		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.29*S );
 
-		return kth/characteristicValue.thermalconductivity_c;
+		return kth/characteristicValue.thermalconductivity_c ;
 	}
 
 	double Cp( double T, double Pw, double S ) const {
@@ -125,9 +125,9 @@ public:
 		double Cv;
 		/* mu: unit -> J*kg^-1*K^-1 */
 
-		Cv = Cp( T, Pw, S );
+		Cv = Cp( T, Pw, S )*characteristicValue.specificheat_c;
 
-		return Cv;
+		return Cv/characteristicValue.volumetricheat_c;;
 
 	}
 
@@ -136,7 +136,7 @@ public:
 		double psat;   /* [Pa] */
 
 #ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.RefT();
+		double T_ref = parameter.ReferenceTemperature();
 		T = T_ref;
 #endif
 

@@ -84,8 +84,8 @@ public:
 	}
 
 	double ThermalConductivity() const {
-		/* unit -> W/mK */
-		double kth = 3.0;
+		/* unit -> Watt/(meter Kelvin) */ 
+		double kth = 3.0 ;
 		return kth/characteristicValue.thermalconductivity_c;
 	}
 
@@ -97,8 +97,8 @@ public:
 
 	double Cv() const {
 		/* unit -> W/kg.K */
-		double Cv = Cp();
-		return Cv;
+		double Cv = Cp()*characteristicValue.specificheat_c;
+		return Cv/characteristicValue.volumetricheat_c;
 	}
 
 	double Tortuosity( double porosity ) const {

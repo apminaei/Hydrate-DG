@@ -326,7 +326,7 @@ void driver(const GV &gv, // GridView
 	 
 	//	VTK
 	std::string fileName = ptree.get("output.file_name",(std::string)"test");
-	std::string pathName = "/home/amir/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/outputs/";
+	std::string pathName = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/FGP/outputs/";
 	pathName += fileName ;
 	//if(helper.rank()==0){
 		//std::filesystem::create_directory(pathName);

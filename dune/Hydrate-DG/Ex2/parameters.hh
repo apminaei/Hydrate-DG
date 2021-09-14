@@ -52,7 +52,6 @@ private:
 public:
 
 	MeshParameters<PTree> mesh;
-	
 	//! constructor
 	Parameters (const PTree& ptree_)
 	:ptree(ptree_),
@@ -128,7 +127,7 @@ public:
 	}
 
 	double InitialPw(Dune::FieldVector< double,dim > xglobal) const {
-		double Pw = Pw_t0 + 1000.* 9.81 * (0.-xglobal[1])*X_c.x_c;
+		double Pw = Pw_t0 + 1030.21 * 9.81 * (0.-xglobal[1])*X_c.x_c;
 		return Pw; /* Pa */
 	}
 
@@ -143,7 +142,7 @@ public:
 	}
 
 	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
-		double T = T_t0 + ReferenceTemperature() - gradTz * xglobal[1]*X_c.x_c ; /*K*/
+		double T = T_t0 + ref_temperature - gradTz * xglobal[1]*X_c.x_c ; /*K*/
 		return T; /* K */
 	}
 	
@@ -168,6 +167,7 @@ public:
 	}
 
 	double InitialXC(Dune::FieldVector< double,dim > xglobal) const {
+		
 		double XC = XC_t0;
 		return XC;
 	}
@@ -192,19 +192,31 @@ public:
 	/**********************************************************************/
 	/* REFERENCE STATE VALUES */
 	double ReferenceSalinity() const {
-		return ref_salinity;
+		double refSal = ref_salinity;
+		#ifdef STATEINDEPENDENTPROPERTIES
+			refSal = 0.02;
+		#endif
+		return refSal;
 	}
 	double ReferenceTemperature() const {
-		return ref_temperature; /*K*/
+		double ref = ref_temperature;
+		#ifdef STATEINDEPENDENTPROPERTIES
+			ref = ref_temperature + 8.;
+		#endif
+		return ref; /*K*/
 	}
 	double ReferencePressure() const {
-		return ref_pressure; /*Pa*/
+		double ref = ref_pressure;
+		#ifdef STATEINDEPENDENTPROPERTIES
+			ref = ref_pressure * 20.;
+		#endif
+		return ref; /*Pa*/
 	}
 	double HydrateDissociationRateConstant() const {
-		return kd * (t_END/T_end) ;
+		return kd ;//* (t_END/T_end) ;
 	}
 	double HydrateFormationRateConstant() const {
-		return kf * (t_END/T_end);
+		return kf ;//* (t_END/T_end);
 	}
 	double time_end() const {
 		return t_END;
@@ -213,20 +225,20 @@ public:
 		return T_end;
 	}
 
-#ifdef STATEINDEPENDENTPROPERTIES
-	// (P,T,sal) reference state for CASE1
-	double RefP() const {
-		return 20.*ReferencePressure(); /*Pa*/
-	}
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 	// (P,T,sal) reference state for CASE1
+// 	double RefP() const {
+// 		return 20.*ReferencePressure(); /*Pa*/
+// 	}
 
-	double RefT() const {
-		return ReferenceTemperature() + 8.0; /*K*/
-	}
+// 	double ReferenceTemperature() const {
+// 		return ReferenceTemperature() + 8.0; /*K*/
+// 	}
 
-	double RefSal() const {
-		return 0.02; /*kg/kg*/;
-	}
-#endif
+// 	double RefSal() const {
+// 		return 0.02; /*kg/kg*/;
+// 	}
+// #endif
 
     /**********************************************************************/
 	Dune::FieldVector<double,dim>
@@ -244,7 +256,7 @@ public:
 	g( ) const {
 		Dune::FieldVector<double,dim> gravity( 0. );
 		double g = 0.;
-		if(gravity_flag) g = g_magnitude;
+		if(gravity_flag) g = -g_magnitude;
 		gravity[dim-1] = g;
 		gravity[0] = 0.;
 		return gravity; /*N/kg*/

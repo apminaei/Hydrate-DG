@@ -12,6 +12,7 @@ public:
 	constexpr static double dispersivity_c = 1.e-9;//x_c * x_c / t_c;
 	constexpr static double P_c = 1.e6;//viscosity_c * x_c * x_c / (t_c  * permeability_c);//5.e4; // Pentry Characteristic value for Pressure
 	constexpr static double T_c = 1.e2;//t_c/(density_c*specificheat_c);//1.e0; // T_ref Characteristic value for Temperature
+	constexpr static double volumetricheat_c =  specificheat_c  ;
 
 	constexpr static double X_source_mass 		= t_c/density_c;// Correct
 	constexpr static double X_convective_mass 	= ( permeability_c/(x_c*x_c) ) * ( P_c*t_c/viscosity_c );// Correct

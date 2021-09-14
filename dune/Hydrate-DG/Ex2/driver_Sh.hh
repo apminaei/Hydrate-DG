@@ -477,14 +477,14 @@ void driver_Sh(const GV &gv, // GridView
 
 
 	// Linear and PDESOLVER
-	using PDESOLVER_Sh = Dune::PDELab::Newton< IGO_Sh, LS_Sh, U_Sh >;
-    PDESOLVER_Sh pdesolver_sh( igo_sh, ls_sh );
+	using PDESOLVER_Sh = Dune::PDELab::Newton< IGO_Sh, LS, U_Sh >;
+    PDESOLVER_Sh pdesolver_sh( igo_sh, ls );
 	// using PDESOLVER_Sg = Dune::PDELab::Newton< IGO_Sg, LS_Sg, U_Sg >;
     // PDESOLVER_Sg pdesolver_sg( igo_sg, ls_sg );
 	// using PDESOLVER_Pw = Dune::PDELab::Newton< IGO_Pw, LS_Pw, U_Pw >;
     // PDESOLVER_Pw pdesolver_pw( igo_pw, ls_pw );
-	using PDESOLVER_T = Dune::PDELab::Newton< IGO_T, LS_T, U_T >;
-    PDESOLVER_T pdesolver_t( igo_t, ls_t );
+	using PDESOLVER_T = Dune::PDELab::Newton< IGO_T, LS, U_T >;
+    PDESOLVER_T pdesolver_t( igo_t, ls );
 	// using PDESOLVER_XC = Dune::PDELab::Newton< IGO_XC, LS_XC, U_XC >;
     // PDESOLVER_XC pdesolver_xc( igo_xc, ls_xc );
 	// using PDESOLVER_XCH4 = Dune::PDELab::Newton< IGO_XCH4, LS_XCH4, U_XCH4 >;
@@ -727,7 +727,7 @@ void driver_Sh(const GV &gv, // GridView
 
 	int newton_iterations = 0;
 	double newton_first_defect = 0.;
-	double newton_reduction = 0.;
+	double newton_defect = 0.;
 	
 	//	BEGIN TIME LOOP
 	while ( time < (t_END - 1e-8/Xc_t))
@@ -784,16 +784,16 @@ void driver_Sh(const GV &gv, // GridView
 			osm.apply( time, dt, uold, unew );
 			newton_iterations = osm.getPDESolver().result().iterations;
 			newton_first_defect = osm.getPDESolver().result().first_defect;
-			newton_reduction = osm.getPDESolver().result().reduction;
+			newton_defect = osm.getPDESolver().result().defect;
 		
 			uold = unew;
 			// time = current_time;
 			// dt = current_dt; 
-			DGF_Pw dgf_pw(subgfs_Pw, unew);
-			DGF_Sg dgf_sg(subgfs_Sg, unew);
-			DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
-			DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
-			DGF_XC dgf_xc(subgfs_XC, unew);
+			// DGF_Pw dgf_pw(subgfs_Pw, unew);
+			// DGF_Sg dgf_sg(subgfs_Sg, unew);
+			// DGF_XCH4 dgf_xch4(subgfs_XCH4, unew);
+			// DGF_YH2O dgf_yh2o(subgfs_YH2O, unew);
+			// DGF_XC dgf_xc(subgfs_XC, unew);
 			if(helper.rank()==0){
 				// std::cout << "current_time = " << current_time  << "   time = " << time<< std::endl;
 				// std::cout << "current_dt = " << current_dt  << "   dt = " << dt<< std::endl;
@@ -884,7 +884,7 @@ void driver_Sh(const GV &gv, // GridView
 										dt*Xc_t,
 										newton_iterations,
 										newton_first_defect,
-										newton_reduction,
+										newton_defect,
 										clock_time_elapsed );
 		}
 		// GRAPHICS FOR NEW OUTPUT
@@ -900,7 +900,7 @@ void driver_Sh(const GV &gv, // GridView
 		/*********************************************************************************************
 			 * OUTPUT 
 			 *********************************************************************************************/
-		if ((time + dt > (t_OP * opcount - 1.e-3)) and (time + dt < t_OP * opcount + 1.e-3))
+		if (((time + dt)/(t_OP * opcount) > (1.-1.e-3)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-3)))
 		{
 			// primary variables
 			vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_pw, "Pw"));
@@ -960,13 +960,13 @@ void driver_Sh(const GV &gv, // GridView
 		if(helper.rank()==0){
 			std::cout << " , time+dt = " 
 			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< (time + dt)
+			<< (time + dt) * Xc_t
 			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< " , opTime = "  << t_OP * opcount  ;
+			<< " , opTime = "  << (t_OP * opcount)* Xc_t  ;
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-		if ((time + dt) * Xc_t > (t_OP * opcount * Xc_t + 1.e-8) )
+		if ((time + dt) * Xc_t > (t_OP * opcount * Xc_t + 1.e-6) )
 		{
 			
 			dt = t_OP * opcount - time;
@@ -974,7 +974,7 @@ void driver_Sh(const GV &gv, // GridView
 			if(helper.rank()==0){
 				std::cout<< " , because timeNext > opNext , dt set to : " 
 				<< std::setw(12) << std::setprecision(8) << std::scientific
-				<< dt  << std::endl;
+				<< dt * Xc_t << std::endl;
 				std::cout<< std::flush;
 			}
 			dtFlag = -1;
@@ -983,7 +983,7 @@ void driver_Sh(const GV &gv, // GridView
 		if(helper.rank()==0){
 			std::cout<< " , dt  : "  
 			<< std::setw(12) << std::setprecision(8) << std::scientific
-			<< dt  << std::endl;
+			<< dt * Xc_t << std::endl;
 			std::cout<<" "<< std::endl;
 			std::cout << " READY FOR NEXT ITERATION. " << std::endl;
 			std::cout<< std::flush;

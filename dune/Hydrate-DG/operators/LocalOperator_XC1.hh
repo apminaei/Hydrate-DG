@@ -164,7 +164,7 @@ public:
     Xc_T = property.characteristicValue.T_c;
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;/* ndim*/
-    gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
+    gravity = property.parameter.g() / Xc_grav  ; /* ndim */
     #ifdef STATEINDEPENDENTPROPERTIES
       		T_ref = property.parameter.RefT()/Xc_T;
     #endif

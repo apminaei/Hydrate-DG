@@ -312,7 +312,7 @@ public:
 		return 20.*ReferencePressure(); /*Pa*/
 	}
 
-	double RefT() const {
+	double ReferenceTemperature() const {
 		return ReferenceTemperature() + 8.0; /*K*/
 	}
 

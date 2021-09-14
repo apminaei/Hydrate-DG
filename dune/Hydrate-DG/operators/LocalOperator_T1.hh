@@ -165,7 +165,7 @@ public:
     Xc_T = property.characteristicValue.T_c;
     Xc_t = property.characteristicValue.t_c;
     T_ref = property.parameter.ReferenceTemperature()/Xc_T;/* ndim*/
-    gravity = -property.parameter.g() / Xc_grav  ; /* ndim */
+    gravity = property.parameter.g() / Xc_grav  ; /* ndim */
     // #ifdef STATEINDEPENDENTPROPERTIES
     //   		T_ref = property.parameter.RefT()/Xc_T;
     // #endif
@@ -1260,13 +1260,13 @@ public:
       RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>=0.0)
       {
-        omegaup_T_s = 1.0;
-        omegaup_T_n = 0.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
       else
       {
-        omegaup_T_s = 0.0;
-        omegaup_T_n = 1.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       // integration factor
@@ -1760,13 +1760,13 @@ public:
       RF omegaup_T_s, omegaup_T_n;
       if (normalflux_T>=0.0)
       {
-        omegaup_T_s = 1.0;
-        omegaup_T_n = 0.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
       else
       {
-        omegaup_T_s = 0.0;
-        omegaup_T_n = 1.0;
+        omegaup_T_s = 0.5;
+        omegaup_T_n = 0.5;
       }
 
       //   fluxes and diff. flux
@@ -1792,7 +1792,7 @@ public:
       }
 
       auto convectiveflux_Heat_w = omegaup_w_s * convectiveflux_Heat_w_s + omegaup_w_n * convectiveflux_Heat_w_n;
-      if (veltype[Indices::BCId_water] == Indices::BCId_neumann){
+      if (veltype[Indices::BCId_water] == Indices::BCId_neumann || bctype[Indices::PVId_Pw] == Indices::BCId_neumann){
         convectiveflux_Heat_w = 0.5 * ( rho_w_s * Cp_w_s * (T_s - T_ref) + rho_w_n * Cp_w_n * (T_n - T_ref)) * normalvelocity_w_n;
       }
 

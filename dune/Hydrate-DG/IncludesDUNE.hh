@@ -8,7 +8,7 @@
 #ifndef INCLUDESDUNE_HH_
 #define INCLUDESDUNE_HH_
 // (options: PVS, NCP, CGP)
-#define NCP
+//#define NCP
 #define ALUGRID
 #define PARALLEL
 
@@ -49,6 +49,8 @@
 #include<dune/istl/superlu.hh>
 #include<dune/pdelab/function/callableadapter.hh>
 
+// #include<dune/pdelab.hh>
+
 #include<dune/pdelab/newton/newton.hh>
 #include<dune/pdelab/common/function.hh>
 #include<dune/pdelab/common/vtkexport.hh>
@@ -83,6 +85,7 @@
 #include<dune/pdelab/gridoperator/onestep.hh>
 
 #include<dune/pdelab/backend/istl/bcrsmatrixbackend.hh>
+#include<dune/pdelab/backend/istl/seq_amg_dg_backend.hh>
 #include<dune/pdelab/backend/istl/istlsolverbackend.hh>
 #include<dune/pdelab/stationary/linearproblem.hh>
 #include<dune/pdelab/instationary/onestep.hh>		//for instationary

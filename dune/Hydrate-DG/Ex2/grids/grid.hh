@@ -80,21 +80,50 @@ public:
 
 
 	bool isLeftBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( (globalPos[0] < origin + eps)  )//and (globalPos[1] < Z_GHSZ_bottom + eps)
-			return true;
-		else
-			return false;
+		
+		if( dimension == 2 ){
+			if( globalPos[0] < origin + eps ){
+				return true;
+			}
+			else
+				return false;
+		}
+		else if( dimension == 3 ){
+			if( globalPos[0] < origin + eps ){
+				return true;
+			}
+			else
+				return false;
+		}
 	}
 
 	bool isRightBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( globalPos[0] > X_length - eps )
-			return true;
-		else
-			return false;
+		
+		if( dimension == 2 ){
+			if( globalPos[0] > X_length - eps ){
+				return true;
+			}
+			else
+				return false;
+		}
+		else if( dimension == 3 ){
+			if( globalPos[0]  > X_length - eps ){
+				return true;
+			}
+			else
+				return false;
+		}
 	}
 
 	bool isBottomBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( dimension == 2 ){
+		if( dimension == 1 ){
+			if( globalPos[0] < Z_length + eps ){
+				return true;
+			}
+			else
+				return false;
+		}
+		else if( dimension == 2 ){
 			if( globalPos[1] < Z_length + eps ){
 				return true;
 			}
@@ -102,7 +131,7 @@ public:
 				return false;
 		}
 		else if( dimension == 3 ){
-			if( globalPos[2] < origin + eps ){
+			if( globalPos[2] < Z_length + eps ){
 				return true;
 			}
 			else
@@ -111,7 +140,14 @@ public:
 	}
 
 	bool isTopBoundary( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( dimension == 2 ){
+		if( dimension == 1 ){
+			if( globalPos[0] > origin - eps ){
+				return true;
+			}
+			else
+				return false;
+		}
+		else if( dimension == 2 ){
 			if( globalPos[1] > origin - eps ){
 				return true;
 			}
@@ -119,7 +155,7 @@ public:
 				return false;
 		}
 		else if( dimension == 3 ){
-			if( globalPos[2] < Z_length - eps ){
+			if( globalPos[2] > origin - eps ){
 				return true;
 			}
 			else
@@ -153,10 +189,25 @@ public:
 
 	//##################################################################################
 	bool isGHSZ( Dune::FieldVector< double, dimension > globalPos ) const{
-		if((Z_GHSZ_bottom - eps) < globalPos[1] and globalPos[1]< (Z_GHSZ_top + eps))
-			return true;
-		else
-			return false;
+		
+		if( dimension == 1 ){
+			if((Z_GHSZ_bottom - eps) < globalPos[0] and globalPos[0]< (Z_GHSZ_top + eps))
+				return true;
+			else
+				return false;
+		}
+		else if( dimension == 2 ){
+			if((Z_GHSZ_bottom - eps) < globalPos[1] and globalPos[1]< (Z_GHSZ_top + eps))
+				return true;
+			else
+				return false;
+		}
+		else if( dimension == 3 ){
+			if((Z_GHSZ_bottom - eps) < globalPos[2] and globalPos[2]< (Z_GHSZ_top + eps))
+				return true;
+			else
+				return false;
+		}
 	}
 
 	//##################################################################################

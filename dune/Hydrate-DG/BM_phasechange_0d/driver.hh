@@ -144,11 +144,11 @@ void driver(const GV &gv, // GridView
 	Dune::PDELab::interpolate(initial, gfs, uold); // Initialize the solution at t=0 (uold) with the given initial values
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	ConvectionDiffusionDGMethod::Type method_g = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_w = ConvectionDiffusionDGMethod::SIPG;
-	ConvectionDiffusionDGMethod::Type method_T = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_x = ConvectionDiffusionDGMethod::NIPG;
-	ConvectionDiffusionDGMethod::Type method_y = ConvectionDiffusionDGMethod::NIPG;
+	double method_g = -1.;
+	double method_w = -1.;
+	double method_T = 1.;
+	double method_x = 1.;
+	double method_y = 1.;
 	double alpha_g = 1.e3;
 	double alpha_w = 1.e3;
 	double alpha_s = 1.e3; 
@@ -158,7 +158,7 @@ void driver(const GV &gv, // GridView
 	double intorder=4;
 
 	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_S, FEM_T, FEM_X, FEM_Y> LOP; // spatial part
-	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder,  alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property);
