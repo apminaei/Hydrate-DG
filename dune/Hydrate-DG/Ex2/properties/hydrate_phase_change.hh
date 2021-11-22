@@ -72,8 +72,7 @@ public:
 
 		double A_s;
 
- 		double M_base = 1.e5;//pow( 2.*permeability, -1/2. );//
-		//double sh = std::max(0., std::min(1., Sh));
+ 		double M_base =  1.e5;//pow( 2.*permeability, -1/2. );//
  		double M_SF = pow( porosity*(1.-Sh), 3./2. );
  		A_s = M_base * M_SF ;
 

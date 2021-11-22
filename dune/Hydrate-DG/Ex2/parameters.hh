@@ -45,7 +45,9 @@ private:
 	double ref_saltconcentration;
 	double ref_temperature;
 	double ref_pressure;
-	double rotationdegree;
+	double rotationdegree1;
+	double rotationdegree2;
+	double rotationdegree3;
 
 	bool gravity_flag;
 	double g_magnitude;
@@ -101,7 +103,9 @@ public:
 			kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-17);/*mol/m².Pa.s*/
 			
-			rotationdegree = ptree.get("permeability.rotation",(double)10.);
+			rotationdegree1 = ptree.get("permeability.rotation1",(double)10.);
+			rotationdegree2 = ptree.get("permeability.rotation2",(double)10.);
+			rotationdegree3 = ptree.get("permeability.rotation3",(double)10.);
 
 			//gravity
 			gravity_flag = ptree.get("gravity.flag",(bool)true);
@@ -122,7 +126,11 @@ public:
 	//2. Initial Values
 
 	double InitialSg(Dune::FieldVector< double,dim > xglobal) const {
-		double Sg = Sg_t0;
+		double Sg = 0.;
+		// if( dim == 2 && mesh.isFGP(xglobal)){
+		// 	Sg = Sg_t0;//* (rand()%2) + 0.001;//
+		// }
+
 		return Sg;
 	}
 
@@ -156,7 +164,7 @@ public:
 	
 
 	double InitialSh(Dune::FieldVector< double,dim > xglobal) const {
-		double Sh = 0.0 ;
+		double Sh = Sh_t0 ;
 		double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
 		
 		if( dim == 1 && mesh.isGHSZ(xglobal)){
@@ -203,8 +211,18 @@ public:
 	int num_materials() const {
 		return numMaterials;
 	}
-	double rotationDegree()const{
-		return rotationdegree;
+	double rotationDegree1()const{
+		return rotationdegree1;
+	}
+	double rotationDegree2()const{
+		return rotationdegree2;
+	}
+	double rotationDegree3()const{
+		return rotationdegree3;
+	}
+
+	double DTz()const{
+		return gradTz;
 	}
 	/**********************************************************************/
 	/* REFERENCE STATE VALUES */

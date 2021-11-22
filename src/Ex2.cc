@@ -17,6 +17,7 @@
 #include <chrono>
 #include <stdio.h>
 #include <filesystem>
+
 #include "../dune/Hydrate-DG/IncludesDUNE.hh"
 #include "../dune/Hydrate-DG/Ex2/include_problem.hh"
 //TODO: Change problem name to: BM-phasechange-0d
@@ -46,16 +47,7 @@ int main(int argc, char **argv)
 	    Dune::ParameterTree ptree;
 	    Dune::ParameterTreeParser ptreeparser;
 	    ptreeparser.readINITree(input_file,ptree);
-	    ptreeparser.readOptions(argc,argv,ptree); 
-
-		std::string fileName = ptree.get("output.file_name",(std::string)"test");
-		std::string pathName = ptree.get("output.path_name",(std::string)"test");
-		pathName += "outputs/";
-		pathName += fileName ;
-		if (helper.rank() == 0)
-		{
-				std::filesystem::create_directory(pathName);
-		}
+	    ptreeparser.readOptions(argc,argv,ptree);
 
 		std::string fileName = ptree.get("output.file_name",(std::string)"test");
 		std::string pathName = ptree.get("output.path_name",(std::string)"test");
@@ -156,38 +148,6 @@ int main(int argc, char **argv)
 
 #endif
 
-#elif defined(UG) 
-		typedef  Dune::UGGrid<dim> Grid;
-		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
-		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
-		std::array<unsigned int, dim> elements;
-		elements[0] = N[0];
-		elements[1] = N[1];
-		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-#endif
-
-// #ifdef ALUGRID 
-// 		// std::string filename = ptree.get("grid.alugrid.name",
-//         //                                  (std::string)"grid.msh");
-// 		// auto grid_file = PATH;
-// 		// grid_file += "grids/";
-// 		// grid_file += filename;
-//         // Dune::GridFactory<Grid> factory;
-//         // Dune::GmshReader<Grid>::read(factory,grid_file,false,false);
-//         // std::shared_ptr<Grid> grid(factory.createGrid());
-
-// 		// Grid(UGCollectiveCommunication comm =CollectiveCommunication<MPI_Comm>);
-		
-// 		auto ll = Dune::FieldVector<Grid::ctype, dim>{{0, L[1]}};
-// 		auto ur = Dune::FieldVector<Grid::ctype, dim>{{L[0], 0}};
-// 		std::array<unsigned int, dim> elements;
-// 		elements[0] = N[0];
-// 		elements[1] = N[1];
-// 		// std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createSimplexGrid(ll, ur, elements);
-// 		std::shared_ptr<Grid> grid = Dune::StructuredGridFactory<Grid>::createCubeGrid(ll, ur, elements); // load balance the grid
-// #endif
-		
 		typedef Grid::LeafGridView GV;
 		GV gv = grid->leafGridView();
 		// grid->globalRefine(1);

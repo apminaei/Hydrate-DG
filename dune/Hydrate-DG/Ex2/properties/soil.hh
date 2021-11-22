@@ -26,10 +26,21 @@ public:
 		double por = 0.;
 		
 		por = prop_L[0][0];
-		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){//
+		if( mesh.isLenz1(xglobal) && parameter.num_materials() > 1){//
 			por = prop_L[1][0];
 			
 		}
+		if( mesh.isLenz2(xglobal) && !mesh.isLenz1(xglobal) && parameter.num_materials() > 2){//
+			por = prop_L[2][0];
+			
+			
+		}
+		 
+		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal) && !mesh.isLenz2(xglobal) && parameter.num_materials() > 2){//
+		// 	por = prop_L[3][0];
+			
+			
+		// }
 		return por;
 	}
 
@@ -42,13 +53,27 @@ public:
 		auto prop_L = parameter.layer_properties();
 		double K = prop_L[0][1];/*m^2*/
 		
-		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+		if( mesh.isLenz1(xglobal) && parameter.num_materials() > 1){
 			K = prop_L[1][1];	
 			
         	// std::cout << K << "  " << xglobal << std::endl;
         	// exit(0)	;
       	
 		}
+		if( mesh.isLenz2(xglobal) && !mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
+			K = prop_L[2][1];	
+			
+        	// std::cout << K << "  " << xglobal << std::endl;
+        	// exit(0)	;
+      	
+		}
+		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal)  && !mesh.isLenz2(xglobal) && parameter.num_materials() > 2){
+		// 	K = prop_L[3][1];	
+			
+        // 	// std::cout << K << "  " << xglobal << std::endl;
+        // 	// exit(0)	;
+      	
+		// }
 
 		return K/characteristicValue.permeability_c; /*ndim*/
 	}
@@ -69,20 +94,38 @@ public:
 		PermeabilityTensor[0][1] = 0. ;
 		PermeabilityTensor[1][0] = 0. ;
 		PermeabilityTensor[1][1] = K_yy ;
-		auto rotation = parameter.rotationDegree()/180*M_PI;// degree to radian
-		auto rotation_at_xglobal = (-2.*rotation / (mesh.X_length*characteristicValue.x_c))*xglobal[0]+rotation;
+		auto rotation1 = parameter.rotationDegree1()/180*M_PI;// degree to radian
+		auto rotation2 = parameter.rotationDegree2()/180*M_PI;// degree to radian
+		auto rotation3 = parameter.rotationDegree3()/180*M_PI;// degree to radian
+		auto rotation_at_xglobal = (-2.*rotation1 / (mesh.X_length*characteristicValue.x_c))*xglobal[0]+rotation1;
 		// std::cout << std::cos(rotation) << std::endl;
 		// std::cout << std::sin(rotation) << std::endl;
 		// exit(0);
 		// rotation with 8,3439 degree counterclockwise
-		if( mesh.isLenz(xglobal) && parameter.num_materials() > 1){
+		if( mesh.isLenz1(xglobal) && parameter.num_materials() > 1){
 			
-			PermeabilityTensor[0][0] = std::cos(rotation_at_xglobal) * K_xx ; //
-			PermeabilityTensor[0][1] = -std::sin(rotation_at_xglobal)  * K_yy ;
-			PermeabilityTensor[1][0] = std::sin(rotation_at_xglobal) * K_xx ;
-			PermeabilityTensor[1][1] = std::cos(rotation_at_xglobal) * K_yy ;// 
+			PermeabilityTensor[0][0] = std::cos(rotation1) * K_xx ; //
+			PermeabilityTensor[0][1] = -std::sin(rotation1)  * K_yy ;
+			PermeabilityTensor[1][0] = std::sin(rotation1) * K_xx ;
+			PermeabilityTensor[1][1] = std::cos(rotation1) * K_yy ;// 
       	
 		}
+		if( mesh.isLenz2(xglobal) && !mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
+			
+			PermeabilityTensor[0][0] = std::cos(rotation2) * K_xx ; //
+			PermeabilityTensor[0][1] = -std::sin(rotation2)  * K_yy ;
+			PermeabilityTensor[1][0] = std::sin(rotation2) * K_xx ;
+			PermeabilityTensor[1][1] = std::cos(rotation2) * K_yy ;// 
+      	
+		}
+		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal) && !mesh.isLenz2(xglobal) && parameter.num_materials() > 3){
+			
+		// 	PermeabilityTensor[0][0] =  K_xx ; //std::cos(rotation3) *
+		// 	PermeabilityTensor[0][1] = -std::sin(rotation3)  * K_yy ;
+		// 	PermeabilityTensor[1][0] = 0.;//std::sin(rotation3) * K_xx ;
+		// 	PermeabilityTensor[1][1] = std::cos(rotation3) * K_yy ;// 
+      	
+		// }
 		  
 		return PermeabilityTensor; /*ndim*/
 	}

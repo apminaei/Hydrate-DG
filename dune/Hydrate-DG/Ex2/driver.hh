@@ -92,7 +92,7 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::legendre > FEM_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::legendre > FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_T; 
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_X; 
 
@@ -268,13 +268,13 @@ void driver(const GV &gv, // GridView
 	double method_T = 0.;//ConvectionDiffusionDGMethod::NIPG;
 	double method_x = 0.;//ConvectionDiffusionDGMethod::NIPG;
 	double method_y = 0.;//ConvectionDiffusionDGMethod::NIPG;
-	double alpha_g = 1.e0;//* property.characteristicValue.X_source_mass;
-	double alpha_w = 1.e0;//* property.characteristicValue.P_c;
-	double alpha_s = 1.e0;
-	double alpha_T = 1.e0;//* property.characteristicValue.T_c;
-	double alpha_x = 1.e0 ;//* property.characteristicValue.X_source_mass;
-	double alpha_y = 1.e0;
-	double intorder=4; 
+	double alpha_g = ptree.get("penalty_coeff.Sg",(double)1.e3); // 1.e3; //
+	double alpha_w = ptree.get("penalty_coeff.Pw",(double)1.e3); // 1.e1; //
+	double alpha_s = ptree.get("penalty_coeff.Sh",(double)1.e3); // 1.e1; //
+	double alpha_T = ptree.get("penalty_coeff.T",(double)1.e3); // 1.e1; //
+	double alpha_x = ptree.get("penalty_coeff.XC",(double)1.e3); // 1.e1; //
+	double alpha_y = ptree.get("penalty_coeff.YH2O",(double)1.e3); // 1.e1; //
+	double intorder= ptree.get("quadrature.order",(int)6);; 
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;
@@ -347,10 +347,10 @@ void driver(const GV &gv, // GridView
 	// params.setGamma(1);
 	// params.setAdditive(false);
 	// ls.setParameters(params);
-	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS;
+	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS;//doesn't work
 	// LS ls(gfs,max_linear_iteration,1,true,true);
 
-	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //works
+	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //doesn't work
 	// LS ls(gfs, cc);
 
 	// typedef Dune::PDELab::ISTLBackend_CG_AMG_SSOR<IGO> LS; // should be checked
@@ -360,7 +360,7 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, 100, verbose);
 
 	auto param = ls.parameters();
-	//param.setMaxLevel(3); // max number of coarsening levels
+	// param.setMaxLevel(3); // max number of coarsening levels
 	param.setCoarsenTarget(100000000); // max DoF at coarsest level
 	ls.setParameters(param);
 
@@ -372,21 +372,22 @@ void driver(const GV &gv, // GridView
 
 	// using LS = Dune::PDELab::ISTLBackend_SEQ_AMG_4_DG<IGO,GFS,Dune::PDELab::CG2DGProlongation,Dune::SeqSSOR,Dune::BiCGSTABSolver>; //works
 	// LS ls(igo,gfs,max_linear_iteration,2,true,true);
-	// // // set parameters for AMG in CG-subspace
+	// // // // set parameters for AMG in CG-subspace
 	// Dune::Amg::Parameters params = ls.parameters();
 	// params.setCoarsenTarget(10000);
 	// params.setMaxLevel(20);
-	// params.setProlongationDampingFactor(0.1);
+	// params.setProlongationDampingFactor(1.8);
 	// params.setNoPreSmoothSteps(3);
 	// params.setNoPostSmoothSteps(3);
 	// params.setGamma(1);
 	// params.setAdditive(false);
 	// ls.setParameters(params);
 
-
+	
+	
 	typedef Dune::PDELab::ISTLBackend_SEQ_SuperLU LS;
 	LS ls;
-	std::cout << " LS DONE ! " << std::endl;
+	// std::cout << " LS DONE ! " << std::endl;
 #endif
 
     //    SELECT SOLVER FOR NON-LINEAR PROBLEM
@@ -667,13 +668,13 @@ void driver(const GV &gv, // GridView
 	// add data field for all components of the space to the VTK writer
 	// primary variables
 	// Dune::PDELab::addSolutionToVTKWriter(vtkSequenceWriter,gfs,uold,Dune::PDELab::vtk::DefaultFunctionNameGenerator("u"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
-	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
+	vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pg>>(dgf_Pg, "Pg"));
 	vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pc>>(dgf_Pc, "Pc"));
 	vtkSequenceWriter.addCellData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Sw    > >( dgf_Sw    , "Sw"   ));
@@ -742,7 +743,7 @@ void driver(const GV &gv, // GridView
 	auto dt_in_year = dt * Xc_t / t_day_sec;
 	
 	//	BEGIN TIME LOOP
-	while ( time < (t_END - 1e-3/Xc_t))
+	while ( time < (t_END - 1e-9/Xc_t))
 	{
 		if( exceptionCaught==false ){
 				dt = std::max(dt,dt_min);
@@ -768,11 +769,11 @@ void driver(const GV &gv, // GridView
 			newton_first_defect = osm.getPDESolver().result().first_defect;
 			newton_defect = osm.getPDESolver().result().defect;
 			
-            auto jacobian = osm.getPDESolver().getJacobian();
-			if(helper.rank()==0 &&  (opcount%100==0)){
-			Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
-			Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
-			}
+            // auto jacobian = osm.getPDESolver().getJacobian();
+			// if(helper.rank()==0 &&  (opcount%100==0)){
+			// Dune::writeMatrixToMatlab ( Dune::PDELab::Backend::native(jacobian), jacPath+"jacobian");
+			// Dune::writeVectorToMatlab(Dune::PDELab::Backend::native(unew),jacPath+"solution");
+			// }
 			auto newton_defects = osm.getPDESolver().result().defects;
 			auto u_norm_two = unew.two_norm();
 			auto u_norm_one = unew.one_norm();
@@ -868,10 +869,10 @@ void driver(const GV &gv, // GridView
 		
 
 		postprocess.evalProjectedSolution(); 
-		auto uoldtmp = uold;
-		uoldtmp =0.;
-		uoldtmp.axpy(1,  unew);
-		uoldtmp.axpy(0.,  uold);
+		// auto uoldtmp = uold;
+		// uoldtmp =0.;
+		// uoldtmp.axpy(1,  unew);
+		// uoldtmp.axpy(0.,  uold);
 		uold = unew;
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
@@ -887,7 +888,7 @@ void driver(const GV &gv, // GridView
 		/*********************************************************************************************
 			 * OUTPUT
 			 *********************************************************************************************/
-		if (((time + dt)/(t_OP * opcount) > (1.-1.e-3)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-3)))
+		if (((time + dt)/(t_OP * opcount) > (1.-1.e-9)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-9)))
 		{
 			// primary variables
 			// vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
@@ -947,7 +948,7 @@ void driver(const GV &gv, // GridView
 			std::cout<< std::flush;
 		}
 		dtLast = dt;
-		if ((time + dt) > (t_OP * opcount + 1.e-6) and time < (t_OP * opcount - 1.e-6))
+		if ((time + dt) > (t_OP * opcount + 1.e-9) and time < (t_OP * opcount - 1.e-9))
 		{
 			
 			dt = t_OP * opcount - time;

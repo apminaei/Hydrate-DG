@@ -55,12 +55,31 @@ public:
 	const double X_GHSZ_left = ptree.get("grid.ghsz.Xleft",(double)1.)/Xc.x_c; //ndim 
 	const double X_GHSZ_right = ptree.get("grid.ghsz.Xright",(double)1.)/Xc.x_c; //ndim
 
-	const double Zmin_lenz = ptree.get("grid.lenz.Zmin",(double)1.)/Xc.x_c; //m
-	const double Zmax_lenz = ptree.get("grid.lenz.Zmax",(double)1.)/Xc.x_c; //m
-	const double Xmin_lenz = ptree.get("grid.lenz.Xmin",(double)1.)/Xc.x_c; //m
-	const double Xmax_lenz = ptree.get("grid.lenz.Xmax",(double)1.)/Xc.x_c; //m
-	const double X0_lenz = ptree.get("grid.lenz.X0",(double)1.)/Xc.x_c; //m
-	const double X1_lenz = ptree.get("grid.lenz.X1",(double)1.)/Xc.x_c; //m
+	const double Zmin_lenz1 = ptree.get("grid.lenz1.Zmin",(double)1.)/Xc.x_c; //m
+	const double Zmax_lenz1 = ptree.get("grid.lenz1.Zmax",(double)1.)/Xc.x_c; //m
+	const double Xmin_lenz1 = ptree.get("grid.lenz1.Xmin",(double)1.)/Xc.x_c; //m
+	const double Xmax_lenz1 = ptree.get("grid.lenz1.Xmax",(double)1.)/Xc.x_c; //m
+	const double X0_lenz1 = ptree.get("grid.lenz1.X0",(double)1.)/Xc.x_c; //m
+	const double X1_lenz1 = ptree.get("grid.lenz1.X1",(double)1.)/Xc.x_c; //m
+
+	const double Zmin_lenz2 = ptree.get("grid.lenz2.Zmin",(double)1.)/Xc.x_c; //m
+	const double Zmax_lenz2 = ptree.get("grid.lenz2.Zmax",(double)1.)/Xc.x_c; //m
+	const double Xmin_lenz2 = ptree.get("grid.lenz2.Xmin",(double)1.)/Xc.x_c; //m
+	const double Xmax_lenz2 = ptree.get("grid.lenz2.Xmax",(double)1.)/Xc.x_c; //m
+	const double X0_lenz2 = ptree.get("grid.lenz2.X0",(double)1.)/Xc.x_c; //m
+	const double X1_lenz2 = ptree.get("grid.lenz2.X1",(double)1.)/Xc.x_c; //m
+
+	const double Zmin_lenz3 = ptree.get("grid.lenz3.Zmin",(double)1.)/Xc.x_c; //m
+	const double Zmax_lenz3 = ptree.get("grid.lenz3.Zmax",(double)1.)/Xc.x_c; //m
+	const double Xmin_lenz3 = ptree.get("grid.lenz3.Xmin",(double)1.)/Xc.x_c; //m
+	const double Xmax_lenz3 = ptree.get("grid.lenz3.Xmax",(double)1.)/Xc.x_c; //m
+	const double X0_lenz3 = ptree.get("grid.lenz3.X0",(double)1.)/Xc.x_c; //m
+	const double X1_lenz3 = ptree.get("grid.lenz3.X1",(double)1.)/Xc.x_c; //m
+
+	const double Zmin_fgp = ptree.get("grid.fgp.Zmin",(double)1.)/Xc.x_c; //m
+	const double Zmax_fgp = ptree.get("grid.fgp.Zmax",(double)1.)/Xc.x_c; //m
+	const double Xmin_fgp = ptree.get("grid.fgp.Xmin",(double)1.)/Xc.x_c; //m
+	const double Xmax_fgp = ptree.get("grid.fgp.Xmax",(double)1.)/Xc.x_c; //m
 
 	double volumeFactor( double r /*radial component of cell center*/ ) const {
 
@@ -213,32 +232,73 @@ public:
 	}
 		// 
 	//##################################################################################
-	// bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
-	// 	if( Xmin_lenz  <= globalPos[0] && globalPos[0] <= Xmax_lenz && Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz   ){
+	bool isFGP( Dune::FieldVector< double, dimension > globalPos ) const{
+		if( Xmin_fgp  <= globalPos[0] && globalPos[0] <= Xmax_fgp && Zmin_fgp <= globalPos[1] && globalPos[1]<= Zmax_fgp   ){
+			return true;
+		}
+		else
+			return false;
+	}
+
+	// case [0,500]*[-500,0]
+	bool isLenz2( Dune::FieldVector< double, dimension > globalPos ) const{
+		if(
+			(-360/Xc.x_c)  >= (-0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) && (-0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)
+			&&
+			 Zmin_lenz1 <= globalPos[1] && globalPos[1]<= Zmax_lenz1
+			&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1   ){
+			return true;
+		}
+		else
+			return false;
+	}
+	bool isLenz1( Dune::FieldVector< double, dimension > globalPos ) const{
+		if(
+			(-190/Xc.x_c)  >= (0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) && (0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-210/Xc.x_c)
+			&&
+			 Zmin_lenz2 <= globalPos[1] && globalPos[1]<= Zmax_lenz2
+			&& X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2   ){
+			return true;
+		}
+		else
+			return false;
+	}
+
+	// bool isLenz3( Dune::FieldVector< double, dimension > globalPos ) const{
+	// 	if(
+	// 		(-340/Xc.x_c)  >= (-0.1*(globalPos[0]-150/Xc.x_c)+globalPos[1]) && (-0.1*(globalPos[0]-150/Xc.x_c)+globalPos[1]) >= (-360/Xc.x_c)
+	// 		&&
+	// 		 Zmin_lenz3 <= globalPos[1] && globalPos[1]<= Zmax_lenz3
+	// 		&& X0_lenz3 <= globalPos[0] && globalPos[0]<= X1_lenz3   ){
 	// 		return true;
 	// 	}
 	// 	else
 	// 		return false;
 	// }
 
-	bool isLenz( Dune::FieldVector< double, dimension > globalPos ) const{
-		if(
-			//(-2.75+(75/110/15))  <= (75/11/5*globalPos[0]+globalPos[1]) && (75/11/5*globalPos[0]+globalPos[1]) <= (-2.25+(15/11/15))
-			(-3.2+0.01*std::sin(M_PI*globalPos[0]/X_length))  <= globalPos[1] && globalPos[1]  <= (-2.7+0.1*std::sin(M_PI*globalPos[0]/X_length))
-			// &&
-			//  Zmin_lenz <= globalPos[1] && globalPos[1]<= Zmax_lenz
-			&& X0_lenz <= globalPos[0] && globalPos[0]<= X1_lenz   ){
-			return true;
-		}
-		else
-			return false;
-	}
-	//##################################################################################
-	bool isWell( Dune::FieldVector< double, dimension > globalPos ) const{
-		if( (globalPos[0] < origin + eps) && (globalPos[1] > Z_GHSZ_bottom - eps)  ){
-			return true;
-		}
-		else
-			return false;
-	}
+	// case [0,250]*[-600,0]
+	// bool isLenz1( Dune::FieldVector< double, dimension > globalPos ) const{
+	// 	if(
+	// 		(-430/Xc.x_c)  <= (20/90*(globalPos[0]-100/Xc.x_c)+globalPos[1]) && (20/90*(globalPos[0]-110/Xc.x_c)+globalPos[1]) <= (-420/Xc.x_c)
+	// 		&&
+	// 		 Zmin_lenz1 <= globalPos[1] && globalPos[1]<= Zmax_lenz1
+	// 		&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1   ){
+	// 		return true;
+	// 	}
+	// 	else
+	// 		return false;
+	// }
+	// bool isLenz2( Dune::FieldVector< double, dimension > globalPos ) const{
+	// 	if(
+	// 		(-240/Xc.x_c)  >= (-20/90*(globalPos[0]-50/Xc.x_c)+globalPos[1]) && (-20/90*(globalPos[0]-60/Xc.x_c)+globalPos[1]) >= (-250/Xc.x_c)
+	// 		&&
+	// 		 Zmin_lenz2 <= globalPos[1] && globalPos[1]<= Zmax_lenz2
+	// 		&& X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2   ){
+	// 		return true;
+	// 	}
+	// 	else
+	// 		return false;
+	// }
+	//####################################1
+		
 };
