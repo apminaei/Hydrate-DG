@@ -35,6 +35,11 @@ public:
 			
 			
 		}
+		if( mesh.isLenz2(xglobal) && mesh.isLenz1(xglobal) && parameter.num_materials() > 2){//
+			por = 0.5*prop_L[1][0]+0.5*prop_L[2][0];
+			
+			
+		}
 		 
 		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal) && !mesh.isLenz2(xglobal) && parameter.num_materials() > 2){//
 		// 	por = prop_L[3][0];
@@ -67,6 +72,13 @@ public:
         	// exit(0)	;
       	
 		}
+		if( mesh.isLenz2(xglobal) && mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
+			K = (prop_L[2][1]+prop_L[1][1])/2;	
+			
+        	// std::cout << K << "  " << xglobal << std::endl;
+        	// exit(0)	;
+      	
+		}
 		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal)  && !mesh.isLenz2(xglobal) && parameter.num_materials() > 2){
 		// 	K = prop_L[3][1];	
 			
@@ -89,6 +101,10 @@ public:
 		
 		double K_yy = K_xx;
 		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor;
+		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor1;
+		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor2;
+
+		Dune::FieldMatrix<double,dim, dim> PermeabilityTensor3;
 		
 		PermeabilityTensor[0][0] = K_xx ;
 		PermeabilityTensor[0][1] = 0. ;
@@ -104,18 +120,26 @@ public:
 		// rotation with 8,3439 degree counterclockwise
 		if( mesh.isLenz1(xglobal) && parameter.num_materials() > 1){
 			
-			PermeabilityTensor[0][0] = std::cos(rotation1) * K_xx ; //
-			PermeabilityTensor[0][1] = -std::sin(rotation1)  * K_yy ;
-			PermeabilityTensor[1][0] = std::sin(rotation1) * K_xx ;
-			PermeabilityTensor[1][1] = std::cos(rotation1) * K_yy ;// 
+			PermeabilityTensor1[0][0] = std::cos(rotation1) * K_xx ; //
+			PermeabilityTensor1[0][1] = -std::sin(rotation1)  * K_yy ;
+			PermeabilityTensor1[1][0] = std::sin(rotation1) * K_xx ;
+			PermeabilityTensor1[1][1] = std::cos(rotation1) * K_yy ;// 
       	
 		}
 		if( mesh.isLenz2(xglobal) && !mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
 			
-			PermeabilityTensor[0][0] = std::cos(rotation2) * K_xx ; //
-			PermeabilityTensor[0][1] = -std::sin(rotation2)  * K_yy ;
-			PermeabilityTensor[1][0] = std::sin(rotation2) * K_xx ;
-			PermeabilityTensor[1][1] = std::cos(rotation2) * K_yy ;// 
+			PermeabilityTensor2[0][0] = std::cos(rotation2) * K_xx ; //
+			PermeabilityTensor2[0][1] = -std::sin(rotation2)  * K_yy ;
+			PermeabilityTensor2[1][0] = std::sin(rotation2) * K_xx ;
+			PermeabilityTensor2[1][1] = std::cos(rotation2) * K_yy ;// 
+      	
+		}
+		if( mesh.isLenz2(xglobal) && mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
+			
+			PermeabilityTensor3[0][0] = (std::cos(rotation1)+std::cos(rotation2)) * K_xx/2 ; //
+			PermeabilityTensor3[0][1] = -(std::sin(rotation1)+std::sin(rotation2)) * K_yy/2 ;
+			PermeabilityTensor3[1][0] = (std::sin(rotation1)+std::sin(rotation2)) * K_xx/2 ;
+			PermeabilityTensor3[1][1] = (std::cos(rotation1)+std::cos(rotation2)) * K_yy/2 ;// 
       	
 		}
 		// if( mesh.isLenz3(xglobal) && !mesh.isLenz1(xglobal) && !mesh.isLenz2(xglobal) && parameter.num_materials() > 3){

@@ -243,10 +243,10 @@ public:
 	// case [0,500]*[-500,0]
 	bool isLenz2( Dune::FieldVector< double, dimension > globalPos ) const{
 		if(
-			(-360/Xc.x_c)  >= (-0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) && (-0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)
+			(-350/Xc.x_c)  >= (-0.75*(globalPos[0]-120/Xc.x_c)+globalPos[1]) && (-0.75*(globalPos[0]-120/Xc.x_c)+globalPos[1]) >= (-370/Xc.x_c)
 			&&
-			 Zmin_lenz1 <= globalPos[1] && globalPos[1]<= Zmax_lenz1
-			&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1   ){
+			 Zmin_lenz2 <= globalPos[1] && globalPos[1]<= Zmax_lenz2 && X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2 
+			   ){
 			return true;
 		}
 		else
@@ -254,10 +254,9 @@ public:
 	}
 	bool isLenz1( Dune::FieldVector< double, dimension > globalPos ) const{
 		if(
-			(-190/Xc.x_c)  >= (0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) && (0.5*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-210/Xc.x_c)
-			&&
-			 Zmin_lenz2 <= globalPos[1] && globalPos[1]<= Zmax_lenz2
-			&& X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2   ){
+			(-280/Xc.x_c)  >= (0.75*(globalPos[0]-150/Xc.x_c)+globalPos[1]) && (0.75*(globalPos[0]-150/Xc.x_c)+globalPos[1]) >= (-300/Xc.x_c) &&
+			 Zmin_lenz1 <= globalPos[1] && globalPos[1]<= Zmax_lenz1 && X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1 
+			  ){
 			return true;
 		}
 		else

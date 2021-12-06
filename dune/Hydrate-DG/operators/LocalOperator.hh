@@ -1226,9 +1226,9 @@ public:
       K_n.mv(gradu_Sh_n, Kgradu_Sh_n);
 
       Dune::FieldVector<RF, dim> Kn_F_s;
-      K_s.mv(n_F_local, Kn_F_s);
+      K_s.mtv(n_F_local, Kn_F_s);
       Dune::FieldVector<RF, dim> Kn_F_n;
-      K_n.mv(n_F_local, Kn_F_n);
+      K_n.mtv(n_F_local, Kn_F_n);
 
       double eta_s = 1/BrooksCParams_s[1];
       auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s, Sh_s, 0., 0.);
@@ -1606,12 +1606,12 @@ public:
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
         r_s.accumulate(lfsv_Sg_s, i,   term_nipg_g * krN_s * omegaup_g_s * Xc_conv_m * rho_g_s *Xc_P/Xc_x
-                                    * (1. - YH2O_s) * (- coeff_grad_Sw_s) * Kn_F_s * gradpsi_Pw_s[i] * factor);
+                                    * (1. - YH2O_s) * (Xc_P/Xc_x * -coeff_grad_Sw_s) * Kn_F_s * gradpsi_Pw_s[i] * factor);
       }
       for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
         r_n.accumulate(lfsv_Sg_n, i,  term_nipg_g * krN_n * omegaup_g_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
-                                    * (1. - YH2O_n) * (- coeff_grad_Sw_n) * Kn_F_n * gradpsi_Pw_n[i] * factor);
+                                    * (1. - YH2O_n) * (Xc_P/Xc_x * -coeff_grad_Sw_n) * Kn_F_n * gradpsi_Pw_n[i] * factor);
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
@@ -1680,12 +1680,12 @@ public:
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
         r_s.accumulate(lfsv_Pw_s, i,  term_nipg_w * (omegaup_w_s * krW_s * Xc_conv_m * rho_w_s * (1. - XC_s - XCH4_s) * Xc_P/Xc_x
-                                                                   * n_F_local * gradpsi_Pw_n[i] ) * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s  - Xc_rho * rho_w_s * gravity
+                                                                   * Kn_F_s * gradpsi_Pw_n[i] ) * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s  - Xc_rho * rho_w_s * gravity
       }
       for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
         r_n.accumulate(lfsv_Pw_n, i,  term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x
-                                                                   * n_F_local * gradpsi_Pw_n[i] ) * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n - Xc_rho * rho_w_n * gravity
+                                                                   * Kn_F_n * gradpsi_Pw_n[i] ) * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n - Xc_rho * rho_w_n * gravity
       }
       //standard IP term integral
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
@@ -2246,9 +2246,9 @@ public:
       K.mv(gradu_Sh_n, Kgradu_Sh_n);
 
       Dune::FieldVector<RF, dim> Kn_F_s;
-      K.mv(n_F_local, Kn_F_s);
+      K.mtv(n_F_local, Kn_F_s);
       Dune::FieldVector<RF, dim> Kn_F_n;
-      K.mv(n_F_local, Kn_F_n);
+      K.mtv(n_F_local, Kn_F_n);
 
 	    // evaluate normal flux of Pw i.e. grad_Pw.n
       RF grad_Pw_s = gradu_Pw_s * n_F_local;
@@ -2566,8 +2566,8 @@ public:
       }
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r.accumulate(lfsv_Sg_s, i,  term_nipg_g * permeability * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
-                                        * (1. - YH2O_n) * (- coeff_grad_Sw_n)) * n_F_local * gradpsi_Pw_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
+        r.accumulate(lfsv_Sg_s, i,  term_nipg_g  * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n
+                                        * (1. - YH2O_n) * ( Xc_P/Xc_x * -coeff_grad_Sw_n )) * Kn_F_s * gradpsi_Pw_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
@@ -2588,8 +2588,7 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
       {
-        r.accumulate(lfsv_XC_s, i,  term_nipg_c_x * Xc_diff_m *
-            (  rho_w_n * Sw_n * DC_w_n  )* gradpsi_Pw_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
+        r.accumulate(lfsv_XC_s, i,  term_nipg_c_x * Xc_diff_m * (rho_w_n * Sw_n * DC_w_n  )* gradpsi_Pw_s[i] * n_F_local * factor);//+ omegaup_x_n *Sw_n * rho_w_n * DC_w_n
       }
       // standard IP term integral
       for (size_type i = 0; i < lfsv_XC_s.size(); i++)
@@ -2610,8 +2609,8 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r.accumulate(lfsv_Pw_s, i, term_nipg_w * permeability * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
-                                                                   * n_F_local * (gradpsi_Pw_s[i]) * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
+        r.accumulate(lfsv_Pw_s, i, term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
+                                                                   * Kn_F_s * (gradpsi_Pw_s[i]) * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
 
       }
       //standard IP term integral
