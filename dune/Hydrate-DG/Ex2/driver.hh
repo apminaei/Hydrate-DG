@@ -263,11 +263,11 @@ void driver(const GV &gv, // GridView
 	
 
 	//	MAKE INSTATIONARY GRID OPERATOR SPACE
-	double method_g = 1.;//ConvectionDiffusionDGMethod::SIPG;
-	double method_w = 1.;//ConvectionDiffusionDGMethod::SIPG;
-	double method_T = 1.;//ConvectionDiffusionDGMethod::NIPG;
-	double method_x = 1.;//ConvectionDiffusionDGMethod::NIPG;
-	double method_y = 1.;//ConvectionDiffusionDGMethod::NIPG;
+	double method_g = 0.;//ConvectionDiffusionDGMethod::SIPG;
+	double method_w = 0.;//ConvectionDiffusionDGMethod::SIPG;
+	double method_T = 0.;//ConvectionDiffusionDGMethod::NIPG;
+	double method_x = 0.;//ConvectionDiffusionDGMethod::NIPG;
+	double method_y = 0.;//ConvectionDiffusionDGMethod::NIPG;
 	double alpha_g = ptree.get("penalty_coeff.Sg",(double)1.e3); // 1.e3; //
 	double alpha_w = ptree.get("penalty_coeff.Pw",(double)1.e3); // 1.e1; //
 	double alpha_s = ptree.get("penalty_coeff.Sh",(double)1.e3); // 1.e1; //

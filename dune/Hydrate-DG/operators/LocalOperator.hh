@@ -511,7 +511,7 @@ public:
       auto krW = property.hydraulicProperty.krw(cell, ip_local, Sw, Sh) / (property.water.DynamicViscosity(T_dim, Pw_dim, S) );
       auto krN = property.hydraulicProperty.krg(cell, ip_local, Sw, Sh) / (property.gas.DynamicViscosity(T_dim, Pg_dim));
 
-      auto perm_dim = property.soil.SedimentPermeability(cell, ip_local ) * Xc_K;
+      auto perm_dim = permeability * Xc_K;
       // compute source terms
 			auto q_g  = property.kinetics.GasGenerationRate( T_dim, Pg_dim, Sh, Sw, XCH4, zCH4, S, por, perm_dim); /*dim*/
 			auto q_w  = property.kinetics.WaterGenerationRate( q_g ); /*dim*/
@@ -1592,6 +1592,7 @@ public:
       tmp =  Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
 
       double term_nipg_g = -theta_g * (Sg_s - Sg_n);
+      double term_nipg_ch4_x = -theta_x * (XCH4_s - XCH4_n);
       double term_penalty_sg =  penalty_factor_g * (Sg_s - Sg_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
@@ -1605,14 +1606,16 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Sg_s, i,   term_nipg_g * krN_s * omegaup_g_s * Xc_conv_m * rho_g_s *Xc_P/Xc_x
-                                    * (1. - YH2O_s) * (Xc_P/Xc_x * -coeff_grad_Sw_s) * Kn_F_s * gradpsi_Pw_s[i] * factor);
+        r_s.accumulate(lfsv_Sg_s, i, omegaup_xch4_s *  term_nipg_ch4_x * Xc_diff_m * rho_w_s * Sw_s * DCH4_w_s * gradpsi_Pw_s[i] * n_F_local * factor   );
       }
+      // term_nipg_g * krN_s * omegaup_g_s * Xc_conv_m * rho_g_s *Xc_P/Xc_x
+      //                               * (1. - YH2O_s) * (Xc_P/Xc_x * -coeff_grad_Sw_s) * Kn_F_s * gradpsi_Pw_s[i] * factor
       for (size_type i = 0; i < lfsv_Sg_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Sg_n, i,  term_nipg_g * krN_n * omegaup_g_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
-                                    * (1. - YH2O_n) * (Xc_P/Xc_x * -coeff_grad_Sw_n) * Kn_F_n * gradpsi_Pw_n[i] * factor);
+        r_n.accumulate(lfsv_Sg_n, i, omegaup_xch4_n *  term_nipg_ch4_x * Xc_diff_m * rho_w_n * Sw_n * DCH4_w_n * gradpsi_Pw_n[i] * n_F_local * factor);
       }
+      //  term_nipg_g * krN_n * omegaup_g_n * Xc_conv_m * rho_g_n * Xc_P/Xc_x
+      //                               * (1. - YH2O_n) * (Xc_P/Xc_x * -coeff_grad_Sw_n) * Kn_F_n * gradpsi_Pw_n[i] * factor
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
@@ -1664,6 +1667,7 @@ public:
       tmp =  Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
 
       double term_nipg_w = -theta_w * (Pw_s - Pw_n);
+      double term_nipg_yh2o_x = -theta_x * (YH2O_s - YH2O_n);
       double term_penalty_w =  penalty_factor_w * (Pw_s - Pw_n);
       // diffusion term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
@@ -1679,14 +1683,17 @@ public:
 
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r_s.accumulate(lfsv_Pw_s, i,  term_nipg_w * (omegaup_w_s * krW_s * Xc_conv_m * rho_w_s * (1. - XC_s - XCH4_s) * Xc_P/Xc_x
-                                                                   * Kn_F_s * gradpsi_Pw_n[i] ) * factor);//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s  - Xc_rho * rho_w_s * gravity
+        r_s.accumulate(lfsv_Pw_s, i, omegaup_yh2o_s *  term_nipg_yh2o_x * Xc_diff_m * rho_g_s * Sg_s * DH2O_g_s * gradpsi_Pw_s[i] * n_F_local * factor );//+ krN_s * omegaup_g_s * rho_g_s * YH2O_s  - Xc_rho * rho_w_s * gravity
+       
       }
+      // term_nipg_w * (omegaup_w_s * krW_s * Xc_conv_m * rho_w_s * (1. - XC_s - XCH4_s) * Xc_P/Xc_x
+      //                                                              * Kn_F_s * gradpsi_Pw_n[i] ) * factor
       for (size_type i = 0; i < lfsv_Pw_n.size(); i++)
       {
-        r_n.accumulate(lfsv_Pw_n, i,  term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x
-                                                                   * Kn_F_n * gradpsi_Pw_n[i] ) * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n - Xc_rho * rho_w_n * gravity
+        r_n.accumulate(lfsv_Pw_n, i,   omegaup_yh2o_n *  term_nipg_yh2o_x * Xc_diff_m * rho_g_n * Sg_n * DH2O_g_n * gradpsi_Pw_n[i] * n_F_local * factor );// + krN_n * omegaup_g_n * rho_g_n * YH2O_n - Xc_rho * rho_w_n * gravity
       }
+      //  term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x
+      //                                                              * Kn_F_n * gradpsi_Pw_n[i] ) * factor
       //standard IP term integral
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
@@ -2559,6 +2566,7 @@ public:
       // CH4-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
       double term_nipg_g = -method_g * (Sg_s - Sg_n);
+      double term_nipg_ch4_x = -theta_x * (XCH4_s - XCH4_n);
       double term_penalty_sg = penalty_factor_g * (Sg_s - Sg_n);
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
@@ -2566,9 +2574,10 @@ public:
       }
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
-        r.accumulate(lfsv_Sg_s, i,  term_nipg_g  * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n
-                                        * (1. - YH2O_n) * ( Xc_P/Xc_x * -coeff_grad_Sw_n )) * Kn_F_s * gradpsi_Pw_s[i] * factor); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
+        r.accumulate(lfsv_Sg_s, i, omegaup_xch4_s *  term_nipg_ch4_x * Xc_diff_m * rho_w_s * Sw_s * DCH4_w_s * gradpsi_Pw_s[i] * n_F_local * factor ); //+ omegaup_g_n * krN_n * rho_g_n  * (1. - YH2O_n) * (- coeff_grad_Sw_n)
       }
+      // term_nipg_g  * (omegaup_g_n * krN_n * Xc_conv_m * rho_g_n
+      //                                   * (1. - YH2O_n) * ( Xc_P/Xc_x * -coeff_grad_Sw_n )) * Kn_F_s * gradpsi_Pw_s[i] * factor
       // standard IP term integral
       for (size_type i = 0; i < lfsv_Sg_s.size(); i++)
       {
@@ -2600,6 +2609,7 @@ public:
       // H2O-component-wise mass-balance
       tmp =  Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
       double term_nipg_w = -method_w * (Pw_s - Pw_n);
+      double term_nipg_yh2o_x = -method_x * (YH2O_s - YH2O_n);
       double term_penalty_w = penalty_factor_w * (Pw_s - Pw_n) ;
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
@@ -2609,10 +2619,11 @@ public:
       // (non-)symmetric IP term
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
-        r.accumulate(lfsv_Pw_s, i, term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
-                                                                   * Kn_F_s * (gradpsi_Pw_s[i]) * factor);//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
+        r.accumulate(lfsv_Pw_s, i, omegaup_yh2o_s *  term_nipg_yh2o_x * Xc_diff_m * rho_g_s * Sg_s * DH2O_g_s * gradpsi_Pw_s[i] * n_F_local * factor );//+ omegaup_w_n * krW_n * rho_w_n  * (1. - XC_n - XCH4_n) + omegaup_g_s * krN_s * rho_g_s *  YH2O_s
 
       }
+      // term_nipg_w * (omegaup_w_n * krW_n * Xc_conv_m * rho_w_n * (1. - XC_n - XCH4_n) * Xc_P/Xc_x   )
+      //                                                              * Kn_F_s * (gradpsi_Pw_s[i]) * factor
       //standard IP term integral
       for (size_type i = 0; i < lfsv_Pw_s.size(); i++)
       {
