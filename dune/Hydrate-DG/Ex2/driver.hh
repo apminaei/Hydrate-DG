@@ -78,6 +78,8 @@ void driver(const GV &gv, // GridView
 	const int degree_C = 1;
 	const int degree_Y = 1;
 
+	const int degree_PP = 0;
+
 	// const int degree_pen = 1;
 
 	//	GFS
@@ -87,7 +89,17 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::ConformingDirichletConstraints CON0;	// pure Neumann: no constraints
 #endif									
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
-	//typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > OPBSim;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > FEM_P;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_Sg,dim,Dune::GeometryType::simplex > FEM_Sg;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_T,dim,Dune::GeometryType::simplex > FEM_T;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_X,dim,Dune::GeometryType::simplex > FEM_X;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_Y,dim,Dune::GeometryType::simplex > FEM_Y;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_Sh,dim,Dune::GeometryType::simplex > FEM_Sh;
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_X,dim,Dune::GeometryType::simplex > FEM_C;
+
+	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_PP,dim,Dune::GeometryType::simplex > FEM_PP;
+
+
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sg;
@@ -102,9 +114,9 @@ void driver(const GV &gv, // GridView
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_C;  
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 0, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP;//l2orthonormal 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 1, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP;//l2orthonormal 
 
-	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, 0> FEM_PP;
+	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_P;
 	
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_Sg> FEM_Sg;
 	
@@ -118,15 +130,17 @@ void driver(const GV &gv, // GridView
 	
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_C> FEM_C; 
 
-	FEM_X fem_x;
-	FEM_T fem_T;
-	FEM_Sg fem_Sg;
-	FEM_P fem_P;
-	FEM_Y fem_y;
-	FEM_C fem_c;
-	FEM_Sh fem_Sh;
+	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_PP> FEM_PP;
+
+	FEM_X fem_x;//(gv);
+	FEM_T fem_T;//(gv);
+	FEM_Sg fem_Sg;//(gv);
+	FEM_P fem_P;//(gv);
+	FEM_Y fem_y;//(gv);
+	FEM_C fem_c;//(gv);
+	FEM_Sh fem_Sh;//(gv);
 	
-	FEM_PP fem_PP;//(gv)
+	FEM_PP fem_PP;//(gv);
 
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
@@ -456,11 +470,13 @@ void driver(const GV &gv, // GridView
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
-													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC>  GFS_PP;
+													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
+													 GFS_CC, GFS_CC, GFS_CC, GFS_CC>  GFS_PP;
 		GFS_PP gfs_pp(	gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
-						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc);
+						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
+						 gfs_cc, gfs_cc, gfs_cc, gfs_cc);
 		
 		typedef typename GFS_PP::template ConstraintsContainer<Real>::Type CC_PP;
 		CC_PP cc_pp;
@@ -520,8 +536,16 @@ void driver(const GV &gv, // GridView
 		SUBPP_tau 	subpp_tau(gfs_pp);
 		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Peq	  > >> SUBPP_Peq;
 		SUBPP_Peq 	subpp_Peq(gfs_pp);
-		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_HS	  > >> SUBPP_HS;
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_HS > >> SUBPP_HS;
 		SUBPP_HS 	subpp_HS(gfs_pp);
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Vwx > >> SUBPP_Vwx;
+		SUBPP_Vwx 	subpp_Vwx(gfs_pp);
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Vwy > >> SUBPP_Vwy;
+		SUBPP_Vwy 	subpp_Vwy(gfs_pp);
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Vgx > >> SUBPP_Vgx;
+		SUBPP_Vgx 	subpp_Vgx(gfs_pp);
+		typedef typename Dune::PDELab::GridFunctionSubSpace< GFS_PP, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::SVId_Vgy > >> SUBPP_Vgy;
+		SUBPP_Vgy 	subpp_Vgy(gfs_pp);
 
 		
 		using U_PP = Dune::PDELab::Backend::Vector<GFS_PP,double>;
@@ -621,7 +645,18 @@ void driver(const GV &gv, // GridView
 		DGF_Peq dgf_Peq( subpp_Peq, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_HS, U_PP > DGF_HS;
 		DGF_HS dgf_HS( subpp_HS, u_pp );
-		
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Vwx, U_PP > DGF_Vwx;
+		DGF_Vwx dgf_Vwx( subpp_Vwx, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Vwy, U_PP > DGF_Vwy;
+		DGF_Vwy dgf_Vwy( subpp_Vwy, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Vgx, U_PP > DGF_Vgx;
+		DGF_Vgx dgf_Vgx( subpp_Vgx, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Vgy, U_PP > DGF_Vgy;
+		DGF_Vgy dgf_Vgy( subpp_Vgy, u_pp );
+	//*****************************
+
+
+	//*******************************	
 
 	 
 	//	VTK
@@ -695,7 +730,11 @@ void driver(const GV &gv, // GridView
 	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HCH4  > >( dgf_HCH4  , "HCH4" ));
 	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_tau   > >( dgf_tau   , "tau"  ));
 	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Peq   > >( dgf_Peq   , "Peq"  ));
-	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HS   > >( dgf_HS   , "HS"  ));
+	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_HS > >( dgf_HS   , "HS"  ));
+	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Vwx   > >( dgf_Vwx   , "Vwx"  ));
+	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Vwy   > >( dgf_Vwy   , "Vwy"  ));
+	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Vgx   > >( dgf_Vgx   , "Vgx"  ));
+	vtkSequenceWriter.addVertexData( std::make_shared< Dune::PDELab::VTKGridFunctionAdapter< DGF_Vgy   > >( dgf_Vgy   , "Vgy"  ));
 
 
 

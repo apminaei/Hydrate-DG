@@ -35,6 +35,8 @@ private:
 	double Xc_t;
 	double Xc_x;
 
+	double Xc_gravity;
+
 //    typedef typename GV::template Codim<0>::template Partition<Dune::Interior_Partition>::Iterator LeafIterator;
 	typedef typename GV::Traits::template Codim<0>::Iterator LeafIterator;
     typedef typename GV::IndexSet IndexSet;
@@ -72,6 +74,7 @@ public:
 		  Xc_T 		= param.characteristicValue.T_c;
 		  Xc_t 		= param.characteristicValue.t_c;
 		  Xc_x 		= param.characteristicValue.x_c;
+		  Xc_gravity= param.characteristicValue.X_gravity;
 	  }
 
 	virtual ~PostProcess()
@@ -153,6 +156,17 @@ public:
 		typedef typename LFS_PP::template Child<Indices::SVId_HS>::Type LFS_PP_HS;
 		const LFS_PP_HS& lfs_pp_HS = lfs_pp.template child<Indices::SVId_HS>();
 		
+		typedef typename LFS_PP::template Child<Indices::SVId_Vwx>::Type LFS_PP_Vwx;
+		const LFS_PP_Vwx& lfs_pp_Vwx = lfs_pp.template child<Indices::SVId_Vwx>();
+		
+		typedef typename LFS_PP::template Child<Indices::SVId_Vwy>::Type LFS_PP_Vwy;
+		const LFS_PP_Vwy& lfs_pp_Vwy = lfs_pp.template child<Indices::SVId_Vwy>();
+
+		typedef typename LFS_PP::template Child<Indices::SVId_Vgx>::Type LFS_PP_Vgx;
+		const LFS_PP_Vgx& lfs_pp_Vgx = lfs_pp.template child<Indices::SVId_Vgx>();
+		
+		typedef typename LFS_PP::template Child<Indices::SVId_Vgy>::Type LFS_PP_Vgy;
+		const LFS_PP_Vgy& lfs_pp_Vgy = lfs_pp.template child<Indices::SVId_Vgy>();
 		
 
 		typedef Dune::PDELab::LFSIndexCache<LFS_PP> LFSCache_PP;
@@ -166,6 +180,7 @@ public:
 		// Loop over each volume
 		LeafIterator beginElem = gv.template begin< 0 >();
 		LeafIterator endElem = gv.template end< 0 >();
+		auto gravity = param.parameter.g()  ; /* ndim */
 
 		// Iterate over each element
 		for ( LeafIterator self = beginElem; self!= endElem; ++self )
@@ -194,14 +209,23 @@ public:
 			// for (int i=0; i <  geo.corners(); i++){
 			// 	cornervalue = geo.corner(i);
 			// 	ip_local = geo.local(cornervalue);
-				
+			Dune::FieldVector<RF, dim> grad_Pw(0.0);
+			Dune::FieldVector<RF, dim> Kgrad_Pw(0.0);
+			Dune::FieldVector<RF, dim> grad_Sg(0.0);
+			Dune::FieldVector<RF, dim> Kgrad_Sg(0.0);
+			Dune::FieldVector<RF, dim> grad_Sh(0.0);
+			Dune::FieldVector<RF, dim> Kgrad_Sh(0.0);
+			Dune::FieldVector<RF, dim> Kg(0.0);
 			
 	        RF Pw=0.;
 	        evaluation_Pw->evalFunction(cell, ip_local, &Pw);
+			evaluation_Pw->evalGradient(cell, ip_local, &grad_Pw);
 	        RF Sg=0.;
 	        evaluation_Sg->evalFunction(cell,ip_local,&Sg);
+			evaluation_Sg->evalGradient(cell, ip_local, &grad_Sg);
 	        RF Sh=0.;
 	        evaluation_Sh->evalFunction(cell,ip_local,&Sh);
+			evaluation_Sh->evalGradient(cell, ip_local, &grad_Sh);
 	        RF T=0.;
 	        evaluation_T->evalFunction(cell,ip_local,&T);
 	        RF YH2O=0.;
@@ -217,10 +241,24 @@ public:
 	        for(int i = 0. ; i < lfs_pp.size() ; i++){
 	        	ul_pp[i] = 0.;
 	        }
-
+			auto BrooksCParams = param.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
 			RF porosity = param.soil.SedimentPorosity( cell,ip_local );
-			RF K = param.soil.SedimentPermeability( cell,ip_local )
+			RF permeability = param.soil.SedimentPermeability( cell,ip_local )
 				 * param.hydraulicProperty.PermeabilityScalingFactor( cell,ip_local, Sh, porosity );
+
+			auto K = param.soil.SedimentPermeabilityTensor(cell, ip_local)
+                    * param.hydraulicProperty.PermeabilityScalingFactor(cell, ip_local, Sh, porosity ); /*ndim K from soil.hh*/
+			
+			K.mv(gravity, Kg);
+
+			// compute K * gradient of Pw
+			K.mv(grad_Pw, Kgrad_Pw);
+
+			// compute K * gradient of Sg
+			K.mv(grad_Sg, Kgrad_Sg);
+
+			// compute K * gradient of Sh
+			K.mv(grad_Sh, Kgrad_Sh);
 
 			RF S = XC * (param.salt.MolarMass()/param.gas.MolarMass());
 			// RF Xc = param.parameter.ReferenceSaltConcentration();
@@ -254,6 +292,26 @@ public:
 			RF Peq = 1.e3 * exp( 38.592 - (8533.8/ (T * Xc_T) ) + Coeff*S );
 			
 			RF HS = (15.e0 * (Peq/ Xc_P-Pg)/abs(Peq/ Xc_P-Pg)+15.e0 ) ;
+			// if((Peq-Pg*Xc_P)<= 1.e-2 && (Peq-Pg*Xc_P)>= -1.e-2){HS=1.;}//
+
+			double eta = 1/BrooksCParams[1];
+			auto Swe = param.hydraulicProperty.EffectiveSw(Sw,Sh,0., 0.);
+			auto dPc_dSwe = param.hydraulicProperty.dPc_dSwe(Swe, BrooksCParams[0], BrooksCParams[1]); /*ndim */
+			auto dSwe_dSw =  param.hydraulicProperty.dSwe_dSw(Sw,Sh,0., 0.);
+			auto coeff_grad_Sw = dPc_dSwe * dSwe_dSw * param.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+
+			auto dPcSF1_dSh =  param.hydraulicProperty.dPcSF1_dSh( Sh, BrooksCParams[1], BrooksCParams[4]);
+			auto dSwe_dSh = param.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
+			auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg * coeff_grad_Sw *  dSwe_dSw  ;
+
+      		auto Kgrad_Pg = Kgrad_Pw - coeff_grad_Sw * Kgrad_Sg + (coeff_grad_Sh ) * Kgrad_Sh;
+
+			auto Vwx = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[0]*Xc_P/Xc_x-rhow*Xc_rho*Kg[0]);
+			auto Vwy = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[1]*Xc_P/Xc_x-rhow*Xc_rho*Kg[1]);
+
+			auto Vgx = - krg/(mug*Xc_mu)*Xc_K*(Kgrad_Pg[0]*Xc_P/Xc_x-rhog*Xc_rho*Kg[0]);
+			auto Vgy = - krg/(mug*Xc_mu)*Xc_K*(Kgrad_Pg[1]*Xc_P/Xc_x-rhog*Xc_rho*Kg[1]);
+			
 
 			ul_pp[lfs_pp_Pg.localIndex(0)]	  = Pg*Xc_P ;
 	        ul_pp[lfs_pp_Pw.localIndex(0)] 	  = Pw*Xc_P ;
@@ -269,7 +327,7 @@ public:
 	        ul_pp[lfs_pp_YH2O.localIndex(0)]  = YH2O ;
 	        ul_pp[lfs_pp_rhow.localIndex(0)]  = rhow*Xc_rho ;
 	        ul_pp[lfs_pp_rhog.localIndex(0)]  = rhog*Xc_rho ;
-	        ul_pp[lfs_pp_K.localIndex(0)] 	  = K*Xc_K ;
+	        ul_pp[lfs_pp_K.localIndex(0)] 	  = permeability*Xc_K ;
 	        ul_pp[lfs_pp_krw.localIndex(0)]   = krw ;
 	        ul_pp[lfs_pp_krg.localIndex(0)]   = krg ;
 	        ul_pp[lfs_pp_muw.localIndex(0)]   = muw*Xc_mu ;
@@ -283,6 +341,10 @@ public:
 	        ul_pp[lfs_pp_tau.localIndex(0)]   = tau ;
 	        ul_pp[lfs_pp_Peq.localIndex(0)]   = Peq ;
 	        ul_pp[lfs_pp_HS.localIndex(0)]   = HS ;
+	        ul_pp[lfs_pp_Vwx.localIndex(0)]   = Vwx ;
+	        ul_pp[lfs_pp_Vwy.localIndex(0)]   = Vwy ;
+	        ul_pp[lfs_pp_Vgx.localIndex(0)]   = Vgx ;
+	        ul_pp[lfs_pp_Vgy.localIndex(0)]   = Vgy ;
 
 			
 			u_pp_view.write( ul_pp );

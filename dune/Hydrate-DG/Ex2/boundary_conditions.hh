@@ -11,7 +11,7 @@ private :
 	ProblemInitialConditions<GV,Properties> icvalue;
 	// double time_fraction = property.parameter.time_end() / 31.536e6; 
 	double Xc_time = 1. / (36.*24.*36. * 1.e3);
-	double press_rate = 1.5e-3;
+	double press_rate = 1.e-3;
 
 public :
 

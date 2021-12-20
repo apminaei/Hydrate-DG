@@ -119,16 +119,16 @@ public:
 		// exit(0);
 		// rotation with 8,3439 degree counterclockwise
 		if( mesh.isLenz1(xglobal) && parameter.num_materials() > 1){
-			
-			PermeabilityTensor[0][0] = std::cos(rotation1) * K_xx ; // 
+			 
+			PermeabilityTensor[0][0] =  K_xx ; // std::cos(rotation1) *
 			PermeabilityTensor[0][1] = -std::sin(rotation1)  * K_yy ;
-			PermeabilityTensor[1][0] = std::sin(rotation1) * K_xx ;
+			PermeabilityTensor[1][0] = 0.;//std::sin(rotation1) * K_xx ;
 			PermeabilityTensor[1][1] = std::cos(rotation1) * K_yy ;// 
       	
 		}
 		if( mesh.isLenz2(xglobal) && !mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
 			
-			PermeabilityTensor[0][0] =  K_xx ; //std::cos(rotation2) *
+			PermeabilityTensor[0][0] =   K_xx ; //std::cos(rotation2) *
 			PermeabilityTensor[0][1] = -std::sin(rotation2)  * K_yy ;
 			PermeabilityTensor[1][0] = 0.;//std::sin(rotation2) * K_xx ;
 			PermeabilityTensor[1][1] = std::cos(rotation2) * K_yy ;// 
@@ -136,9 +136,9 @@ public:
 		}
 		if( mesh.isLenz2(xglobal) && mesh.isLenz1(xglobal) && parameter.num_materials() > 2){
 			
-			PermeabilityTensor[0][0] =  K_xx ; //(std::cos(rotation1)+std::cos(rotation2)) *
+			PermeabilityTensor[0][0] = (std::cos(rotation1)+std::cos(rotation2)) * K_xx/2 ; //
 			PermeabilityTensor[0][1] = -(std::sin(rotation1)+std::sin(rotation2)) * K_yy/2 ;
-			PermeabilityTensor[1][0] = 0.;//(std::sin(rotation1)+std::sin(rotation2)) * K_xx/2 ;
+			PermeabilityTensor[1][0] = (std::sin(rotation1)+std::sin(rotation2)) * K_xx/2 ;
 			PermeabilityTensor[1][1] = (std::cos(rotation1)+std::cos(rotation2)) * K_yy/2 ;// 
       	
 		}

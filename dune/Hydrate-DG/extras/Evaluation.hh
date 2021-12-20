@@ -94,6 +94,20 @@ namespace Dune {
 
 		// e.geometry().global(xlocal)
 
+		/*
+				vlocal are the solution in terms of lagrange basis
+				xlocal are the solution in terms of chosen basis
+
+					[1 -1 -1 1] 
+					|1 1 -1 -1|
+			T^t =	|1 -1 1 -1|
+					[1 1  1  1]
+					vlocal[0] = xlocal[0]-xlocal[1]-xlocal[2]+xlocal[3]
+					vlocal[1] = xlocal[0]+xlocal[1]-xlocal[2]-xlocal[3]
+					vlocal[2] = xlocal[0]-xlocal[1]+xlocal[2]-xlocal[3]
+					vlocal[3] = xlocal[0]+xlocal[1]+xlocal[2]+xlocal[3]
+		*/
+
 		  for (unsigned int i=0; i<xlocal.size(); i++){
 			  if (xlocal[i]< 0.){
 			   xlocal[i] = 0.;

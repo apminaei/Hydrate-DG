@@ -45,7 +45,7 @@ public:
 	static const int VId_XCH4	= 4 ;
 	static const int VId_YH2O	= 5 ;
 
-	const static int numOfSVs 	= 28;
+	const static int numOfSVs 	= 32;
 	const static int SVId_Pg	= 0;  // gas phase pressure
 	const static int SVId_Pw	= 1;  // water phase pressure
 	const static int SVId_Pc	= 2;  // capillary pressure
@@ -74,6 +74,10 @@ public:
  	const static int SVId_tau	= 25; // tortuosity
  	const static int SVId_Peq	= 26; // Equi. Pressure
  	const static int SVId_HS	= 27; // Hydrate Stability zone
+ 	const static int SVId_Vwx	= 28; // Velocity
+	const static int SVId_Vwy	= 29; // Velocity
+	const static int SVId_Vgx	= 30; // Velocity
+	const static int SVId_Vgy	= 31; // Velocity
 
 
 	/* SECONDARY VARIABLES FOR POST PROCESS AND O/P */
