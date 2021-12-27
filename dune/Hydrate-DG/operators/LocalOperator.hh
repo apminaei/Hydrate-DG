@@ -504,7 +504,7 @@ public:
       auto dPcSF1_dSh =  property.hydraulicProperty.dPcSF1_dSh( Sh, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh = property.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
       auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P 
-                          + property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * dSwe_dSh;//- Sg * coeff_grad_Sw *  dSwe_dSw  ;
+                          + property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * (dSwe_dSh-dSwe_dSw);//- Sg * coeff_grad_Sw *  dSwe_dSw  ;
 
       auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4); /*ndim density from CH4.hh; the input arguments are dimensional   */
       auto rho_w = property.water.Density(T_dim, Pw_dim, S); /*ndim density from H2O.hh; the input arguments are dimensional*/
@@ -1240,7 +1240,7 @@ public:
       auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]);
       auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
       auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams_s[0] / Xc_P 
-                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]) * dPc_dSwe_s * dSwe_dSh_s;//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]) * dPc_dSwe_s * (dSwe_dSh_s-dSwe_dSw_s);//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
       double eta_n = 1/BrooksCParams_n[1];
       auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n, 0., 0.);
@@ -1251,7 +1251,7 @@ public:
       auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]);
       auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0., 0.);
       auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams_n[0] / Xc_P 
-                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]) * dPc_dSwe_n * dSwe_dSh_n;//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
+                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]) * dPc_dSwe_n * (dSwe_dSh_n-dSwe_dSw_n);//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
 
 
       auto Kgradu_Pg_s = Kgradu_Pw_s - coeff_grad_Sw_s * Kgradu_Sg_s + (coeff_grad_Sh_s ) * Kgradu_Sh_s;
@@ -2089,7 +2089,7 @@ public:
       auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
       auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams[0] / Xc_P 
-                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_s * dSwe_dSh_s;//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_s * (dSwe_dSh_s-dSwe_dSw_s);//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
 
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
@@ -2124,7 +2124,7 @@ public:
       auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0., 0.);
       auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams[0] / Xc_P 
-                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_n * dSwe_dSh_n;//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
+                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_n * (dSwe_dSh_n-dSwe_dSw_n);//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
 
 
       auto krW_n = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n_dim, Pw_n_dim, S_n));

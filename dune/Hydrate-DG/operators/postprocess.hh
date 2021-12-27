@@ -302,9 +302,10 @@ public:
 
 			auto dPcSF1_dSh =  param.hydraulicProperty.dPcSF1_dSh( Sh, BrooksCParams[1], BrooksCParams[4]);
 			auto dSwe_dSh = param.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
-			auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg * coeff_grad_Sw *  dSwe_dSw  ;
+			auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * (dSwe_dSh-dSwe_dSw);//- Sg * coeff_grad_Sw *  dSwe_dSw  ;
 
-      		auto Kgrad_Pg = Kgrad_Pw - coeff_grad_Sw * Kgrad_Sg + (coeff_grad_Sh ) * Kgrad_Sh;
+      		auto Kgrad_Pg = Kgrad_Pw - coeff_grad_Sw * Kgrad_Sg + coeff_grad_Sh * Kgrad_Sh;
 
 			auto Vwx = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[0]*Xc_P/Xc_x-rhow*Xc_rho*Kg[0]);
 			auto Vwy = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[1]*Xc_P/Xc_x-rhow*Xc_rho*Kg[1]);
