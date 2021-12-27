@@ -1412,7 +1412,7 @@ public:
       // {
       //   omegaup_g_s = 0.;
       //   omegaup_g_n = 1.;
-      // }
+      }
       // else 
       // {
       //   omegaup_g_s = 0.5;
@@ -1435,7 +1435,7 @@ public:
 
       // upwinding wrt gas-phase velocity
       // RF omegaup_g_s, omegaup_g_n;
-      // if (normalflux_g>=0.0)
+      // if (normalflux_g<0.0)
       // {
       //   omegaup_g_s = 1.0;
       //   omegaup_g_n = 0.0;
@@ -1446,8 +1446,8 @@ public:
       //   omegaup_g_n = 1.0;
       // }
       // // upwinding wrt water-phase velocity
-      // RF omegaup_w_s, omegaup_w_n;
-      // if (normalflux_w>=0.0)
+      // // RF omegaup_w_s, omegaup_w_n;
+      // if (normalflux_w<0.0)
       // {
       //   omegaup_w_s = 1.0;
       //   omegaup_w_n = 0.0;
@@ -2398,7 +2398,7 @@ public:
       // }
       // upwinding wrt gas-phase velocity
       // RF omegaup_g_s, omegaup_g_n;
-      // if (normalflux_g>=0.0)
+      // if (normalflux_g>0.0)
       // {
       //   omegaup_g_s = 1.0;
       //   omegaup_g_n = 0.0;
@@ -2409,8 +2409,8 @@ public:
       //   omegaup_g_n = 1.0;
       // }
       // // upwinding wrt water-phase velocity
-      // RF omegaup_w_s, omegaup_w_n;
-      // if (normalflux_w>=0.0)
+      // // RF omegaup_w_s, omegaup_w_n;
+      // if (normalflux_w>0.0)
       // {
       //   omegaup_w_s = 1.0;
       //   omegaup_w_n = 0.0;
