@@ -36,7 +36,7 @@ public:
 		//auto s = 0.03115;//S * water.MolarMass()/methane.MolarMass();
 		double P_eq = 1.e3 * exp( A - B/( T ) + C*S ); // defined in Pascals
 		// std::cout << P_eq <<"  " << S << std::endl;
-		// return P_eq;
+		return P_eq;
 	}
 
 	//rate constant for hydrate dissociation; base 1.e-14 for t_end = 2.16e6

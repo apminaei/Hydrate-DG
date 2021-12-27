@@ -243,8 +243,8 @@ public:
     // define types
     using RF = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
         Traits::LocalBasisType::Traits::RangeFieldType;
-    typedef typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
-        Traits::LocalBasisType::Traits::JacobianType JacobianType;
+    // typedef typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::FiniteElementType::
+    //     Traits::LocalBasisType::Traits::JacobianType JacobianType;
     using size_type = typename LFSU::template Child<Indices::PVId_Pw>::Type::Traits::SizeType;
 
     // dimensions
@@ -261,7 +261,7 @@ public:
     // Reference to cell
 	  const auto& cell = eg.entity();
 		const IndexSet &indexSet = gv.indexSet();
-		int cell_number = indexSet.index(cell);
+		// int cell_number = indexSet.index(cell);
 
     // Get geometry
     auto geo = eg.geometry();
@@ -489,8 +489,8 @@ public:
 
       double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
-      auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
-      auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */
+      // auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
+      // auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */
 
       auto YCH4 =  property.mixture.YCH4(XCH4, T_dim, Pg_dim, XC, zCH4);
       auto XH2O =  property.mixture.XH2O(YH2O, T_dim, Pg_dim, XC);
@@ -503,7 +503,8 @@ public:
 
       auto dPcSF1_dSh =  property.hydraulicProperty.dPcSF1_dSh( Sh, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh = property.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
-      auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg * coeff_grad_Sw *  dSwe_dSw  ;
+      auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * dSwe_dSh;//- Sg * coeff_grad_Sw *  dSwe_dSw  ;
 
       auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4); /*ndim density from CH4.hh; the input arguments are dimensional   */
       auto rho_w = property.water.Density(T_dim, Pw_dim, S); /*ndim density from H2O.hh; the input arguments are dimensional*/
@@ -555,7 +556,7 @@ public:
 
       
       RF factor = ip.weight() * geo.integrationElement(ip.position());
-      double tmp = 0.;
+      // double tmp = 0.;
       // integrate (A grad u - bu)*grad phi_i + a*u*phi_i
       for (size_type i = 0; i < lfsv_Sg.size(); i++)
       {
@@ -568,7 +569,7 @@ public:
       {
         r.accumulate(lfsv_XC, i, (( Xc_conv_m * convectiveflux_SALT_w
                                   + Xc_diff_m * diffusiveflux_SALT ) * gradpsi_Pw[i]
-                                  ) * factor);
+                                  - (q_s ) * Xc_source_m * psi_Pw[i]) * factor);
       }
 
       for (size_type i = 0; i < lfsv_Pw.size(); i++)
@@ -1238,7 +1239,8 @@ public:
 
       auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]);
       auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams_s[0] / Xc_P - Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams_s[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]) * dPc_dSwe_s * dSwe_dSh_s;//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
       double eta_n = 1/BrooksCParams_n[1];
       auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n, 0., 0.);
@@ -1248,7 +1250,8 @@ public:
 
       auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]);
       auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0., 0.);
-      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams_n[0] / Xc_P - Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
+      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams_n[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]) * dPc_dSwe_n * dSwe_dSh_n;//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
 
 
       auto Kgradu_Pg_s = Kgradu_Pw_s - coeff_grad_Sw_s * Kgradu_Sg_s + (coeff_grad_Sh_s ) * Kgradu_Sh_s;
@@ -1435,7 +1438,7 @@ public:
 
       // upwinding wrt gas-phase velocity
       // RF omegaup_g_s, omegaup_g_n;
-      // if (normalflux_g>=0.0)
+      // if (normalflux_g>0.0)
       // {
       //   omegaup_g_s = 1.0;
       //   omegaup_g_n = 0.0;
@@ -1445,9 +1448,9 @@ public:
       //   omegaup_g_s = 0.0;
       //   omegaup_g_n = 1.0;
       // }
-      // // upwinding wrt water-phase velocity
+      // upwinding wrt water-phase velocity
       // RF omegaup_w_s, omegaup_w_n;
-      // if (normalflux_w>=0.0)
+      // if (normalflux_w>0.0)
       // {
       //   omegaup_w_s = 1.0;
       //   omegaup_w_n = 0.0;
@@ -1588,8 +1591,9 @@ public:
 
       /*ACCCUMULATE RESIDUALS*/
 			double tmp=0.;
+      double term_lax_ch4 = penalty_factor_g * std::abs(XCH4_s - XCH4_n);
       // CH4-component-wise mass-balance
-      tmp =  Xc_conv_m * convectiveflux_CH4 + Xc_diff_m * diffusiveflux_CH4 ;
+      tmp =  Xc_conv_m * convectiveflux_CH4 + term_lax_ch4 + Xc_diff_m * diffusiveflux_CH4 ;
 
       double term_nipg_g = -theta_g * (Sg_s - Sg_n);
       double term_nipg_ch4_x = -theta_x * (XCH4_s - XCH4_n);
@@ -1628,7 +1632,9 @@ public:
 
 
       // SALT-component-wise mass-balance
-      tmp =  Xc_conv_m * convectiveflux_SALT + Xc_diff_m * diffusiveflux_SALT ;
+
+      double term_lax_c = penalty_factor_x * std::abs(XC_s - XC_n);
+      tmp =  Xc_conv_m * convectiveflux_SALT + term_lax_c + Xc_diff_m * diffusiveflux_SALT ;
 
       double term_nipg_c_x = -theta_x * (XC_s - XC_n);
 
@@ -1664,7 +1670,8 @@ public:
 
 
       // H2O-component-wise mass-balance
-      tmp =  Xc_conv_m * convectiveflux_H2O + Xc_diff_m * diffusiveflux_H2O ;
+      double term_lax_yh2o = penalty_factor_w * std::abs(YH2O_s - YH2O_n);
+      tmp =  Xc_conv_m * convectiveflux_H2O + term_lax_yh2o + Xc_diff_m * diffusiveflux_H2O ;
 
       double term_nipg_w = -theta_w * (Pw_s - Pw_n);
       double term_nipg_yh2o_x = -theta_x * (YH2O_s - YH2O_n);
@@ -1739,7 +1746,9 @@ public:
       // }
 
       // ENERGY balance
-      tmp =  Xc_conv_h * convectiveflux_Heat +  Xc_diff_h * diffusiveflux_Heat;
+      double term_lax_t_w = penalty_factor_T * std::abs(Cp_w_s * (T_s - T_ref)-Cp_w_n * (T_n - T_ref));
+      double term_lax_t_g = penalty_factor_T * std::abs(Cp_g_s * (T_s - T_ref)-Cp_g_n * (T_n - T_ref));
+      tmp =  Xc_conv_h * convectiveflux_Heat + term_lax_t_w + term_lax_t_g + Xc_diff_h * diffusiveflux_Heat;
       double term_nipg_T = -theta_T * (T_s - T_n);
       double term_penalty_T =  penalty_factor_T * (T_s - T_n) ;
       // diffusion term
@@ -2079,7 +2088,8 @@ public:
 
       auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams[0] / Xc_P - Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_s * dSwe_dSh_s;//- Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
 
       auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
@@ -2113,7 +2123,8 @@ public:
 
       auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams[1], BrooksCParams[4]);
       auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0., 0.);
-      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams[0] / Xc_P - Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
+      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams[0] / Xc_P 
+                          + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_n * dSwe_dSh_n;//- Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
 
 
       auto krW_n = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_n, Sh_n) / (property.water.DynamicViscosity(T_n_dim, Pw_n_dim, S_n));
@@ -2398,7 +2409,7 @@ public:
       // }
       // upwinding wrt gas-phase velocity
       // RF omegaup_g_s, omegaup_g_n;
-      // if (normalflux_g>=0.0)
+      // if (normalflux_g>0.0)
       // {
       //   omegaup_g_s = 1.0;
       //   omegaup_g_n = 0.0;
@@ -2408,9 +2419,9 @@ public:
       //   omegaup_g_s = 0.0;
       //   omegaup_g_n = 1.0;
       // }
-      // // upwinding wrt water-phase velocity
+      // upwinding wrt water-phase velocity
       // RF omegaup_w_s, omegaup_w_n;
-      // if (normalflux_w>=0.0)
+      // if (normalflux_w>0.0)
       // {
       //   omegaup_w_s = 1.0;
       //   omegaup_w_n = 0.0;

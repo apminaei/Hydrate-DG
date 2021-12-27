@@ -32,7 +32,7 @@ public:
 	BrooksCoreyParameters( const typename GV::Traits::template Codim<0>::Entity& element,
 	   	   	 	 	 	   const Dune::FieldVector<double,dim>& xlocal ) const {
 
-		Dune::FieldVector<double,dim> x = element.geometry().global(xlocal);
+		// Dune::FieldVector<double,dim> x = element.geometry().global(xlocal);
 
 		std::vector<double> BCParams (numOfParams,0.);
 
@@ -187,11 +187,11 @@ public:
 		double a = 0.05 ;
 
 		if( Swe > a ){
-			dPc = Pentry * (-1./lambda) * std::pow( Swe , -(1./lambda) - 1. );
+			dPc = Pentry * (-eta) * std::pow( Swe , -(eta) - 1. );
 		}
 		else if ( Swe <= a ){
-			double dPc_a  = Pentry * (-1./lambda) * std::pow( a , -(1./lambda) - 1. ) ;
-			double ddPc_a = Pentry * (-1./lambda) * (-1./lambda-1.) * std::pow( a , -(1./lambda) - 2. );
+			double dPc_a  = Pentry * (-eta) * std::pow( a , -(eta) - 1. ) ;
+			double ddPc_a = Pentry * (-eta) * (-eta-1.) * std::pow( a , -(eta) - 2. );
 			dPc = dPc_a + ddPc_a * ( Swe - a );
 		}
 		else {
@@ -318,10 +318,10 @@ public:
 									  double porosity ) const {
 
 		auto BCParams = BrooksCoreyParameters(element,xlocal);
-		double Pentry 	= BCParams[id_Pentry];
-		double lambda 	= BCParams[id_lambda];
-		double Sgr 		= BCParams[id_Sgr];
-		double Swr 		= BCParams[id_Swr];
+		// double Pentry 	= BCParams[id_Pentry];
+		// double lambda 	= BCParams[id_lambda];
+		// double Sgr 		= BCParams[id_Sgr];
+		// double Swr 		= BCParams[id_Swr];
 		double m 		= BCParams[id_m];
 		double beta 	= BCParams[id_beta];
 

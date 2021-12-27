@@ -172,13 +172,14 @@ public:
 
       		// evaluate YH2O
       		RF YH2O = 0.0;
-      		for (size_type i = 0; i < lfsu_YH2O.size(); i++)
+      		for (size_type i=0; i<lfsu_YH2O.size(); i++)
         		YH2O += x(lfsu_YH2O, i) * phi_YH2O[i];
 
 			// evaluate XC
       		RF XC = 0.0;
-      		for (size_type i = 0; i < lfsu_XC.size(); i++)
+      		for (size_type i=0; i<lfsu_XC.size(); i++){
         		XC += x(lfsu_XC, i) * phi_XC[i];
+			}
 
 			// Sg = std::max(0., Sg);
 			// Sh = std::max(0., Sh);

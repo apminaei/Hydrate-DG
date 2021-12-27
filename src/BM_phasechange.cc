@@ -36,10 +36,10 @@ int main(int argc, char **argv)
 			}
 			return 1;
 		}
-		std::string PATH = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/";
+		std::string PATH = "/home/peiravim/dune-2.8/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/";
 		char input[80];
 	    sscanf(argv[1],"%39s", input);
-	    std::string input_file = "/home/peiravim/dune-2.7/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/inputs/";
+	    std::string input_file = "/home/peiravim/dune-2.8/Hydrate-DG/dune/Hydrate-DG/BM_phasechange_0d/inputs/";
 	    input_file += input;
 	    std::cout<< "input file: " << input_file << std::endl ;
 
