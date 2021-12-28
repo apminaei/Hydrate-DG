@@ -285,9 +285,11 @@ public:
 		if(
 				(-150/150*(globalPos[0]-100/Xc.x_c)+globalPos[1]) <= (-365/Xc.x_c)
 			&& 	(-150/150*(globalPos[0]-110/Xc.x_c)+globalPos[1]) >= (-375/Xc.x_c) 
-			&& (15/15*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-365/Xc.x_c)
-			&& 	(15/15*(globalPos[0]-240/Xc.x_c)+globalPos[1]) <= (-220/Xc.x_c)
-			 // && Zmin_lenz2 <= globalPos[1] && globalPos[1]<= Zmax_lenz2 && X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2 
+			// && (15/15*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-365/Xc.x_c)
+			&& 	(15/15*(globalPos[0]-245/Xc.x_c)+globalPos[1]) <= (-220/Xc.x_c)
+			 && Zmin_lenz2 <= globalPos[1] 
+			 //&& globalPos[1]<= Zmax_lenz2 
+			 //&& X0_lenz2 <= globalPos[0] && globalPos[0]<= X1_lenz2 
 			   ){
 			return true;
 		}
@@ -299,8 +301,10 @@ public:
 			 	(150/150*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-230/Xc.x_c)
 			&& 	(150/150*(globalPos[0]-110/Xc.x_c)+globalPos[1]) <= (-220/Xc.x_c) 
 			&& (-15/15*(globalPos[0]-100/Xc.x_c)+globalPos[1]) <= (-230/Xc.x_c)
-			&& 	(-15/15*(globalPos[0]-240/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)
-			//&& Zmin_lenz1 <= globalPos[1] && globalPos[1]<= Zmax_lenz1 //&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1 
+			// && 	(-15/15*(globalPos[0]-240/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)
+			&& Zmin_lenz1 <= globalPos[1] 
+			//&& globalPos[1]<= Zmax_lenz1 
+			//&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1 
 			  ){
 			return true;
 		}
