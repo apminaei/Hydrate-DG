@@ -3,7 +3,7 @@
  *********************************************************/
 
 template< class GV,
-		  class Params,
+		  class Params, class FEM_P,  class FEM_Sg,  class FEM_Sh,  class FEM_T,  class FEM_X,  class FEM_Y,  class FEM_C,
 		  class Evaluation_Pw,
 		  class Evaluation_Sg,
 		  class Evaluation_Sh,
@@ -15,7 +15,14 @@ template< class GV,
 class PostProcess{
 private:
 	const GV&  gv;
-	const Params& param;
+	const Params& param; 
+	const FEM_P &fem_P;
+	const FEM_Sg &fem_Sg;
+	const FEM_Sh &fem_Sh;
+	const FEM_T &fem_T;
+	const FEM_X &fem_x;
+	const FEM_Y &fem_y;
+	const FEM_C &fem_c;
 	Evaluation_Pw    *evaluation_Pw;
 	Evaluation_Sg    *evaluation_Sg;
 	Evaluation_Sh    *evaluation_Sh;
@@ -44,7 +51,8 @@ private:
 public:
 
 	PostProcess(	const GV& gv_,
-					const Params& param_,
+					const Params& param_, const FEM_P& fem_P_, const FEM_Sg& fem_Sg_, const FEM_Sh& fem_Sh_,
+					const FEM_T& fem_T_, const FEM_X& fem_x_, const FEM_Y& fem_y_, const FEM_C& fem_c_, 
 					Evaluation_Pw 	*evaluation_Pw_,
 					Evaluation_Sg 	*evaluation_Sg_,
 					Evaluation_Sh 	*evaluation_Sh_,
@@ -55,7 +63,7 @@ public:
 					GFS_PP	gfs_pp_,
 					U_pp	*u_pp_ )
 	: gv(gv_),
-	  param(param_),
+	  param(param_), fem_P(fem_P_), fem_Sg(fem_Sg_), fem_Sh(fem_Sh_), fem_T(fem_T_), fem_x(fem_x_), fem_y(fem_y_), fem_c(fem_c_),
 	  evaluation_Pw(evaluation_Pw_),
 	  evaluation_Sg(evaluation_Sg_),
 	  evaluation_Sh(evaluation_Sh_),
@@ -304,7 +312,8 @@ public:
 			auto dSwe_dSh = param.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
 			auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg * coeff_grad_Sw *  dSwe_dSw  ;
 
-      		auto Kgrad_Pg = Kgrad_Pw - coeff_grad_Sw * Kgrad_Sg + (coeff_grad_Sh ) * Kgrad_Sh;
+                        //   + param.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * (dSwe_dSh);//
+      		auto Kgrad_Pg = Kgrad_Pw - coeff_grad_Sw * Kgrad_Sg + coeff_grad_Sh * Kgrad_Sh;
 
 			auto Vwx = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[0]*Xc_P/Xc_x-rhow*Xc_rho*Kg[0]);
 			auto Vwy = - krw/(muw*Xc_mu)*Xc_K*(Kgrad_Pw[1]*Xc_P/Xc_x-rhow*Xc_rho*Kg[1]);
@@ -369,36 +378,28 @@ public:
 		{
 			// Reference to cell
 	        const auto& cell = *self;
-			const IndexSet &indexSet = gv.indexSet();
-			int cell_number = indexSet.index(cell);
-	        // get geometry
-	        auto geo = cell.geometry();
-			// dimension
-			const auto dim = geo.mydimension;
-
-			
-	        // cell geometry
-	        auto ref_el = referenceElement(geo);
-	        auto cell_center_local = ref_el.position(0,0) ;
-	        auto cell_volume = geo.volume();
-			auto ip_global = geo.global(cell_center_local);
-      		auto ip_local = geo.local(ip_global);
-
 	        // evaluation_Pw->updateSolution(cell);
-	        
-	        evaluation_Sg->updateSolution(cell);
-	        
-	        evaluation_Sh->updateSolution(cell);
-	        
+	        if(fem_Sg.polynomial()==Dune::PDELab::QkDGBasisPolynomial::lagrange){
+	        	evaluation_Sg->updateSolution(cell);
+			}else{
+				evaluation_Sg->updateLegendreSolution(cell);
+			}
+	        if(fem_Sh.polynomial()==Dune::PDELab::QkDGBasisPolynomial::lagrange){
+	        	evaluation_Sh->updateSolution(cell);
+				// std::cout << "lagrange   " << std::endl; 
+			}else{
+				evaluation_Sh->updateLegendreSolution(cell);
+				// std::cout << "legendre   " << std::endl;
+			}
 	        // evaluation_T->updateSolution(cell);
 	        
 	        // evaluation_YH2O->updateSolution(cell);
-	        
-	        evaluation_XCH4->updateSolution(cell);
-	        
-	        // evaluation_XC->updateSolution(cell);
-			
-			
+	        if(fem_x.polynomial()==Dune::PDELab::QkDGBasisPolynomial::lagrange){
+	        	evaluation_XCH4->updateSolution(cell);
+			}else{
+				evaluation_XCH4->updateLegendreSolution(cell);
+			}
+	       
 
 		}//END:iterate over each volume
 	}

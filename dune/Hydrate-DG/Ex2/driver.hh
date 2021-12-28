@@ -64,7 +64,7 @@ void driver(const GV &gv, // GridView
 	
 	
 	Real dtstart = dt;
-	Real time_op = time;
+	// Real time_op = time;
 	Real clock_time_elapsed = 0.;
 
 	int maxAllowableIterations = ptree.get("adaptive_time_control.max_newton_steps",(int)10);
@@ -78,7 +78,7 @@ void driver(const GV &gv, // GridView
 	const int degree_C = 1;
 	const int degree_Y = 1;
 
-	const int degree_PP = 0;
+	const int degree_PP = 1;
 
 	// const int degree_pen = 1;
 
@@ -99,22 +99,28 @@ void driver(const GV &gv, // GridView
 
 	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_PP,dim,Dune::GeometryType::simplex > FEM_PP;
 
-
+	auto const xc_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;;
+	auto const xch4_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
+	auto const yh2o_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
+	auto const pw_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;// ptree.get("basis.pw",);
+	auto const sg_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
+	auto const sh_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
+	auto const t_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_P;
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sg;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, pw_basis_polynomial > FEM_P;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, sg_basis_polynomial > FEM_Sg;
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_T; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_T, dim, t_basis_polynomial > FEM_T; 
 	
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_X; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_X, dim, xch4_basis_polynomial > FEM_X; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Y;
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Y, dim, yh2o_basis_polynomial > FEM_Y;
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_Sh; 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sh, dim, sh_basis_polynomial > FEM_Sh; 
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange > FEM_C;  
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, xc_basis_polynomial > FEM_C;  
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, 1, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP;//l2orthonormal 
+	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_PP, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_PP;//l2orthonormal 
 
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_P;
 	
@@ -140,6 +146,11 @@ void driver(const GV &gv, // GridView
 	FEM_C fem_c;//(gv);
 	FEM_Sh fem_Sh;//(gv);
 	
+	
+	// if (fem_x.polynomial()==Dune::PDELab::QkDGBasisPolynomial::lagrange){
+	// 	std::cout << "fem_x.polynomial()" << std::endl;
+	// 	exit(0);
+	// }
 	FEM_PP fem_PP;//(gv);
 
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
@@ -169,6 +180,10 @@ void driver(const GV &gv, // GridView
 													 Dune::PDELab::EntityBlockedOrderingTag,
 													 GFS_P, GFS_Sg, GFS_Sh, GFS_T, GFS_X,GFS_Y,GFS_C> 
 													 GFS;
+	// typedef Dune::PDELab::PowerGridFunctionSpace< GFS_P,
+	// 												  Indices::numOfPVs,
+	// 												  VBE0,
+	// 												  Dune::PDELab::LexicographicOrderingTag > GFS;
 	GFS gfs(gfs_P,  gfs_Sg, gfs_Sh, gfs_T, gfs_x, gfs_y,gfs_c);
 	
     typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
@@ -288,7 +303,7 @@ void driver(const GV &gv, // GridView
 	double alpha_T = ptree.get("penalty_coeff.T",(double)1.e3); // 1.e1; //
 	double alpha_x = ptree.get("penalty_coeff.XC",(double)1.e3); // 1.e1; //
 	double alpha_y = ptree.get("penalty_coeff.YH2O",(double)1.e3); // 1.e1; //
-	double intorder= ptree.get("quadrature.order",(int)6);; 
+	double intorder= ptree.get("quadrature.order",(int)6);
 
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;
@@ -369,12 +384,12 @@ void driver(const GV &gv, // GridView
 
 	// typedef Dune::PDELab::ISTLBackend_CG_AMG_SSOR<IGO> LS; // should be checked
 	// int verbose = 0;
-	// if (gfs.gridView().comm().rank() == 0)
-	// 	verbose = 1;
+	// // if (gfs.gridView().comm().rank() == 0)
+	// // 	verbose = 1;
 	// LS ls(gfs, 100, verbose);
 
 	auto param = ls.parameters();
-	// param.setMaxLevel(3); // max number of coarsening levels
+	// param.setMaxLevel(1); // max number of coarsening levels
 	param.setCoarsenTarget(100000000); // max DoF at coarsest level
 	ls.setParameters(param);
 
@@ -433,8 +448,8 @@ void driver(const GV &gv, // GridView
 	// pdesolver.setReduction(ptree.get("newton.Reduction",(double)1e-5));
     // // pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
 	// pdesolver.setAbsoluteLimit(ptree.get("newton.AbsoluteLimit",(double)1.e-4)); 
-	auto reduction = ptree.get("newton.Reduction",(double)1e-5);
-	auto absolutlimit = ptree.get("newton.AbsoluteLimit",(double)1e-5);
+	// auto reduction = ptree.get("newton.Reduction",(double)1e-5);
+	// auto absolutlimit = ptree.get("newton.AbsoluteLimit",(double)1e-5);
 	
 	std::cout << " PDESOLVER DONE ! " << std::endl;
 
@@ -464,7 +479,7 @@ void driver(const GV &gv, // GridView
 
 		
 	//  POST-PROCESS
-		// typedef Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed> VBE_PP;
+		typedef Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed> VBE_PP;
 		typedef Dune::PDELab::CompositeGridFunctionSpace<VBE, 
 													 Dune::PDELab::EntityBlockedOrderingTag,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
@@ -472,6 +487,10 @@ void driver(const GV &gv, // GridView
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC, GFS_CC,
 													 GFS_CC, GFS_CC, GFS_CC, GFS_CC>  GFS_PP;
+		// typedef Dune::PDELab::PowerGridFunctionSpace< GFS_CC,
+		// 											  Indices::numOfSVs,
+		// 											  VBE0,
+		// 											  Dune::PDELab::LexicographicOrderingTag > GFS_PP;
 		GFS_PP gfs_pp(	gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
 						gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc, gfs_cc,
@@ -551,7 +570,7 @@ void driver(const GV &gv, // GridView
 		using U_PP = Dune::PDELab::Backend::Vector<GFS_PP,double>;
 		U_PP u_pp(gfs_pp, 0.0);
 
-		PostProcess<GV, Properties,
+		PostProcess<GV, Properties, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C,
 					Dune::PDELab::Evaluation<SUBGFS_Pw	,U> ,
 					Dune::PDELab::Evaluation<SUBGFS_Sg	,U> ,
 					Dune::PDELab::Evaluation<SUBGFS_Sh	,U> ,
@@ -559,7 +578,7 @@ void driver(const GV &gv, // GridView
 					Dune::PDELab::Evaluation<SUBGFS_XCH4,U> ,
 					Dune::PDELab::Evaluation<SUBGFS_YH2O,U> ,
 					Dune::PDELab::Evaluation<SUBGFS_XC,U>,
-					 GFS_PP, U_PP > postprocess( gv, property,
+					 GFS_PP, U_PP > postprocess( gv, property, fem_P, fem_Sg, fem_Sh, fem_T, fem_x, fem_y, fem_c, 
 												 &evaluation_Pw,
 												 &evaluation_Sg,
 												 &evaluation_Sh,
@@ -768,7 +787,7 @@ void driver(const GV &gv, // GridView
 	//	INITIALIZE
 	unew = uold;
 	int opcount = 1;
-	double timecount = time;
+	// double timecount = time;
 	double dtLast = dtstart;
 	int dtFlag = 0;
 
@@ -947,7 +966,7 @@ void driver(const GV &gv, // GridView
 				std::cout<< " ******************************************************************* " << std::endl;
 				std::cout<< std::flush;
 			}
-			timecount = time;
+			// timecount = time;
 			opcount = opcount + 1;
 		}
 

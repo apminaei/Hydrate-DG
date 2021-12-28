@@ -106,6 +106,8 @@ namespace Dune {
 					vlocal[1] = xlocal[0]+xlocal[1]-xlocal[2]-xlocal[3]
 					vlocal[2] = xlocal[0]-xlocal[1]+xlocal[2]-xlocal[3]
 					vlocal[3] = xlocal[0]+xlocal[1]+xlocal[2]+xlocal[3]
+
+
 		*/
 
 		  for (unsigned int i=0; i<xlocal.size(); i++){
@@ -118,6 +120,61 @@ namespace Dune {
 			x_view.commit();
 			x_view.unbind();
 	  }
+	  inline void updateLegendreSolution(const typename Traits::ElementType& e) const{
+
+		  LFS lfs(gfs);
+		  LFSCache lfs_cache(lfs);
+		  VectorView x_view((*xglobal));
+
+		  lfs.bind(e);
+		  lfs_cache.update();
+		  x_view.bind(lfs_cache);
+
+		  std::vector<typename Vector::ElementType> xlocal(lfs.size());
+		  std::vector<double> vlocal(xlocal.size());
+		  x_view.read(xlocal);
+
+		// e.geometry().global(xlocal)
+
+		/*
+				vlocal are the solution in terms of lagrange basis
+				xlocal are the solution in terms of chosen basis
+			lagrange = S * Legendre, 
+					[1 -1 -1 1] 
+					|1 1 -1 -1|
+			S = 1/4 |1 -1 1 -1|
+					[1 1  1  1]
+
+			legendre = T * lagrange
+					[1  1  1 1] 
+					|-1 1 -1 1|
+			T =  	|-1 -1 1 1|
+					[1 -1 -1 1]
+			lagrange and legendre are column vectors
+		*/
+		vlocal[0] = xlocal[0]-xlocal[1]-xlocal[2]+xlocal[3];
+		vlocal[1] = xlocal[0]+xlocal[1]-xlocal[2]-xlocal[3];
+		vlocal[2] = xlocal[0]-xlocal[1]+xlocal[2]-xlocal[3];
+		vlocal[3] = xlocal[0]+xlocal[1]+xlocal[2]+xlocal[3];
+
+					
+		//*/
+
+		for (unsigned int i=0; i<vlocal.size(); i++){
+			if (vlocal[i]< 0.){
+			   vlocal[i] = 0.;
+			}
+		}
+		xlocal[0] =0.25*( vlocal[0]+vlocal[1]+vlocal[2]+vlocal[3]);
+		xlocal[1] = 0.25*( -vlocal[0]+vlocal[1]-vlocal[2]+vlocal[3]);
+		xlocal[2] = 0.25*(- vlocal[0]-vlocal[1]+vlocal[2]+vlocal[3]);
+		xlocal[3] = 0.25*( vlocal[0]-vlocal[1]-vlocal[2]+vlocal[3]);
+
+			x_view.write( xlocal );
+			x_view.commit();
+			x_view.unbind();
+	  }
+
 
 
 	  inline void evalFunction(const typename Traits::ElementType& e,
