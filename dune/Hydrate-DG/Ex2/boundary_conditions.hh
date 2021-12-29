@@ -108,7 +108,7 @@ public :
 			// double Pw_top = icv[Indices::PVId_Pw];
 			// double T_top  = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){ 
-			double	Pw_top = icv[Indices::PVId_Pw] + (2600. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+			double	Pw_top = icv[Indices::PVId_Pw] + (920. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
 												/ (property.characteristicValue.P_c);
 			double	T_top  = icv[Indices::PVId_T]+( property.parameter.DTz() * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 			// }
@@ -208,7 +208,7 @@ public :
 			// double Pw_top = icv[Indices::PVId_Pw];
 			// double T_top  = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){ 
-			double	Pw_top = icv[Indices::PVId_Pw] + (2600. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+			double	Pw_top = icv[Indices::PVId_Pw] + (920. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
 												/ (property.characteristicValue.P_c);
 			double	T_top  = icv[Indices::PVId_T]+( property.parameter.DTz() * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 			// }

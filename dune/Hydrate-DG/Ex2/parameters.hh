@@ -127,9 +127,9 @@ public:
 
 	double InitialSg(Dune::FieldVector< double,dim > xglobal) const {
 		double Sg = 0.;
-		// if( dim == 2 && mesh.isFGP(xglobal)){
-		// 	Sg = Sg_t0;//* (rand()%2) + 0.001;//
-		// }
+		if( dim == 2 && mesh.isFGP(xglobal)){
+			Sg = Sg_t0;//* (rand()%2) + 0.001;//
+		}
 
 		return Sg;
 	}
@@ -165,14 +165,14 @@ public:
 
 	double InitialSh(Dune::FieldVector< double,dim > xglobal) const {
 		double Sh = Sh_t0 ;
-		double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
+		// double GHSZ_width = mesh.Z_GHSZ_top - mesh.Z_GHSZ_bottom;
 		
-		if( dim == 1 && mesh.isGHSZ(xglobal)){
-			Sh = 1.2 * (xglobal[0]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[0]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
-		}
-		if( dim == 2 && mesh.isGHSZ(xglobal)){
-			Sh = 1.2 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
-		}
+		// if( dim == 1 && mesh.isGHSZ(xglobal)){
+		// 	Sh = 1.2 * (xglobal[0]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[0]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
+		// }
+		// if( dim == 2 && mesh.isGHSZ(xglobal)){
+		// 	Sh = 1.2 * (xglobal[1]-mesh.Z_GHSZ_bottom)/GHSZ_width * (xglobal[1]-mesh.Z_GHSZ_top)/(-GHSZ_width);//* (rand()%2) + 0.001;//
+		// }
 		return Sh;
 	}
 
