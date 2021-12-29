@@ -108,7 +108,7 @@ public :
 			// double Pw_top = icv[Indices::PVId_Pw];
 			// double T_top  = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){ 
-			double	Pw_top = icv[Indices::PVId_Pw] + (920. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+			double	Pw_top = icv[Indices::PVId_Pw] + (2600. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
 												/ (property.characteristicValue.P_c);
 			double	T_top  = icv[Indices::PVId_T]+( property.parameter.DTz() * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 			// }
@@ -127,7 +127,7 @@ public :
 
 			// bcvalue[Indices::PVId_T ] = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){
-			bcvalue[indices.PVId_T] = -property.parameter.DTz() * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+			bcvalue[indices.PVId_T] = property.parameter.DTz() * (property.characteristicValue.x_c/property.characteristicValue.T_c);
 			// }
 			// bcvalue[indices.PVId_Pw] =   -(property.water.Density(T, P, S)-1.e-6)* 9.81 * property.characteristicValue.density_c  * property.characteristicValue.x_c /*should increase */
 			// 									/ (property.characteristicValue.P_c);
@@ -208,7 +208,7 @@ public :
 			// double Pw_top = icv[Indices::PVId_Pw];
 			// double T_top  = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){ 
-			double	Pw_top = icv[Indices::PVId_Pw] + (920. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
+			double	Pw_top = icv[Indices::PVId_Pw] + (2600. * 9.81 * press_rate * Xc_time * (time+dt)) /*should increase */
 												/ (property.characteristicValue.P_c);
 			double	T_top  = icv[Indices::PVId_T]+( property.parameter.DTz() * press_rate * Xc_time * (time+dt) )/ property.characteristicValue.T_c;
 			// }
@@ -225,7 +225,7 @@ public :
 
 			// bcvalue[Indices::BCId_heat ] = icv[Indices::PVId_T];
 			// if( time > (50000. * 12.*30.*24*60.*60.)){
-				bcvalue[Indices::BCId_heat ] =  -property.parameter.DTz() * (property.characteristicValue.x_c/property.characteristicValue.T_c);
+				bcvalue[Indices::BCId_heat ] =  property.parameter.DTz() * (property.characteristicValue.x_c/property.characteristicValue.T_c);
 			// }
 			// bcvalue[Indices::BCId_water] = 0.;//icv[Indices::PVId_Pw];//- 0.06 * 1000. * property.parameter.g()[dim-1]/property.characteristicValue.P_c;
 		}
