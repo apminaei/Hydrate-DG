@@ -298,11 +298,11 @@ public:
 	}
 	bool isLenz1( Dune::FieldVector< double, dimension > globalPos ) const{
 		if(
-			 	(150/150*(globalPos[0]-100/Xc.x_c)+globalPos[1]) >= (-230/Xc.x_c)
-			&& 	(150/150*(globalPos[0]-110/Xc.x_c)+globalPos[1]) <= (-220/Xc.x_c) 
-			&& (-15/15*(globalPos[0]-100/Xc.x_c)+globalPos[1]) <= (-230/Xc.x_c)
-			// && 	(-15/15*(globalPos[0]-240/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)
-			&& Zmin_lenz1 <= globalPos[1] 
+			 	(150/150*(globalPos[0]-30/Xc.x_c)+globalPos[1]) >= (-240/Xc.x_c)
+			&& 	(150/150*(globalPos[0]-40/Xc.x_c)+globalPos[1]) <= (-230/Xc.x_c) 
+			&& (-15/15*(globalPos[0]-30/Xc.x_c)+globalPos[1]) <= (-240/Xc.x_c)
+			 && 	(-15/15*(globalPos[0]-170/Xc.x_c)+globalPos[1]) >= (-380/Xc.x_c)  
+			//&& Zmin_lenz1 <= globalPos[1] 
 			//&& globalPos[1]<= Zmax_lenz1 
 			//&& X0_lenz1 <= globalPos[0] && globalPos[0]<= X1_lenz1 
 			  ){
@@ -312,5 +312,8 @@ public:
 			return false;
 	}
 	//####################################1
+	int getdim( ) const{
+		return dimension;
+	}
 		
 };

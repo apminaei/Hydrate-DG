@@ -99,7 +99,7 @@ public:
 		double a1 = 2.26e-9;
 		double a2 = 0.002554;
 
-		D = ( a0 + a1*T + a2/Pg ) ;//0.638e-6;//
+		D =0.638e-6;// 1.e0*( a0 + a1*T + a2/Pg ) ;//
 
 		return D/X_c.dispersivity_c ;
 
@@ -119,8 +119,7 @@ public:
 		double A = 0.003475 ; 	/* K */
 		double B = 1.e0*1.57e-5;		/* cm^2/s */
 
-		D =   B * exp(-A/T) * 1.0e-6; // pow((Pw/1.0135e5),2.) * B * exp(-A/T) * 1.0e-6;//
-
+		D =  B * exp(-A/T) * 1.0e-6; //  pow((Pw/1.0135e5),2.) * B * exp(-A/T) * 1.0e-6;//
 		return D/X_c.dispersivity_c;
 	}
 

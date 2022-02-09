@@ -28,7 +28,7 @@ void driver(const GV &gv, // GridView
 	
 	Properties property(gv,ptree);
 
-
+	
 
 	/* Non-dimensionalize time prams */
 	/*in input file dt, dt_initprob, t_END, t_END_initprob, dt_min, dt_max, t_OP are specified in kilo-annum*/
@@ -87,7 +87,12 @@ void driver(const GV &gv, // GridView
 	typedef Dune::PDELab::OverlappingConformingDirichletConstraints CON0;
 #else
 	typedef Dune::PDELab::ConformingDirichletConstraints CON0;	// pure Neumann: no constraints
-#endif									
+#endif		
+// #ifdef PARALLEL
+// 	using CON0 = Dune::PDELab::P0ParallelConstraints;
+// #else
+// 	using CON0 = Dune::PDELab::NoConstraints;
+// #endif							
 	typedef Dune::PDELab::ISTL::VectorBackend<> VBE0;	// default block size: 1
 	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_P,dim,Dune::GeometryType::simplex > FEM_P;
 	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_Sg,dim,Dune::GeometryType::simplex > FEM_Sg;
@@ -99,13 +104,13 @@ void driver(const GV &gv, // GridView
 
 	// typedef OPBLocalFiniteElementMap<Coord,Real,degree_PP,dim,Dune::GeometryType::simplex > FEM_PP;
 
-	auto const xc_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;;
-	auto const xch4_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
-	auto const yh2o_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
-	auto const pw_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;// ptree.get("basis.pw",);
-	auto const sg_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
-	auto const sh_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
-	auto const t_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::legendre;
+	auto const xc_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
+	auto const xch4_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
+	auto const yh2o_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
+	auto const pw_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;// ptree.get("basis.pw",);
+	auto const sg_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
+	auto const sh_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
+	auto const t_basis_polynomial = Dune::PDELab::QkDGBasisPolynomial::lagrange;
 	
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_P, dim, pw_basis_polynomial > FEM_P;
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_Sg, dim, sg_basis_polynomial > FEM_Sg;
@@ -120,7 +125,7 @@ void driver(const GV &gv, // GridView
 
 	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_C, dim, xc_basis_polynomial > FEM_C;  
 
-	typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_PP, dim, Dune::PDELab::QkDGBasisPolynomial::legendre> FEM_PP;//l2orthonormal 
+	// typedef Dune::PDELab::QkDGLocalFiniteElementMap<Coord, Real, degree_PP, dim, Dune::PDELab::QkDGBasisPolynomial::lagrange> FEM_PP;//l2orthonormal 
 
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_P> FEM_P;
 	
@@ -136,7 +141,7 @@ void driver(const GV &gv, // GridView
 	
 	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_C> FEM_C; 
 
-	// typedef Dune::PDELab::PkLocalFiniteElementMap<GV, Coord, Real, degree_PP> FEM_PP;
+	typedef Dune::PDELab::QkLocalFiniteElementMap<GV, Coord, Real, degree_PP> FEM_PP;
 
 	FEM_X fem_x;//(gv);
 	FEM_T fem_T;//(gv);
@@ -151,7 +156,7 @@ void driver(const GV &gv, // GridView
 	// 	std::cout << "fem_x.polynomial()" << std::endl;
 	// 	exit(0);
 	// }
-	FEM_PP fem_PP;//(gv);
+	FEM_PP fem_PP(gv);
 
 	typedef Dune::PDELab::GridFunctionSpace<GV, FEM_P, CON0, VBE0> GFS_P; // gfs
 	GFS_P gfs_P(gv, fem_P);
@@ -188,6 +193,7 @@ void driver(const GV &gv, // GridView
 	
     typedef typename GFS::template ConstraintsContainer<Real>::Type CC;
     CC cc;
+	cc.clear();
 	//	MAKE VECTOR CONTAINER FOR THE SOLUTION
 	using U = Dune::PDELab::Backend::Vector<GFS, double>;
 	U uold(gfs, 0.0);
@@ -218,13 +224,21 @@ void driver(const GV &gv, // GridView
     SUBGFS_XC    subgfs_XC(gfs);
 
 	//  EVALUATION FUNCTIONS FOR PRIMARY VARIABLES
-	// Dune::PDELab::Evaluation<SUBGFS_Pw	,U> evaluation_Pw(	 subgfs_Pw	,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_Sg	,U> evaluation_Sg(	 subgfs_Sg	,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_Sh	,U> evaluation_Sh(	 subgfs_Sh	,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_T,U> evaluation_T( subgfs_T,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_YH2O,U> evaluation_YH2O( subgfs_YH2O,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_XCH4,U> evaluation_XCH4( subgfs_XCH4,&unew );
-	// Dune::PDELab::Evaluation<SUBGFS_XC,U> evaluation_XC( subgfs_XC,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_Pw	,U> evaluation_Pw(	 subgfs_Pw	,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_Sg	,U> evaluation_Sg(	 subgfs_Sg	,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_Sh	,U> evaluation_Sh(	 subgfs_Sh	,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_T,U> evaluation_T( subgfs_T,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_YH2O,U> evaluation_YH2O( subgfs_YH2O,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_XCH4,U> evaluation_XCH4( subgfs_XCH4,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_XC,U> evaluation_XC( subgfs_XC,&unew );
+
+	Dune::PDELab::Evaluation<SUBGFS_Pw	,U> evaluation_Pw_old(	 subgfs_Pw	,&uold );
+	Dune::PDELab::Evaluation<SUBGFS_Sg	,U> evaluation_Sg_old(	 subgfs_Sg	,&uold );
+	Dune::PDELab::Evaluation<SUBGFS_Sh	,U> evaluation_Sh_old(	 subgfs_Sh	,&uold );
+	Dune::PDELab::Evaluation<SUBGFS_T,U> evaluation_T_old( subgfs_T,&unew );
+	Dune::PDELab::Evaluation<SUBGFS_YH2O,U> evaluation_YH2O_old( subgfs_YH2O,&uold );
+	Dune::PDELab::Evaluation<SUBGFS_XCH4,U> evaluation_XCH4_old( subgfs_XCH4,&uold );
+	Dune::PDELab::Evaluation<SUBGFS_XC,U> evaluation_XC_old( subgfs_XC,&uold );
 
 	// using Pathp = Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_pen>>;
     // using SUBGFS_pen = Dune::PDELab::GridFunctionSubSpace<GFS,Pathp>;
@@ -308,11 +322,47 @@ void driver(const GV &gv, // GridView
 	typedef ProblemBoundaryConditions<GV,Properties> BoundaryConditions ;
 	BoundaryConditions bc( gv,property ) ;
 
-	typedef LocalOperator<GV, Properties, U, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C> LOP; // spatial part
-	LOP lop(gv, property, &unew, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+	typedef LocalOperator<GV, Properties, BoundaryConditions, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C> LOP; // spatial part
+	LOP lop(gv, property, bc, gfs, &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
 
+	// typedef LocalOperator<GV, Properties, U, GFS,
+	// 	 FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Pw	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Sg	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Sh	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_T	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_XCH4 ,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_YH2O ,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_XC	,U>> LOP; // spatial part
+	// LOP lop(gv, property, &unew, gfs,
+	// 						&evaluation_Pw_old,
+	// 						&evaluation_Sg_old,
+	// 						&evaluation_Sh_old,
+	// 						&evaluation_T_old,
+	// 						&evaluation_XCH4_old,
+	// 						&evaluation_YH2O_old,
+	// 						&evaluation_XC_old,
+	// 						 &time, &dt, intorder, method_g, method_w, method_T, method_x, method_y, alpha_g, alpha_w, alpha_s, alpha_T, alpha_x, alpha_y);
+
+	
 	typedef TimeOperator<GV, Properties> TLOP; // temporal part
 	TLOP tlop(gv, property, intorder);
+	// typedef TimeOperator<GV, Properties,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Pw	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Sg	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_Sh	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_T	,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_XCH4 ,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_YH2O ,U>,
+	// 	Dune::PDELab::Evaluation<SUBGFS_XC	,U>> TLOP; // temporal part
+	// TLOP tlop(gv, property,
+	// 						&evaluation_Pw_old,
+	// 						&evaluation_Sg_old,
+	// 						&evaluation_Sh_old,
+	// 						&evaluation_T_old,
+	// 						&evaluation_XCH4_old,
+	// 						&evaluation_YH2O_old,
+	// 						&evaluation_XC_old, intorder);
 
 	typedef Dune::PDELab::ISTL::BCRSMatrixBackend<> MBE;
 	MBE mbe(150);
@@ -337,6 +387,9 @@ void driver(const GV &gv, // GridView
 
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SuperLU<GFS, CC> LS; //doesn't work
 	// LS ls(gfs, cc, 100, 2);
+
+	// typedef Dune::PDELab::ISTLBackend_OVLP_GMRES_ILU0<GFS,CC> LS;
+	// LS ls(gfs,cc,100,2,max_linear_iteration);
 
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_SSORk<GFS,CC> LS;
 	// LS ls(gfs, cc, max_linear_iteration, 10,1);
@@ -377,7 +430,7 @@ void driver(const GV &gv, // GridView
 	// params.setAdditive(false);
 	// ls.setParameters(params);
 	// typedef Dune::PDELab::ISTLBackend_BCGS_AMG_ILU0<IGO> LS;//doesn't work
-	// LS ls(gfs,max_linear_iteration,1,true,true);
+	// LS ls(gfs,max_linear_iteration,2,true,true);
 
 	// typedef Dune::PDELab::ISTLBackend_OVLP_BCGS_ILUn<GFS, CC> LS; //doesn't work
 	// LS ls(gfs, cc);
@@ -389,8 +442,8 @@ void driver(const GV &gv, // GridView
 	// LS ls(gfs, 100, verbose);
 
 	auto param = ls.parameters();
-	// param.setMaxLevel(1); // max number of coarsening levels
-	param.setCoarsenTarget(100000000); // max DoF at coarsest level
+	// param.setMaxLevel(3); // max number of coarsening levels
+	param.setCoarsenTarget(100000); // max DoF at coarsest level
 	ls.setParameters(param);
 
 	std::cout << " PARALLEL LS DONE ! " << std::endl;
@@ -420,29 +473,29 @@ void driver(const GV &gv, // GridView
 #endif
 
     //    SELECT SOLVER FOR NON-LINEAR PROBLEM
-    // using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
-    // PDESOLVER pdesolver( igo, ls );
-    // // select control parameters for non-linear PDE-solver
-	// pdesolver.setLineSearchStrategy(ptree.get("newton.line_search_strategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
-    // //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
-	// pdesolver.setReassembleThreshold(0.0);
-    // pdesolver.setVerbosityLevel(2);
-    // pdesolver.setReduction(ptree.get("newton.reduction",(double)1e-5));
-    // pdesolver.setMinLinearReduction(ptree.get("newton.min_linear_reduction",(double)1.e-9));
-	// pdesolver.setMaxIterations(ptree.get("newton.max_iterations",(int)15));
-    // pdesolver.setForceIteration(ptree.get("newton.force_iterations",(bool)true));
-	// pdesolver.setAbsoluteLimit(ptree.get("newton.abs_error",(double)1.e-4)); 
+    using PDESOLVER = Dune::PDELab::Newton< IGO, LS, U >;
+    PDESOLVER pdesolver( igo, ls );
+    // select control parameters for non-linear PDE-solver
+	pdesolver.setLineSearchStrategy(ptree.get("newton.LineSearchStrategy",(std::string)"noLineSearch"));//Strategy {  hackbuschReusken, hackbuschReuskenAcceptBest }
+    //pdesolver.setLineSearchStrategy(PDESOLVER::Strategy::hackbuschReuskenAcceptBest);
+	pdesolver.setReassembleThreshold(0.0);
+    pdesolver.setVerbosityLevel(2);
+    pdesolver.setReduction(ptree.get("newton.Reduction",(double)1e-5));
+    pdesolver.setMinLinearReduction(ptree.get("newton.MinLinearReduction",(double)1.e-9));
+	pdesolver.setMaxIterations(ptree.get("newton.MaxIterations",(int)15));
+    pdesolver.setForceIteration(ptree.get("newton.ForceIteration",(bool)true));
+	pdesolver.setAbsoluteLimit(ptree.get("newton.AbsoluteLimit",(double)1.e-4)); 
 
 	//TODO: CHECK NEW NEWTON PARAMS
 	//	SELECT SOLVER FOR NON-LINEAR PROBLEM
-	typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
-	PDESOLVER pdesolver(igo, ls);
+	// typedef Dune::PDELab::NewtonMethod<IGO, LS> PDESOLVER;
+	// PDESOLVER pdesolver(igo, ls);
 
 	// 	select control parameters for non-linear PDE-solver
 	// typedef Dune::PDELab::LineSearchNone<PDESOLVER> lineSearchStrategy;
 	// typedef Dune::PDELab::LineSearchHackbuschReusken<PDESOLVER> lineSearchStrategy;
 	// lineSearchStrategy linesearchstrategy(pdesolver);
-	pdesolver.setParameters(ptree.sub("newton"));
+	// pdesolver.setParameters(ptree.sub("newton"));
 	//linesearchstrategy.setParameters(ptree.sub("newton.line_search"));
 	// pdesolver.setVerbosityLevel(ptree.get("newton.VerbosityLevel",(int)3));
 	// pdesolver.setReduction(ptree.get("newton.Reduction",(double)1e-5));
@@ -469,13 +522,102 @@ void driver(const GV &gv, // GridView
 	osm.setVerbosityLevel(2);
 	std::cout << " OSM DONE ! " << std::endl;
 	unew = uold;
-	Dune::PDELab::Evaluation<SUBGFS_Pw	,U> evaluation_Pw(	 subgfs_Pw	,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_Sg	,U> evaluation_Sg(	 subgfs_Sg	,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_Sh	,U> evaluation_Sh(	 subgfs_Sh	,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_T	,U> evaluation_T( subgfs_T,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_YH2O,U> evaluation_YH2O( subgfs_YH2O,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_XCH4,U> evaluation_XCH4( subgfs_XCH4,&unew );
-	Dune::PDELab::Evaluation<SUBGFS_XC	,U> evaluation_XC( subgfs_XC,&unew );
+	
+
+	
+
+	// STEP 1:
+		// L2-PROJECTION OF P0-PRESSURES ONTO Q1-SPACE
+		const int degree = 1; //polynomial degree
+		typedef Dune::PDELab::QkLocalFiniteElementMap<GV, Coord, double, degree> FEMPROJ;
+		FEMPROJ femproj(gv);
+		typedef Dune::PDELab::GridFunctionSpace<GV, FEMPROJ, CON0, VBE0> GFSPROJ0;
+		GFSPROJ0 gfsproj0(gv, femproj);
+#ifdef PARALLEL
+		using VBEPROJ = Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::fixed>;
+		typedef Dune::PDELab::PowerGridFunctionSpace< GFSPROJ0,
+													  Indices::numOfPVs,
+													  VBEPROJ,
+													  Dune::PDELab::EntityBlockedOrderingTag > GFSPROJ;
+		GFSPROJ gfsproj(gfsproj0);
+#else
+		typedef Dune::PDELab::ISTL::VectorBackend<Dune::PDELab::ISTL::Blocking::none > VBEPROJ;
+		typedef Dune::PDELab::PowerGridFunctionSpace< GFSPROJ0,
+													  Indices::numOfPVs,
+													  VBEPROJ,
+													  Dune::PDELab::LexicographicOrderingTag > GFSPROJ;
+		GFSPROJ gfsproj(gfsproj0);
+#endif
+		typedef typename GFSPROJ::template ConstraintsContainer<double>::Type CCPROJ;
+		CCPROJ ccproj;
+		ccproj.clear();
+
+		using SUBPROJ_Pw = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Pw>> >;
+		SUBPROJ_Pw subproj_Pw(gfsproj);
+		using SUBPROJ_Sg = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sg>> >;
+		SUBPROJ_Sg subproj_Sg(gfsproj);
+		using SUBPROJ_Sh = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_Sh>> >;
+		SUBPROJ_Sh subproj_Sh(gfsproj);
+		using SUBPROJ_T = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_T>> >;
+		SUBPROJ_T subproj_T(gfsproj);
+		using SUBPROJ_XC = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_C>> >;
+		SUBPROJ_XC subproj_XC(gfsproj);
+		using SUBPROJ_XCH4 = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_XCH4>> >;
+		SUBPROJ_XCH4 subproj_XCH4(gfsproj);
+		using SUBPROJ_YH2O = Dune::PDELab::GridFunctionSubSpace< GFSPROJ, Dune::TypeTree::HybridTreePath<Dune::index_constant<Indices::PVId_YH2O>> >;
+		SUBPROJ_YH2O subproj_YH2O(gfsproj);
+
+		using UPROJ = Dune::PDELab::Backend::Vector<GFSPROJ,double>;
+		UPROJ u_proj(gfsproj); // u_proj = [Pg_q1, Pw_q1]^T
+
+		Dune::PDELab::Evaluation<SUBPROJ_Sg	,UPROJ> evaluation_projSg(	 subproj_Sg	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_Pw	,UPROJ> evaluation_projPw(	 subproj_Pw	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_Sh	,UPROJ> evaluation_projSh(	 subproj_Sh	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_T	,UPROJ> evaluation_projT(	 subproj_T	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_XC	,UPROJ> evaluation_projXC(	 subproj_XC	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_XCH4	,UPROJ> evaluation_projXCH4(	 subproj_XCH4	,&u_proj );
+		Dune::PDELab::Evaluation<SUBPROJ_YH2O	,UPROJ> evaluation_projYH2O(	 subproj_YH2O	,&u_proj );
+
+		typedef LocalOperatorPROJ< GV,Properties,GFSPROJ,UPROJ,
+		Dune::PDELab::Evaluation<SUBGFS_Pw	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_Sg	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_Sh	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_T	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_XCH4	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_YH2O	,U>,
+		Dune::PDELab::Evaluation<SUBGFS_XC	,U>
+		 > LOPPROJ;	// spatial part
+		LOPPROJ lopproj(gv, property, gfsproj, &u_proj, &evaluation_Pw,
+												 &evaluation_Sg,
+												 &evaluation_Sh,
+												 &evaluation_T,
+												 &evaluation_XCH4,
+												 &evaluation_YH2O,
+												 &evaluation_XC);
+
+		MBE mbeproj(10);
+		typedef Dune::PDELab::GridOperator< GFSPROJ, GFSPROJ, LOPPROJ, MBE, double, double, double, CCPROJ, CCPROJ> GOPROJ;
+		GOPROJ goproj(gfsproj, ccproj, gfsproj, ccproj, lopproj, mbeproj);
+
+#ifdef PARALLEL
+	#ifdef ALUGRID
+			typedef Dune::PDELab::ISTLBackend_OVLP_GMRES_ILU0<GFSPROJ,CCPROJ> LSPROJ;
+			LSPROJ lsproj(gfsproj,ccproj,100,1,200);
+	#else 
+			typedef Dune::PDELab::ISTLBackend_BCGS_AMG_SSOR<GOPROJ> LSPROJ;
+			LSPROJ lsproj(gfsproj,100,3,false,true);
+	#endif
+#else
+		typedef Dune::PDELab::ISTLBackend_SEQ_SuperLU LSPROJ;
+		LSPROJ lsproj;
+#endif
+
+		typedef Dune::PDELab::StationaryLinearProblemSolver<GOPROJ,LSPROJ,UPROJ> SLPPROJ;
+		SLPPROJ slpproj(goproj,lsproj,u_proj,1e-10);
+		// slpproj.apply(); // get initial values of u_proj
+
+
+	
 
 		
 	//  POST-PROCESS
@@ -569,6 +711,7 @@ void driver(const GV &gv, // GridView
 		
 		using U_PP = Dune::PDELab::Backend::Vector<GFS_PP,double>;
 		U_PP u_pp(gfs_pp, 0.0);
+		
 
 		PostProcess<GV, Properties, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C,
 					Dune::PDELab::Evaluation<SUBGFS_Pw	,U> ,
@@ -592,46 +735,46 @@ void driver(const GV &gv, // GridView
 		std::cout << " Post process init DONE ! " << std::endl;
 	//	GRAPHICS FOR INITIAL GUESS
 	// primary variables
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Pw, U> DGF_Pw;
-	DGF_Pw dgf_Pw(subgfs_Pw, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sg, U> DGF_Sg;
-	DGF_Sg dgf_Sg(subgfs_Sg, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_Sh, U> DGF_Sh;
-	DGF_Sh dgf_Sh(subgfs_Sh, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_T, U> DGF_T;
-	DGF_T dgf_T(subgfs_T, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XCH4, U> DGF_XCH4;
-	DGF_XCH4 dgf_XCH4(subgfs_XCH4, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_YH2O, U> DGF_YH2O;
-	DGF_YH2O dgf_YH2O(subgfs_YH2O, uold);
-	typedef Dune::PDELab::DiscreteGridFunction<SUBGFS_XC, U> DGF_XC;
-	DGF_XC dgf_XC(subgfs_XC, uold);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_Pw, UPROJ> DGF_Pw;
+	// DGF_Pw dgf_Pw(subproj_Pw, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_Sg, UPROJ> DGF_Sg;
+	// DGF_Sg dgf_Sg(subproj_Sg, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_Sh, UPROJ> DGF_Sh;
+	// DGF_Sh dgf_Sh(subproj_Sh, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_T, UPROJ> DGF_T;
+	// DGF_T dgf_T(subproj_T, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_XCH4, UPROJ> DGF_XCH4;
+	// DGF_XCH4 dgf_XCH4(subproj_XCH4, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_YH2O, UPROJ> DGF_YH2O;
+	// DGF_YH2O dgf_YH2O(subproj_YH2O, u_proj);
+	// typedef Dune::PDELab::DiscreteGridFunction<SUBPROJ_XC, UPROJ> DGF_XC;
+	// DGF_XC dgf_XC(subproj_XC, u_proj);
 
 	// secondary variables
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Pg, U_PP > DGF_Pg;
 		DGF_Pg dgf_Pg( subpp_Pg, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Pw, U_PP > DGF_Pw;
-		// DGF_Pw dgf_Pw( subpp_Pw, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Pw, U_PP > DGF_Pw;
+		DGF_Pw dgf_Pw( subpp_Pw, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Sg, U_PP > DGF_Sg;
+		DGF_Sg dgf_Sg( subpp_Sg, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Sh, U_PP > DGF_Sh;
+		DGF_Sh dgf_Sh( subpp_Sh, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_T, U_PP > DGF_T;
+		DGF_T dgf_T( subpp_T, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_XCH4, U_PP > DGF_XCH4;
+		DGF_XCH4 dgf_XCH4( subpp_XCH4, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_XC, U_PP > DGF_XC;
+		DGF_XC dgf_XC( subpp_XC, u_pp );
+		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_YH2O, U_PP > DGF_YH2O;
+		DGF_YH2O dgf_YH2O( subpp_YH2O, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Pc, U_PP > DGF_Pc;
 		DGF_Pc dgf_Pc( subpp_Pc, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Sg, U_PP > DGF_Sg;
-		// DGF_Sg dgf_Sg( subpp_Sg, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Sh, U_PP > DGF_Sh;
-		// DGF_Sh dgf_Sh( subpp_Sh, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_Sw, U_PP > DGF_Sw;
 		DGF_Sw dgf_Sw( subpp_Sw, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_T, U_PP > DGF_T;
-		// DGF_T dgf_T( subpp_T, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_XCH4, U_PP > DGF_XCH4;
-		// DGF_XCH4 dgf_XCH4( subpp_XCH4, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_XC, U_PP > DGF_XC;
-		// DGF_XC dgf_XC( subpp_XC, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_XH2O, U_PP > DGF_XH2O;
 		DGF_XH2O dgf_XH2O( subpp_XH2O, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_YCH4, U_PP > DGF_YCH4;
 		DGF_YCH4 dgf_YCH4( subpp_YCH4, u_pp );
-		// typedef Dune::PDELab::DiscreteGridFunction< SUBPP_YH2O, U_PP > DGF_YH2O;
-		// DGF_YH2O dgf_YH2O( subpp_YH2O, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_rhow, U_PP > DGF_rhow;
 		DGF_rhow dgf_rhow( subpp_rhow, u_pp );
 		typedef Dune::PDELab::DiscreteGridFunction< SUBPP_rhog, U_PP > DGF_rhog;
@@ -932,6 +1075,7 @@ void driver(const GV &gv, // GridView
 		// uoldtmp.axpy(1,  unew);
 		// uoldtmp.axpy(0.,  uold);
 		uold = unew;
+		
 		// GRAPHICS FOR NEW OUTPUT
 		// primary variables
 		// DGF_Pw dgf_Pw(subgfs_Pw, uold);
@@ -949,17 +1093,9 @@ void driver(const GV &gv, // GridView
 		if (((time + dt)/(t_OP * opcount) > (1.-1.e-9)) and ((time + dt) / (t_OP * opcount)< (1. + 1.e-9)))
 		{
 			// primary variables
-			// vtkSequenceWriter.addVertexData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Pw>>(dgf_Pw, "Pw"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sh>>(dgf_Sh, "Sh"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_Sg>>(dgf_Sg, "Sg"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_T>>(dgf_T, "T"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XCH4>>(dgf_XCH4, "XCH4"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_YH2O>>(dgf_YH2O, "YH2O"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_XC>>(dgf_XC, "XC"));
-			// vtkSequenceWriter.addCellData(std::make_shared<Dune::PDELab::VTKGridFunctionAdapter<DGF_pen>>(dgf_pen, "pen"));
+			// slpproj.apply();
 			postprocess.evaluate();
 			vtkSequenceWriter.write(time, Dune::VTK::appendedraw);
-			// vtkSequenceWriter.clear();
 			if(helper.rank()==0){
 				std::cout<< " ******************************************************************* " << std::endl;
 				std::cout<< " OUTPUT WRITTEN " << opcount << " ----processor: " << helper.rank() << std::endl;

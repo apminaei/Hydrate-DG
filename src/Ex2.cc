@@ -28,7 +28,16 @@ int main(int argc, char **argv)
 	{
 		// Maybe initialize MPI
 		 Dune::MPIHelper& helper = Dune::MPIHelper::instance(argc, argv);
+		if (helper.rank() == 0) {
+			std::cout << "You called the ground freezing project." << std::endl;
+		}
 
+		if (Dune::MPIHelper::isFake) {
+			std::cout << "This is a sequential program." << std::endl;
+		} else {
+			std::cout << "I am rank " << helper.rank() << " of "
+					<< helper.size() << " processes!" << std::endl;
+		}
 		if (argc != 2)
 		{
 			if (helper.rank() == 0)

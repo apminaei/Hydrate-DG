@@ -1,5 +1,6 @@
 #install headers
 install(FILES boundary_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
+install(FILES boundary_conditions_new.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
 install(FILES characteristic_values.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
 install(FILES initial_conditions.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)
 install(FILES driver.hh DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/Hydrate-DG/Ex2)

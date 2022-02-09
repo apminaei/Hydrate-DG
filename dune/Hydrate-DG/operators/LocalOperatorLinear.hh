@@ -13,14 +13,28 @@ using namespace Dune::PDELab;
 //   enum Type { NIPG, SIPG, IIPG };
 // };
 
-template <class GV, typename Params, typename BC, class GFS, class FEM_P, class FEM_Sg, class FEM_Sh, class FEM_T, class FEM_X, class FEM_Y, class FEM_C>
+template <class GV, typename Params, typename U, class GFS,
+ class FEM_P, class FEM_Sg, class FEM_Sh, class FEM_T, class FEM_X, class FEM_Y, class FEM_C,
+      class Evaluation_Pw,
+		  class Evaluation_Sg,
+		  class Evaluation_Sh,
+		  class Evaluation_T,
+		  class Evaluation_XCH4,
+		  class Evaluation_YH2O,
+		  class Evaluation_XC>
 class LocalOperator :
-                      public Dune::PDELab::NumericalJacobianApplyVolume<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
-                      public Dune::PDELab::NumericalJacobianVolume<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
-                      public Dune::PDELab::NumericalJacobianApplySkeleton<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
-                      public Dune::PDELab::NumericalJacobianSkeleton<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
-                      public Dune::PDELab::NumericalJacobianApplyBoundary<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
-                      public Dune::PDELab::NumericalJacobianBoundary<LocalOperator<GV, Params, BC, GFS, FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C>>,
+                      public Dune::PDELab::NumericalJacobianApplyVolume<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+                      public Dune::PDELab::NumericalJacobianVolume<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+                      public Dune::PDELab::NumericalJacobianApplySkeleton<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+                      public Dune::PDELab::NumericalJacobianSkeleton<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+                      public Dune::PDELab::NumericalJacobianApplyBoundary<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+                      public Dune::PDELab::NumericalJacobianBoundary<LocalOperator<GV, Params, U, GFS,
+                       FEM_P, FEM_Sg, FEM_Sh, FEM_T, FEM_X, FEM_Y, FEM_C, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
                       public Dune::PDELab::FullSkeletonPattern, // matrix entries skeleton
                       public Dune::PDELab::FullVolumePattern,
                       public Dune::PDELab::LocalOperatorDefaultFlags,
@@ -31,10 +45,16 @@ private:
 
   const GV &gv;
   const Params&	  property;
-  const BC &bc;
-  // typedef ProblemBoundaryConditions<GV,Params> BC ;
+  typedef ProblemBoundaryConditions<GV,Params> BC ;
   Dune::FieldVector<double,GV::dimension> gravity;
-  //U *unew;
+  Evaluation_Pw    *evaluation_Pw;
+	Evaluation_Sg    *evaluation_Sg;
+	Evaluation_Sh    *evaluation_Sh;
+	Evaluation_T  	*evaluation_T;
+	Evaluation_XCH4  *evaluation_XCH4;
+	Evaluation_YH2O  *evaluation_YH2O;
+	Evaluation_XC  *evaluation_XC;
+  U *unew;
   GFS gfs;
   double *time;
   double *dt;
@@ -89,9 +109,9 @@ public:
 
   typedef typename GV::IndexSet IndexSet;
 
-  // typedef Dune::PDELab::LocalFunctionSpace<GFS> LFS;
-  // typedef Dune::PDELab::LFSIndexCache<LFS> LFSCache;
-  // typedef typename U::template LocalView<LFSCache> VectorView;
+  typedef Dune::PDELab::LocalFunctionSpace<GFS> LFS;
+  typedef Dune::PDELab::LFSIndexCache<LFS> LFSCache;
+  typedef typename U::template LocalView<LFSCache> VectorView;
 
 
 
@@ -132,9 +152,16 @@ public:
   // std::vector<Cache_pen> cache_pen;
 
   // constructor stores parameters
-  LocalOperator(const GV &gv_, const Params&	 property_, const BC& bc_,
-                     //U *unew_,
-                     GFS gfs_,
+  LocalOperator(const GV &gv_, const Params&	 property_,
+                     U *unew_,
+                     GFS gfs_, 
+                    Evaluation_Pw 	*evaluation_Pw_,
+                    Evaluation_Sg 	*evaluation_Sg_,
+                    Evaluation_Sh 	*evaluation_Sh_,
+                    Evaluation_T *evaluation_T_,
+                    Evaluation_XCH4 *evaluation_XCH4_,
+                    Evaluation_YH2O *evaluation_YH2O_,
+                    Evaluation_XC *evaluation_XC_,
                      double *time_,
                      double *dt_,
                      unsigned int intorder_ = 6,
@@ -145,8 +172,15 @@ public:
                      double method_y_ = 0.,
                      double alpha_g_ = 1., double alpha_w_ = 1., double alpha_s_ = 1., double alpha_T_ = 1., double alpha_x_ = 1., double alpha_y_ = 1.)
       : gv(gv_), property( property_ ),
-        bc(bc_),
+        unew(unew_),
         gfs(gfs_),
+        evaluation_Pw(evaluation_Pw_),
+        evaluation_Sg(evaluation_Sg_),
+        evaluation_Sh(evaluation_Sh_),
+        evaluation_T(evaluation_T_),
+        evaluation_XCH4(evaluation_XCH4_),
+        evaluation_YH2O(evaluation_YH2O_),
+        evaluation_XC(evaluation_XC_),
         time(time_),
         dt(dt_),
         intorder(intorder_),
@@ -261,7 +295,7 @@ public:
 
     // Reference to cell
 	  const auto& cell = eg.entity();
-		// const IndexSet &indexSet = gv.indexSet();
+		const IndexSet &indexSet = gv.indexSet();
 		// int cell_number = indexSet.index(cell);
 
     // Get geometry
@@ -304,26 +338,24 @@ public:
     //      auto intorder = intorderadd + quadrature_factor * order;
     for (const auto &ip : quadratureRule(geo, intorder))
     {
-      auto qp = ip.position();
       // evaluate basis functions
-      auto &phi_Pw = cache_Pw[order_p].evaluateFunction(qp, lfsu_Pw.finiteElement().localBasis());
-      auto &psi_Pw = cache_Pw[order_p].evaluateFunction(qp, lfsv_Pw.finiteElement().localBasis());
-      auto &phi_Sg = cache_Sg[order_s].evaluateFunction(qp, lfsu_Sg.finiteElement().localBasis());
-      auto &psi_Sg = cache_Sg[order_s].evaluateFunction(qp, lfsv_Sg.finiteElement().localBasis());
-      auto &phi_Sh = cache_Sh[order_s].evaluateFunction(qp, lfsu_Sh.finiteElement().localBasis());
-      auto &psi_Sh = cache_Sh[order_s].evaluateFunction(qp, lfsv_Sh.finiteElement().localBasis());
-      auto &phi_T  = cache_T[order_t].evaluateFunction(qp, lfsu_T.finiteElement().localBasis());
-      auto &psi_T  = cache_T[order_t].evaluateFunction(qp, lfsv_T.finiteElement().localBasis());
-      auto &phi_XCH4 = cache_XCH4[order_x].evaluateFunction(qp, lfsu_XCH4.finiteElement().localBasis());
-      auto &psi_XCH4 = cache_XCH4[order_x].evaluateFunction(qp, lfsv_XCH4.finiteElement().localBasis());
-      auto &phi_YH2O = cache_YH2O[order_x].evaluateFunction(qp, lfsu_YH2O.finiteElement().localBasis());
-      auto &psi_YH2O = cache_YH2O[order_x].evaluateFunction(qp, lfsv_YH2O.finiteElement().localBasis());
-      auto &phi_XC = cache_XC[order_x].evaluateFunction(qp, lfsu_XC.finiteElement().localBasis());
-      auto &psi_XC = cache_XC[order_x].evaluateFunction(qp, lfsv_XC.finiteElement().localBasis());
+      auto &phi_Pw = cache_Pw[order_p].evaluateFunction(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &psi_Pw = cache_Pw[order_p].evaluateFunction(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &phi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &psi_Sg = cache_Sg[order_s].evaluateFunction(ip.position(), lfsv_Sg.finiteElement().localBasis());
+      auto &phi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &psi_Sh = cache_Sh[order_s].evaluateFunction(ip.position(), lfsv_Sh.finiteElement().localBasis());
+      auto &phi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsu_T.finiteElement().localBasis());
+      auto &psi_T  = cache_T[order_t].evaluateFunction(ip.position(), lfsv_T.finiteElement().localBasis());
+      auto &phi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsu_XCH4.finiteElement().localBasis());
+      auto &psi_XCH4 = cache_XCH4[order_x].evaluateFunction(ip.position(), lfsv_XCH4.finiteElement().localBasis());
+      auto &phi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsu_YH2O.finiteElement().localBasis());
+      auto &psi_YH2O = cache_YH2O[order_x].evaluateFunction(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &phi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &psi_XC = cache_XC[order_x].evaluateFunction(ip.position(), lfsv_XC.finiteElement().localBasis());
 
-      // auto ip_global = geo.global(qp);
-      // auto ip_local = geo.local(ip_global);
-      
+      auto ip_global = geo.global(ip.position());
+      auto ip_local = geo.local(ip_global);
       // evaluate Pw
       RF Pw = 0.0;
       for (size_type i = 0; i < lfsu_Pw.size(); i++)
@@ -365,36 +397,53 @@ public:
 
       RF Sw = (1. - Sg - Sh);
 
+      RF Pw_old=0.;
+			evaluation_Pw->evalFunctionOld(cell, ip.position(), &Pw_old);
+			RF Sg_old=0.;
+			evaluation_Sg->evalFunctionOld(cell,ip.position(),&Sg_old);
+			RF Sh_old=0.;
+			evaluation_Sh->evalFunctionOld(cell,ip.position(),&Sh_old);
+			RF T_old=0.;
+			evaluation_T->evalFunctionOld(cell,ip.position(),&T_old);
+			RF YH2O_old=0.;
+			evaluation_YH2O->evalFunctionOld(cell,ip.position(),&YH2O_old);
+			RF XCH4_old=0.;
+			evaluation_XCH4->evalFunctionOld(cell,ip.position(),&XCH4_old);
+			RF XC_old=0.;
+			evaluation_XC->evalFunctionOld(cell,ip.position(),&XC_old);
+
+      RF Sw_old = (1. - Sg_old - Sh_old);
 
       // evaluate Pg
-      auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, qp);/*BrooksCParams[0] gives Pentry in Pa*/
-      auto por = property.soil.SedimentPorosity(cell, qp) ;//* (1.-Sh)
-      auto Pc = property.hydraulicProperty.CapillaryPressure(cell, qp, Sw, Sh, por) ; /* ndim */
+      auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell, ip_local);/*BrooksCParams[0] gives Pentry in Pa*/
+      auto por = property.soil.SedimentPorosity(cell, ip_local) ;//* (1.-Sh)
+      auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw_old, Sh_old, por) ; /* ndim */
       RF Pg = Pw + Pc; /* ndim */
-      RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh); /* ndim */
+      RF Pg_old = Pw_old + Pc; /* ndim */
+      RF Peff = (Pg * Sg_old + Pw * Sw_old) / (1. - Sh_old); /* ndim */
 
-      auto Pw_dim = Pw * Xc_P;
-      auto Pg_dim = Pg * Xc_P;
-      auto T_dim = T * Xc_T;
+      auto Pw_dim = Pw_old * Xc_P;
+      auto Pg_dim = Pg_old * Xc_P;
+      auto T_dim = T_old * Xc_T;
 
       // evaluate gradient of basis functions
-      auto &js_Pw = cache_Pw[order_p].evaluateJacobian(qp, lfsu_Pw.finiteElement().localBasis());
-      auto &js_v_Pw = cache_Pw[order_p].evaluateJacobian(qp, lfsv_Pw.finiteElement().localBasis());
-      auto &js_Sg = cache_Sg[order_s].evaluateJacobian(qp, lfsu_Sg.finiteElement().localBasis());
-      auto &js_v_Sg = cache_Sg[order_s].evaluateJacobian(qp, lfsv_Sg.finiteElement().localBasis());
-      auto &js_Sh = cache_Sh[order_s].evaluateJacobian(qp, lfsu_Sh.finiteElement().localBasis());
-      auto &js_v_Sh = cache_Sh[order_s].evaluateJacobian(qp, lfsv_Sh.finiteElement().localBasis());
-      auto &js_T = cache_T[order_t].evaluateJacobian(qp, lfsu_T.finiteElement().localBasis());
-      auto &js_v_T = cache_T[order_t].evaluateJacobian(qp, lfsv_T.finiteElement().localBasis());
-      auto &js_XCH4 = cache_XCH4[order_x].evaluateJacobian(qp, lfsu_XCH4.finiteElement().localBasis());
-      auto &js_v_XCH4 = cache_XCH4[order_x].evaluateJacobian(qp, lfsv_XCH4.finiteElement().localBasis());
-      auto &js_YH2O = cache_YH2O[order_x].evaluateJacobian(qp, lfsu_YH2O.finiteElement().localBasis());
-      auto &js_v_YH2O = cache_YH2O[order_x].evaluateJacobian(qp, lfsv_YH2O.finiteElement().localBasis());
-      auto &js_XC = cache_XC[order_x].evaluateJacobian(qp, lfsu_XC.finiteElement().localBasis());
-      auto &js_v_XC = cache_XC[order_x].evaluateJacobian(qp, lfsv_XC.finiteElement().localBasis());
+      auto &js_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsu_Pw.finiteElement().localBasis());
+      auto &js_v_Pw = cache_Pw[order_p].evaluateJacobian(ip.position(), lfsv_Pw.finiteElement().localBasis());
+      auto &js_Sg = cache_Sg[order_s].evaluateJacobian(ip.position(), lfsu_Sg.finiteElement().localBasis());
+      auto &js_v_Sg = cache_Sg[order_s].evaluateJacobian(ip.position(), lfsv_Sg.finiteElement().localBasis());
+      auto &js_Sh = cache_Sh[order_s].evaluateJacobian(ip.position(), lfsu_Sh.finiteElement().localBasis());
+      auto &js_v_Sh = cache_Sh[order_s].evaluateJacobian(ip.position(), lfsv_Sh.finiteElement().localBasis());
+      auto &js_T = cache_T[order_t].evaluateJacobian(ip.position(), lfsu_T.finiteElement().localBasis());
+      auto &js_v_T = cache_T[order_t].evaluateJacobian(ip.position(), lfsv_T.finiteElement().localBasis());
+      auto &js_XCH4 = cache_XCH4[order_x].evaluateJacobian(ip.position(), lfsu_XCH4.finiteElement().localBasis());
+      auto &js_v_XCH4 = cache_XCH4[order_x].evaluateJacobian(ip.position(), lfsv_XCH4.finiteElement().localBasis());
+      auto &js_YH2O = cache_YH2O[order_x].evaluateJacobian(ip.position(), lfsu_YH2O.finiteElement().localBasis());
+      auto &js_v_YH2O = cache_YH2O[order_x].evaluateJacobian(ip.position(), lfsv_YH2O.finiteElement().localBasis());
+      auto &js_XC = cache_XC[order_x].evaluateJacobian(ip.position(), lfsu_XC.finiteElement().localBasis());
+      auto &js_v_XC = cache_XC[order_x].evaluateJacobian(ip.position(), lfsv_XC.finiteElement().localBasis());
 
       // transform gradients of shape functions to real element
-      jac = geo.jacobianInverseTransposed(qp);
+      jac = geo.jacobianInverseTransposed(ip.position());
 
       for (size_type i = 0; i < lfsu_Pw.size(); i++)
         jac.mv(js_Pw[i][0], gradphi_Pw[i]);
@@ -469,8 +518,8 @@ public:
         gradu_XC.axpy(x(lfsu_XC, i), gradphi_XC[i]);
 
 
-      auto K = property.soil.SedimentPermeabilityTensor(cell, qp)
-                    * property.hydraulicProperty.PermeabilityScalingFactor(cell, qp, Sh, por ); /*ndim K from soil.hh*/
+      auto K = property.soil.SedimentPermeabilityTensor(cell, ip_local)
+                    * property.hydraulicProperty.PermeabilityScalingFactor(cell, ip_local, Sh_old, por ); /*ndim K from soil.hh*/
       K.mv(gravity, Kg);
 
       // compute K * gradient of Pw
@@ -482,42 +531,42 @@ public:
       // compute K * gradient of Sh
       K.mv(gradu_Sh, Kgradu_Sh);
 
-      auto permeability = property.soil.SedimentPermeability(cell, qp )/*ndim K from soil.hh*/
-							  * property.hydraulicProperty.PermeabilityScalingFactor(cell, qp, Sh, por );
+      auto permeability = property.soil.SedimentPermeability(cell, ip_local )/*ndim K from soil.hh*/
+							  * property.hydraulicProperty.PermeabilityScalingFactor(cell, ip_local, Sh_old, por );
 
       auto tau = property.soil.Tortuosity(por);/*ndim tau from soil.hh*/
       auto DH2O_g = tau * por * property.mixture.DiffCoeffH2OInGas(T_dim, Pg_dim); /*ndim D from mixture.hh*/
       auto DCH4_w = tau * por * property.mixture.DiffCoeffCH4InLiquid(T_dim, Pw_dim); /*ndim D from mixture.hh*/
       auto DC_w = tau * por * property.salt.DiffCoeff(T_dim, Pw_dim); /*ndim D from salt.hh*/
 
-      double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S = XC_old * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
       // auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
       // auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */
 
-      auto YCH4 =  property.mixture.YCH4(XCH4, T_dim, Pg_dim, XC, zCH4);
-      auto XH2O =  property.mixture.XH2O(YH2O, T_dim, Pg_dim, XC);
+      auto YCH4 =  property.mixture.YCH4(XCH4_old, T_dim, Pg_dim, XC_old, zCH4);
+      auto XH2O =  property.mixture.XH2O(YH2O_old, T_dim, Pg_dim, XC_old);
 
       double eta = 1/BrooksCParams[1];
-      auto Swe = property.hydraulicProperty.EffectiveSw(Sw,Sh,0., 0.);
+      auto Swe = property.hydraulicProperty.EffectiveSw(Sw_old,Sh_old,0., 0.);
       auto dPc_dSwe = property.hydraulicProperty.dPc_dSwe(Swe, BrooksCParams[0], BrooksCParams[1]); /*ndim */
-      auto dSwe_dSw =  property.hydraulicProperty.dSwe_dSw(Sw,Sh,0., 0.);
-      auto coeff_grad_Sw = dPc_dSwe * dSwe_dSw * property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSw =  property.hydraulicProperty.dSwe_dSw(Sw_old,Sh_old,0., 0.);
+      auto coeff_grad_Sw = dPc_dSwe * dSwe_dSw * property.hydraulicProperty.PcSF1(Sh_old, BrooksCParams[1], BrooksCParams[4]);
 
-      auto dPcSF1_dSh =  property.hydraulicProperty.dPcSF1_dSh( Sh, BrooksCParams[1], BrooksCParams[4]);
-      auto dSwe_dSh = property.hydraulicProperty.dSwe_dSh(Sw,Sh,0., 0.);
-      auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg * coeff_grad_Sw *  dSwe_dSw  ;
+      auto dPcSF1_dSh =  property.hydraulicProperty.dPcSF1_dSh( Sh_old, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSh = property.hydraulicProperty.dSwe_dSh(Sw_old,Sh_old,0., 0.);
+      auto coeff_grad_Sh = dPcSF1_dSh * std::pow( Swe , -eta ) * BrooksCParams[0] / Xc_P - Sg_old * coeff_grad_Sw *  dSwe_dSw  ;
 
                           // + property.hydraulicProperty.PcSF1(Sh, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe * (dSwe_dSh);//
       auto rho_g = property.gas.Density(T_dim, Pg_dim, zCH4); /*ndim density from CH4.hh; the input arguments are dimensional   */
       auto rho_w = property.water.Density(T_dim, Pw_dim, S); /*ndim density from H2O.hh; the input arguments are dimensional*/
 
-      auto krW = property.hydraulicProperty.krw(cell, qp, Sw, Sh) / (property.water.DynamicViscosity(T_dim, Pw_dim, S) );
-      auto krN = property.hydraulicProperty.krg(cell, qp, Sw, Sh) / (property.gas.DynamicViscosity(T_dim, Pg_dim));
+      auto krW = property.hydraulicProperty.krw(cell, ip_local, Sw_old, Sh_old) / (property.water.DynamicViscosity(T_dim, Pw_dim, S) );
+      auto krN = property.hydraulicProperty.krg(cell, ip_local, Sw_old, Sh_old) / (property.gas.DynamicViscosity(T_dim, Pg_dim));
 
       auto perm_dim = permeability * Xc_K;
       // compute source terms
-			auto q_g  = property.kinetics.GasGenerationRate( T_dim, Pg_dim, Sh, Sw, XCH4, zCH4, S, por, perm_dim); /*dim*/
+			auto q_g  = property.kinetics.GasGenerationRate( T_dim, Pg_dim, Sh_old, Sw_old, XCH4_old, zCH4, S, por, perm_dim); /*dim*/
 			auto q_w  = property.kinetics.WaterGenerationRate( q_g ); /*dim*/
 			auto q_h  = property.kinetics.HydrateDissociationRate( q_g ); /*dim*/
 			auto q_s = property.salt.Source(); /*dim------kg/m³s*/
@@ -529,7 +578,7 @@ public:
       auto kth_w = property.water.ThermalConductivity(T_dim, Pw_dim, S); /* ndim */
       auto kth_h = property.hydrate.ThermalConductivity(T_dim, Peff * Xc_P); /* ndim */
       auto kth_s = property.soil.ThermalConductivity(); /* ndim */
-      auto kth_eff = (1. - por) * kth_s + por * (Sg * kth_g + Sw * kth_w + Sh * kth_h); /* ndim */
+      auto kth_eff = (1. - por) * kth_s + por * (Sg_old * kth_g + Sw_old * kth_w + Sh_old * kth_h); /* ndim */
 
       auto gradu_Pg = gradu_Pw  - coeff_grad_Sw * gradu_Sg + (coeff_grad_Sh ) * gradu_Sh;
       auto Kgradu_Pg = Kgradu_Pw - coeff_grad_Sw * Kgradu_Sg + (coeff_grad_Sh ) * Kgradu_Sh;
@@ -558,7 +607,7 @@ public:
       auto diffusiveflux_Heat = kth_eff * gradu_T;
 
       
-      RF factor = ip.weight() * geo.integrationElement(qp);
+      RF factor = ip.weight() * geo.integrationElement(ip.position());
       // double tmp = 0.;
       // integrate (A grad u - bu)*grad phi_i + a*u*phi_i
       for (size_type i = 0; i < lfsv_Sg.size(); i++)
@@ -604,8 +653,6 @@ public:
 			for (size_type i=0; i<lfsv_XCH4.size(); i++){
 				r.accumulate(lfsv_XCH4,i,((Sw - max2) * psi_XCH4[i]  *factor));
 			}
-
-      
 
       // NCP -> water phase
 			// tmp = 0.;
@@ -725,10 +772,10 @@ public:
     auto geo_in_inside = ig.geometryInInside();
     auto geo_in_outside = ig.geometryInOutside();
     // cell geometries
-    // auto ref_el_inside 	= referenceElement(geo_inside);
-	  // auto ref_el_outside = referenceElement(geo_outside);
-	  // auto inside_cell_center_local 	= ref_el_inside.position(0,0);
-	  // auto outside_cell_center_local 	= ref_el_outside.position(0,0);
+    auto ref_el_inside 	= referenceElement(geo_inside);
+	  auto ref_el_outside = referenceElement(geo_outside);
+	  auto inside_cell_center_local 	= ref_el_inside.position(0,0);
+	  auto outside_cell_center_local 	= ref_el_outside.position(0,0);
     // face diameter; this should be revised for anisotropic meshes?
     auto h_F = std::min(geo_inside.volume(), geo_outside.volume()) / geo.volume(); // Houston!
 
@@ -847,8 +894,7 @@ public:
 
       auto ip_global_s = geo_inside.global(iplocal_s);
       auto ip_global_n = geo_outside.global(iplocal_n);
-      // std::cout<< ip.position() <<"  " << ip_global_s << "  " << iplocal_s << std::endl;
-      // exit(0);
+
       // evaluate basis functions
       auto &phi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsu_Pw_s.finiteElement().localBasis());
       auto &psi_Pw_s = cache_Pw[order_p].evaluateFunction(iplocal_s, lfsv_Pw_s.finiteElement().localBasis());
@@ -941,27 +987,63 @@ public:
       RF Sw_s = (1. - Sg_s - Sh_s);
       RF Sw_n = (1. - Sg_n - Sh_n);
 
+      RF Pw_old_s=0.;
+			evaluation_Pw->evalFunctionOld(cell_inside, iplocal_s, &Pw_old_s);
+			RF Sg_old_s=0.;
+			evaluation_Sg->evalFunctionOld(cell_inside, iplocal_s,&Sg_old_s);
+			RF Sh_old_s=0.;
+			evaluation_Sh->evalFunctionOld(cell_inside, iplocal_s,&Sh_old_s);
+			RF T_old_s=0.;
+			evaluation_T->evalFunctionOld(cell_inside, iplocal_s,&T_old_s);
+			RF YH2O_old_s=0.;
+			evaluation_YH2O->evalFunctionOld(cell_inside, iplocal_s,&YH2O_old_s);
+			RF XCH4_old_s=0.;
+			evaluation_XCH4->evalFunctionOld(cell_inside, iplocal_s,&XCH4_old_s);
+			RF XC_old_s=0.;
+			evaluation_XC->evalFunctionOld(cell_inside, iplocal_s,&XC_old_s);
+
+      RF Sw_old_s = (1. - Sg_old_s - Sh_old_s);
+
+      RF Pw_old_n=0.;
+			evaluation_Pw->evalFunctionOld(cell_outside, iplocal_n, &Pw_old_n);
+			RF Sg_old_n=0.;
+			evaluation_Sg->evalFunctionOld(cell_outside, iplocal_n,&Sg_old_n);
+			RF Sh_old_n=0.;
+			evaluation_Sh->evalFunctionOld(cell_outside, iplocal_n,&Sh_old_n);
+			RF T_old_n=0.;
+			evaluation_T->evalFunctionOld(cell_outside, iplocal_n,&T_old_n);
+			RF YH2O_old_n=0.;
+			evaluation_YH2O->evalFunctionOld(cell_outside, iplocal_n,&YH2O_old_n);
+			RF XCH4_old_n=0.;
+			evaluation_XCH4->evalFunctionOld(cell_outside, iplocal_n,&XCH4_old_n);
+			RF XC_old_n=0.;
+			evaluation_XC->evalFunctionOld(cell_outside, iplocal_n,&XC_old_n);
+
+      RF Sw_old_n = (1. - Sg_old_n - Sh_old_n);
+
 
       // evaluate Pw
       auto BrooksCParams_s = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
       auto BrooksCParams_n = property.hydraulicProperty.BrooksCoreyParameters(cell_outside, iplocal_n);/*BrooksCParams[0] gives Pentry in Pa*/
       auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
       auto por_n = property.soil.SedimentPorosity(cell_outside, iplocal_n);
-      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
+      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_old_s, Sh_old_s, por_s) ; /* ndim */
       RF Pg_s = Pw_s + Pc_s;
+      RF Pg_old_s = Pw_old_s + Pc_s;
 
-      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_outside, iplocal_n, Sw_n, Sh_n, por_n) ; /* ndim */
+      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_outside, iplocal_n, Sw_old_n, Sh_old_n, por_n) ; /* ndim */
       RF Pg_n = Pw_n + Pc_n;/* ndim */
+      RF Pg_old_n = Pw_old_n + Pc_n;/* ndim */
 
-      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
+      RF Peff_s = (Pg_s * Sg_old_s + Pw_s * Sw_old_s) / (1. - Sh_old_s);
+      RF Peff_n = (Pg_n * Sg_old_n + Pw_n * Sw_old_n) / (1. - Sh_old_n);
 
-      auto Pw_s_dim = Pw_s * Xc_P;
-      auto Pw_n_dim = Pw_n * Xc_P;
-      auto Pg_s_dim = Pg_s * Xc_P;
-      auto Pg_n_dim = Pg_n * Xc_P;
-      auto T_s_dim = T_s * Xc_T;
-      auto T_n_dim = T_n * Xc_T;
+      auto Pw_s_dim = Pw_old_s * Xc_P;
+      auto Pw_n_dim = Pw_old_n * Xc_P;
+      auto Pg_s_dim = Pg_old_s * Xc_P;
+      auto Pg_n_dim = Pg_old_n * Xc_P;
+      auto T_s_dim = T_old_s * Xc_T;
+      auto T_n_dim = T_old_n * Xc_T;
 
 
 
@@ -1126,14 +1208,14 @@ public:
         gradu_XC_n.axpy(x_n(lfsu_XC_n, i), gradphi_XC_n[i]);
 
       auto K_s = property.soil.SedimentPermeabilityTensor(cell_inside, iplocal_s)
-        * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s); /* ndim */
+        * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_old_s, por_s); /* ndim */
       auto K_n = property.soil.SedimentPermeabilityTensor(cell_outside, iplocal_n)
-        * property.hydraulicProperty.PermeabilityScalingFactor(cell_outside,iplocal_n, Sh_n, por_n); /* ndim */
+        * property.hydraulicProperty.PermeabilityScalingFactor(cell_outside,iplocal_n, Sh_old_n, por_n); /* ndim */
       // auto K_s = K_s1;//
       auto permeability_s = property.soil.SedimentPermeability(cell_inside, iplocal_s)
-        * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s); /* ndim */
+        * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_old_s, por_s); /* ndim */
       auto permeability_n = property.soil.SedimentPermeability(cell_outside, iplocal_n)
-        * property.hydraulicProperty.PermeabilityScalingFactor(cell_outside,iplocal_n, Sh_n, por_n); /* ndim */
+        * property.hydraulicProperty.PermeabilityScalingFactor(cell_outside,iplocal_n, Sh_old_n, por_n); /* ndim */
       // permeability_s = 2. * (permeability_s*permeability_n)/(permeability_s+permeability_n);//
       // // K_s[1][1] = 2. * (K_s[1][1]*K_n[1][1])/(K_s[1][1]+K_n[1][1]);//
       // permeability_n = permeability_s;//
@@ -1159,25 +1241,25 @@ public:
       K_n.mtv(n_F_local, Kn_F_n);
 
       double eta_s = 1/BrooksCParams_s[1];
-      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s, Sh_s, 0., 0.);
+      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_old_s, Sh_old_s, 0., 0.);
       auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams_s[0], BrooksCParams_s[1]);/* ndim */
-      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s * property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]);
+      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_old_s, Sh_old_s, 0., 0.);
+      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s * property.hydraulicProperty.PcSF1(Sh_old_s, BrooksCParams_s[1], BrooksCParams_s[4]);
 
-      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]);
-      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams_s[0] / Xc_P - Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_old_s, BrooksCParams_s[1], BrooksCParams_s[4]);
+      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_old_s, Sh_old_s, 0., 0.);
+      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams_s[0] / Xc_P - Sg_old_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
                           // + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams_s[1], BrooksCParams_s[4]) * dPc_dSwe_s * (dSwe_dSh_s);//
       double eta_n = 1/BrooksCParams_n[1];
-      auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_n,Sh_n, 0., 0.);
+      auto Swe_n = property.hydraulicProperty.EffectiveSw(Sw_old_n,Sh_old_n, 0., 0.);
       auto dPc_dSwe_n =  property.hydraulicProperty.dPc_dSwe(Swe_n, BrooksCParams_n[0], BrooksCParams_n[1]);/* ndim */
-      auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_n, Sh_n, 0., 0.);
-      auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_n * property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]);
+      auto dSwe_dSw_n = property.hydraulicProperty.dSwe_dSw(Sw_old_n, Sh_old_n, 0., 0.);
+      auto coeff_grad_Sw_n = dPc_dSwe_n * dSwe_dSw_n * property.hydraulicProperty.PcSF1(Sh_old_n, BrooksCParams_n[1], BrooksCParams_n[4]);
 
-      auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]);
-      auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_n, Sh_n, 0., 0.);
-      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams_n[0] / Xc_P - Sg_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
+      auto dPcSF1_dSh_n =  property.hydraulicProperty.dPcSF1_dSh( Sh_old_n, BrooksCParams_n[1], BrooksCParams_n[4]);
+      auto dSwe_dSh_n = property.hydraulicProperty.dSwe_dSh(Sw_old_n, Sh_old_n, 0., 0.);
+      auto coeff_grad_Sh_n = dPcSF1_dSh_n * std::pow( Swe_n , -eta_n ) * BrooksCParams_n[0] / Xc_P - Sg_old_n * coeff_grad_Sw_n *  dSwe_dSw_n ;
 
                           // + property.hydraulicProperty.PcSF1(Sh_n, BrooksCParams_n[1], BrooksCParams_n[4]) * dPc_dSwe_n * (dSwe_dSh_n);//
 
@@ -1189,17 +1271,17 @@ public:
 
       
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
-      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_s = XC_old_s * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_n = XC_old_n * (property.salt.MolarMass()/property.gas.MolarMass());
 
-      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s);
+      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_old_s, Sh_old_s);
       auto mu_w_s = property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s) ; /* ndim */
-      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s);
+      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_old_s, Sh_old_s);
       auto mu_g_s = property.gas.DynamicViscosity(T_s_dim, Pg_s_dim) ; /* ndim */
 
-      auto krW_n = property.hydraulicProperty.krw(cell_outside, iplocal_n, Sw_n, Sh_n);
+      auto krW_n = property.hydraulicProperty.krw(cell_outside, iplocal_n, Sw_old_n, Sh_old_n);
       auto mu_w_n = property.water.DynamicViscosity(T_n_dim, Pw_n_dim, S_n) ; /* ndim */
-      auto krN_n = property.hydraulicProperty.krg(cell_outside, iplocal_n, Sw_n, Sh_n);
+      auto krN_n = property.hydraulicProperty.krg(cell_outside, iplocal_n, Sw_old_n, Sh_old_n);
       auto mu_g_n = property.gas.DynamicViscosity(T_n_dim, Pg_n_dim); /* ndim */
 
       // if (krW_s != 0. || krW_n != 0.){
@@ -1264,11 +1346,11 @@ public:
       // rho_w_s = 0.5 * (rho_w_s+rho_w_n);
       // rho_w_n = rho_w_s;
 
-      auto YCH4_s = property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
-      auto XH2O_s = property.mixture.XH2O(YH2O_s, T_s_dim, Pg_s_dim, XC_s);
+      auto YCH4_s = property.mixture.YCH4(XCH4_old_s, T_s_dim, Pg_s_dim, XC_old_s, zCH4_s);
+      auto XH2O_s = property.mixture.XH2O(YH2O_old_s, T_s_dim, Pg_s_dim, XC_old_s);
 
-      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
-      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
+      auto YCH4_n = property.mixture.YCH4(XCH4_old_n, T_n_dim, Pg_n_dim, XC_old_n, zCH4_n);
+      auto XH2O_n = property.mixture.XH2O(YH2O_old_n, T_n_dim, Pg_n_dim, XC_old_n);
 
       auto Cp_g_n = property.gas.Cp(T_n_dim, Pg_n_dim, zCH4_n) ; /* ndim */
       auto Cp_w_n = property.water.Cp(T_n_dim, Pw_n_dim, S_n) ; /* ndim */
@@ -1302,8 +1384,8 @@ public:
       // kth_h_n = kth_h_s;
       // kth_s_s = 0.5*(kth_s_s+kth_s_n); /* ndim */
       // kth_s_n = kth_s_s;
-      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ( Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s); /* ndim */
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ( Sg_old_s * kth_g_s + Sw_old_s * kth_w_s + Sh_old_s * kth_h_s); /* ndim */
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_old_n * kth_g_n + Sw_old_n * kth_w_n + Sh_old_n * kth_h_n);
 
 			for(int i = 0;i<dim;i++){
         v_g[i] = -(omega_s * ( Xc_P/Xc_x * Kgradu_Pg_s[i] - Xc_rho * rho_g_s * Kg_s[i])
@@ -1774,14 +1856,14 @@ public:
     auto geo_in_inside = ig.geometryInInside();
 
     // cell geometries
-    // auto ref_el_inside 	= referenceElement(geo_inside);
-    // auto inside_cell_center_local 	= ref_el_inside.position(0,0);
-    // auto inside_cell_center_global 	= geo_inside.center();
+    auto ref_el_inside 	= referenceElement(geo_inside);
+    auto inside_cell_center_local 	= ref_el_inside.position(0,0);
+    auto inside_cell_center_global 	= geo_inside.center();
 
-    // // face geometry
-    // auto ref_el = referenceElement(geo);
-    // auto face_center_local = ref_el.position(0,0);
-    // auto face_center_global = geo.center();
+    // face geometry
+    auto ref_el = referenceElement(geo);
+    auto face_center_local = ref_el.position(0,0);
+    auto face_center_global = geo.center();
 
     // face diameter; this should be revised for anisotropic meshes?
     auto h_F = geo_inside.volume() / geo.volume(); // Houston!
@@ -1916,12 +1998,12 @@ public:
       RF Sh_s = 0.0;
       for (size_type i = 0; i < lfsu_Sh_s.size(); i++)
         Sh_s += x(lfsu_Sh_s, i) * phi_Sh_s[i];
-
       RF Sh_n = Sh_s ;
       if (bctype[Indices::PVId_Sh] == Indices::BCId_dirichlet)
       {
         Sh_n = bcvalue[Indices::PVId_Sh];
       }
+
 
       // evaluate Sg
       RF Sg_s = 0.0;
@@ -1971,61 +2053,91 @@ public:
         YH2O_n = bcvalue[Indices::PVId_YH2O];
       }
 
+      RF Pw_old_s=0.;
+			evaluation_Pw->evalFunctionOld(cell_inside, iplocal_s, &Pw_old_s);
+			RF Sg_old_s=0.;
+			evaluation_Sg->evalFunctionOld(cell_inside, iplocal_s,&Sg_old_s);
+			RF Sh_old_s=0.;
+			evaluation_Sh->evalFunctionOld(cell_inside, iplocal_s,&Sh_old_s);
+			RF T_old_s=0.;
+			evaluation_T->evalFunctionOld(cell_inside, iplocal_s,&T_old_s);
+			RF YH2O_old_s=0.;
+			evaluation_YH2O->evalFunctionOld(cell_inside, iplocal_s,&YH2O_old_s);
+			RF XCH4_old_s=0.;
+			evaluation_XCH4->evalFunctionOld(cell_inside, iplocal_s,&XCH4_old_s);
+			RF XC_old_s=0.;
+			evaluation_XC->evalFunctionOld(cell_inside, iplocal_s,&XC_old_s);
+
+      RF Sw_old_s = (1. - Sg_old_s - Sh_old_s);
+
+      RF Pw_old_n=Pw_old_s;
+			RF Sg_old_n=Sg_old_s;
+			RF Sh_old_n=Sh_old_s;
+			RF T_old_n=T_old_s;
+			RF YH2O_old_n=YH2O_old_s;
+			RF XCH4_old_n=XCH4_old_s;
+			RF XC_old_n=XC_old_s;
+
+      RF Sw_old_n = (1. - Sg_old_n - Sh_old_n);
+
+
        // evaluate Pg
       auto BrooksCParams = property.hydraulicProperty.BrooksCoreyParameters(cell_inside, iplocal_s);/*BrooksCParams[0] gives Pentry in Pa*/
       auto por_s = property.soil.SedimentPorosity(cell_inside, iplocal_s);
-      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_s, Sh_s, por_s) ; /* ndim */
+      auto Pc_s = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_old_s, Sh_old_s, por_s) ; /* ndim */
 
       RF Pg_s = Pw_s + Pc_s;
+      RF Pg_old_s = Pw_old_s + Pc_s;
       auto por_n = property.soil.SedimentPorosity(cell_inside, iplocal_s) ;
-      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_n, Sh_n, por_n) ; /* ndim */
+      auto Pc_n = property.hydraulicProperty.CapillaryPressure(cell_inside, iplocal_s, Sw_old_n, Sh_old_n, por_n) ; /* ndim */
 
       RF Pg_n = Pw_n + Pc_n;
-      RF Peff_s = (Pg_s * Sg_s + Pw_s * Sw_s) / (1. - Sh_s);
-      RF Peff_n = (Pg_n * Sg_n + Pw_n * Sw_n) / (1. - Sh_n);
+      RF Pg_old_n = Pw_old_n + Pc_n;
+      RF Peff_s = (Pg_s * Sg_old_s + Pw_s * Sw_old_s) / (1. - Sh_old_s);
+      RF Peff_n = (Pg_n * Sg_old_n + Pw_n * Sw_old_n) / (1. - Sh_old_n);
 
-      auto Pw_s_dim = Pw_s * Xc_P;
-      auto Pw_n_dim = Pw_n * Xc_P;
-      auto Pg_s_dim = Pg_s * Xc_P;
-      auto Pg_n_dim = Pg_n * Xc_P;
-      auto T_s_dim = T_s * Xc_T;
-      auto T_n_dim = T_n * Xc_T;
+      auto Pw_s_dim = Pw_old_s * Xc_P;
+      auto Pw_n_dim = Pw_old_n * Xc_P;
+      auto Pg_s_dim = Pg_old_s * Xc_P;
+      auto Pg_n_dim = Pg_old_n * Xc_P;
+      auto T_s_dim = T_old_s * Xc_T;
+      auto T_n_dim = T_old_n * Xc_T;
 
-      double S_s = XC_s * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_s = XC_old_s * (property.salt.MolarMass()/property.gas.MolarMass());
       auto zCH4_s = property.eos.EvaluateCompressibilityFactor(T_s_dim, Pg_s_dim);
       auto H_CH4_w_s = property.gas.SolubilityCoefficient(  T_s_dim/*K*/, S_s ); /*ndim */
       auto P_H_satu_s = property.water.SaturatedVaporPressure( T_s_dim /*K*/, S_s ); /*ndim */
       auto zCH4_n = property.eos.EvaluateCompressibilityFactor(T_n_dim, Pg_n_dim);
-      double S_n = XC_n * (property.salt.MolarMass()/property.gas.MolarMass());
+      double S_n = XC_old_n * (property.salt.MolarMass()/property.gas.MolarMass());
       auto H_CH4_w_n = property.gas.SolubilityCoefficient(  T_n_dim/*K*/, S_n ); /*ndim */
       auto P_H_satu_n = property.water.SaturatedVaporPressure( T_n_dim /*K*/, S_n ); /*ndim */
-      auto YCH4_s = property.mixture.YCH4(XCH4_s, T_s_dim, Pg_s_dim, XC_s, zCH4_s);
-      auto XH2O_s = property.mixture.XH2O(YH2O_s, T_s_dim, Pg_s_dim, XC_s);
+      auto YCH4_s = property.mixture.YCH4(XCH4_old_s, T_s_dim, Pg_s_dim, XC_old_s, zCH4_s);
+      auto XH2O_s = property.mixture.XH2O(YH2O_old_s, T_s_dim, Pg_s_dim, XC_old_s);
 
-      auto YCH4_n = property.mixture.YCH4(XCH4_n, T_n_dim, Pg_n_dim, XC_n, zCH4_n);
-      auto XH2O_n = property.mixture.XH2O(YH2O_n, T_n_dim, Pg_n_dim, XC_n);
+      auto YCH4_n = property.mixture.YCH4(XCH4_old_n, T_n_dim, Pg_n_dim, XC_old_n, zCH4_n);
+      auto XH2O_n = property.mixture.XH2O(YH2O_old_n, T_n_dim, Pg_n_dim, XC_old_n);
 
 
       auto K = property.soil.SedimentPermeabilityTensor(cell_inside,  iplocal_s)
-      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
+      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_old_s, por_s);
       auto permeability = property.soil.SedimentPermeability(cell_inside,  iplocal_s)
-      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_s, por_s);
+      * property.hydraulicProperty.PermeabilityScalingFactor(cell_inside,iplocal_s, Sh_old_s, por_s);
 
       
       double eta_s = 1/BrooksCParams[1];
-      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_s, Sh_s, 0., 0.);
+      auto Swe_s = property.hydraulicProperty.EffectiveSw(Sw_old_s, Sh_old_s, 0., 0.);
       auto dPc_dSwe_s =  property.hydraulicProperty.dPc_dSwe(Swe_s, BrooksCParams[0], BrooksCParams[1]);/* ndim */
-      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s * property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSw_s = property.hydraulicProperty.dSwe_dSw(Sw_old_s, Sh_old_s, 0., 0.);
+      auto coeff_grad_Sw_s = dPc_dSwe_s * dSwe_dSw_s * property.hydraulicProperty.PcSF1(Sh_old_s, BrooksCParams[1], BrooksCParams[4]);
 
-      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_s, BrooksCParams[1], BrooksCParams[4]);
-      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_s, Sh_s, 0., 0.);
-      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams[0] / Xc_P - Sg_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
+      auto dPcSF1_dSh_s =  property.hydraulicProperty.dPcSF1_dSh( Sh_old_s, BrooksCParams[1], BrooksCParams[4]);
+      auto dSwe_dSh_s = property.hydraulicProperty.dSwe_dSh(Sw_old_s, Sh_old_s, 0., 0.);
+      auto coeff_grad_Sh_s = dPcSF1_dSh_s * std::pow( Swe_s , -eta_s ) * BrooksCParams[0] / Xc_P - Sg_old_s * coeff_grad_Sw_s *  dSwe_dSw_s ;
 
 
                           // + property.hydraulicProperty.PcSF1(Sh_s, BrooksCParams[1], BrooksCParams[4]) * dPc_dSwe_s * (dSwe_dSh_s);//
-      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
-      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_s, Sh_s) / (property.gas.DynamicViscosity(T_s_dim, Pg_s_dim) );
+      auto krW_s = property.hydraulicProperty.krw(cell_inside, iplocal_s, Sw_old_s, Sh_old_s) / (property.water.DynamicViscosity(T_s_dim, Pw_s_dim, S_s));
+      auto krN_s = property.hydraulicProperty.krg(cell_inside, iplocal_s, Sw_old_s, Sh_old_s) / (property.gas.DynamicViscosity(T_s_dim, Pg_s_dim) );
 
       //  adding terms regarding components
       auto tau_s = property.soil.Tortuosity(por_s);
@@ -2042,7 +2154,7 @@ public:
       auto kth_w_s = property.water.ThermalConductivity(T_s_dim, Pw_s_dim, S_s);
       auto kth_h_s = property.hydrate.ThermalConductivity(T_s_dim, Peff_s * Xc_P);
       auto kth_s_s = property.soil.ThermalConductivity() ;
-      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ( Sg_s * kth_g_s + Sw_s * kth_w_s + Sh_s * kth_h_s);
+      auto kth_eff_s = (1. - por_s) * kth_s_s + por_s * ( Sg_old_s * kth_g_s + Sw_old_s * kth_w_s + Sh_old_s * kth_h_s);
       auto h_g_s =  Cp_g_s * (T_s-T_ref) ;
       auto h_w_s =  Cp_w_s * (T_s-T_ref) ;
 
@@ -2076,7 +2188,7 @@ public:
       auto kth_w_n = property.water.ThermalConductivity(T_n_dim, Pw_n_dim, S_n);
       auto kth_h_n = property.hydrate.ThermalConductivity(T_n_dim, Peff_n * Xc_P);
       auto kth_s_n = property.soil.ThermalConductivity() ;
-      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_n * kth_g_n + Sw_n * kth_w_n + Sh_n * kth_h_n);
+      auto kth_eff_n = (1. - por_n) * kth_s_n + por_n * ( Sg_old_n * kth_g_n + Sw_old_n * kth_w_n + Sh_old_n * kth_h_n);
       auto kth_eff = 2. * kth_eff_s * kth_eff_n / (kth_eff_s + kth_eff_n);
       auto h_g_n =  Cp_g_n * (T_n-T_ref) ;
       auto h_w_n =  Cp_w_n * (T_n-T_ref) ;

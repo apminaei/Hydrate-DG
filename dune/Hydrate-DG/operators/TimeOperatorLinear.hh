@@ -1,9 +1,16 @@
 using namespace Dune::PDELab;
 
-template <class GV, typename Params>
+template <class GV, typename Params, 
+		class Evaluation_Pw,
+		  class Evaluation_Sg,
+		  class Evaluation_Sh,
+		  class Evaluation_T,
+		  class Evaluation_XCH4,
+		  class Evaluation_YH2O,
+		  class Evaluation_XC>
 class TimeOperator:
-		public Dune::PDELab::NumericalJacobianApplyVolume<TimeOperator<GV, Params>>,
-		public Dune::PDELab::NumericalJacobianVolume<TimeOperator<GV, Params>>,
+		public Dune::PDELab::NumericalJacobianApplyVolume<TimeOperator<GV, Params, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
+		public Dune::PDELab::NumericalJacobianVolume<TimeOperator<GV, Params, Evaluation_Pw, Evaluation_Sg, Evaluation_Sh, Evaluation_T, Evaluation_XCH4, Evaluation_YH2O, Evaluation_XC>>,
 		public Dune::PDELab::FullVolumePattern,
 		public Dune::PDELab::LocalOperatorDefaultFlags,
 		public Dune::PDELab::InstationaryLocalOperatorDefaultMethods<double>
@@ -11,7 +18,13 @@ class TimeOperator:
 private:
 	const GV &gv;
 	const Params&	  property;
-
+	Evaluation_Pw    *evaluation_Pw;
+	Evaluation_Sg    *evaluation_Sg;
+	Evaluation_Sh    *evaluation_Sh;
+	Evaluation_T  	*evaluation_T;
+	Evaluation_XCH4  *evaluation_XCH4;
+	Evaluation_YH2O  *evaluation_YH2O;
+	Evaluation_XC  *evaluation_XC;
 	constexpr static double eps = 1.0e-6;
 	constexpr static double pi = atan(1.) * 4;
 	unsigned int intorder;
@@ -33,11 +46,25 @@ public:
 	// residual assembly flags
 	enum{doAlphaVolume = true	};
 
-  	// typedef typename GV::IndexSet IndexSet;
+  	typedef typename GV::IndexSet IndexSet;
 
 	// constructor remembers parameters
-	TimeOperator(const GV &gv_, const Params&	 property_, unsigned int intorder_ = 4)
-		:gv(gv_), property( property_ ),intorder(intorder_)
+	TimeOperator(const GV &gv_, const Params&	 property_,
+					Evaluation_Pw 	*evaluation_Pw_,
+                    Evaluation_Sg 	*evaluation_Sg_,
+                    Evaluation_Sh 	*evaluation_Sh_,
+                    Evaluation_T *evaluation_T_,
+                    Evaluation_XCH4 *evaluation_XCH4_,
+                    Evaluation_YH2O *evaluation_YH2O_,
+                    Evaluation_XC *evaluation_XC_, unsigned int intorder_ = 4)
+		:gv(gv_), property( property_ ),
+		evaluation_Pw(evaluation_Pw_),
+        evaluation_Sg(evaluation_Sg_),
+        evaluation_Sh(evaluation_Sh_),
+        evaluation_T(evaluation_T_),
+        evaluation_XCH4(evaluation_XCH4_),
+        evaluation_YH2O(evaluation_YH2O_),
+        evaluation_XC(evaluation_XC_),intorder(intorder_)
 	{
 		Xc_K = property.characteristicValue.permeability_c;
 		Xc_mu = property.characteristicValue.viscosity_c;
@@ -93,8 +120,8 @@ public:
 		
 		// Reference to cell
 	  	const auto& cell = eg.entity();
-		// const IndexSet &indexSet = gv.indexSet();
-		// int cell_number = indexSet.index(cell);
+		const IndexSet &indexSet = gv.indexSet();
+		int cell_number = indexSet.index(cell);
 
 		// Get geometry
 		auto geo = eg.geometry();
@@ -105,45 +132,44 @@ public:
 		// loop over quadrature points
 		for (const auto &ip : quadratureRule(geo, intorder))
 		{
-			auto qp = ip.position();
 			// evaluate test shape functions
 			std::vector<RangeType> phi_Pw(lfsu_Pw.size());
-			lfsu_Pw.finiteElement().localBasis().evaluateFunction(qp, phi_Pw);
+			lfsu_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Pw);
 			std::vector<RangeType> psi_Pw(lfsv_Pw.size());
-			lfsv_Pw.finiteElement().localBasis().evaluateFunction(qp, psi_Pw);
+			lfsv_Pw.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Pw);
 
 			std::vector<RangeType> phi_Sg(lfsu_Sg.size());
-			lfsu_Sg.finiteElement().localBasis().evaluateFunction(qp, phi_Sg);
+			lfsu_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sg);
 			std::vector<RangeType> psi_Sg(lfsv_Sg.size());
-			lfsv_Sg.finiteElement().localBasis().evaluateFunction(qp, psi_Sg);
+			lfsv_Sg.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Sg);
 
 			std::vector<RangeType> phi_Sh(lfsu_Sh.size());
-			lfsu_Sh.finiteElement().localBasis().evaluateFunction(qp, phi_Sh);
+			lfsu_Sh.finiteElement().localBasis().evaluateFunction(ip.position(), phi_Sh);
 			std::vector<RangeType> psi_Sh(lfsv_Sh.size());
-			lfsv_Sh.finiteElement().localBasis().evaluateFunction(qp, psi_Sh);
+			lfsv_Sh.finiteElement().localBasis().evaluateFunction(ip.position(), psi_Sh);
 
 			std::vector<RangeType> phi_T(lfsu_T.size());
-			lfsu_T.finiteElement().localBasis().evaluateFunction(qp, phi_T);
+			lfsu_T.finiteElement().localBasis().evaluateFunction(ip.position(), phi_T);
 			std::vector<RangeType> psi_T(lfsv_T.size());
-			lfsv_T.finiteElement().localBasis().evaluateFunction(qp, psi_T);
+			lfsv_T.finiteElement().localBasis().evaluateFunction(ip.position(), psi_T);
 
 			std::vector<RangeType> phi_XCH4(lfsu_XCH4.size());
-			lfsu_XCH4.finiteElement().localBasis().evaluateFunction(qp, phi_XCH4);
+			lfsu_XCH4.finiteElement().localBasis().evaluateFunction(ip.position(), phi_XCH4);
 			std::vector<RangeType> psi_XCH4(lfsv_XCH4.size());
-			lfsv_XCH4.finiteElement().localBasis().evaluateFunction(qp, psi_XCH4);
+			lfsv_XCH4.finiteElement().localBasis().evaluateFunction(ip.position(), psi_XCH4);
 
 			std::vector<RangeType> phi_YH2O(lfsu_YH2O.size());
-			lfsu_YH2O.finiteElement().localBasis().evaluateFunction(qp, phi_YH2O);
+			lfsu_YH2O.finiteElement().localBasis().evaluateFunction(ip.position(), phi_YH2O);
 			std::vector<RangeType> psi_YH2O(lfsv_YH2O.size());
-			lfsv_YH2O.finiteElement().localBasis().evaluateFunction(qp, psi_YH2O);
+			lfsv_YH2O.finiteElement().localBasis().evaluateFunction(ip.position(), psi_YH2O);
 
 			std::vector<RangeType> phi_XC(lfsu_XC.size());
-			lfsu_XC.finiteElement().localBasis().evaluateFunction(qp, phi_XC);
+			lfsu_XC.finiteElement().localBasis().evaluateFunction(ip.position(), phi_XC);
 			std::vector<RangeType> psi_XC(lfsv_XC.size());
-			lfsv_XC.finiteElement().localBasis().evaluateFunction(qp, psi_XC);
+			lfsv_XC.finiteElement().localBasis().evaluateFunction(ip.position(), psi_XC);
 
-			// auto ip_global = geo.global(qp);
-			// auto ip_local = geo.local(ip_global);
+			auto ip_global = geo.global(ip.position());
+			auto ip_local = geo.local(ip_global);
 			// evaluate Pw
 			RF Pw = 0.0;
 			for (size_type i = 0; i < lfsu_Pw.size(); i++)
@@ -186,19 +212,37 @@ public:
 			// Sh = std::max(0., Sh);
 			RF Sw = (1. - Sg - Sh);//std::max(0., std::min(1., ));
 
+			RF Pw_old=0.;
+			evaluation_Pw->evalFunctionOld(cell, ip.position(), &Pw_old);
+			RF Sg_old=0.;
+			evaluation_Sg->evalFunctionOld(cell,ip.position(),&Sg_old);
+			RF Sh_old=0.;
+			evaluation_Sh->evalFunctionOld(cell,ip.position(),&Sh_old);
+			RF T_old=0.;
+			evaluation_T->evalFunctionOld(cell,ip.position(),&T_old);
+			RF YH2O_old=0.;
+			evaluation_YH2O->evalFunctionOld(cell,ip.position(),&YH2O_old);
+			RF XCH4_old=0.;
+			evaluation_XCH4->evalFunctionOld(cell,ip.position(),&XCH4_old);
+			RF XC_old=0.;
+			evaluation_XC->evalFunctionOld(cell,ip.position(),&XC_old);
+
+      		RF Sw_old = (1. - Sg_old - Sh_old);
+
 
 			// evaluate Pg
-			auto por = property.soil.SedimentPorosity(cell, qp)  ;
-      		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, qp, Sw, Sh, por) ; /* ndim */
+			auto por = property.soil.SedimentPorosity(cell, ip_local)  ;
+      		auto Pc = property.hydraulicProperty.CapillaryPressure(cell, ip_local, Sw_old, Sh_old, por) ; /* ndim */
       
 			RF Pg = Pw + Pc ;
-			RF Peff = (Pg * Sg + Pw * Sw) / (1. - Sh);
+			RF Pg_old = Pw_old + Pc ;
+			RF Peff = (Pg * Sg_old + Pw * Sw_old) / (1. - Sh_old);
 
-			auto Pw_dim = Pw * Xc_P;
-      		auto Pg_dim = Pg * Xc_P;
-      		auto T_dim = T * Xc_T;
+			auto Pw_dim = Pw_old * Xc_P;
+      		auto Pg_dim = Pg_old * Xc_P;
+      		auto T_dim = T_old * Xc_T;
 
-			double S = XC * (property.salt.MolarMass()/property.gas.MolarMass());
+			double S = XC_old * (property.salt.MolarMass()/property.gas.MolarMass());
       		auto zCH4 = property.eos.EvaluateCompressibilityFactor(T_dim, Pg_dim);
 			auto H_CH4_w = property.gas.SolubilityCoefficient(  T_dim/*K*/, S ); /*ndim */
 			auto P_H_satu = property.water.SaturatedVaporPressure( T_dim /*K*/, S ); /*ndim */  
@@ -210,19 +254,19 @@ public:
 			auto Cv_w = property.water.Cv(T_dim, Pw_dim, S) ;
 			auto Cv_h = property.hydrate.Cv(T_dim, Peff * Xc_P) ;
 			auto Cv_s = property.soil.Cv();
-			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg * Cv_g + rho_w * Sw * Cv_w + rho_h * Sh * Cv_h);
+			auto Cv_eff = (1. - por) * rho_s * Cv_s + por * (rho_g * Sg_old * Cv_g + rho_w * Sw_old * Cv_w + rho_h * Sh_old * Cv_h);
 			
-			auto H2O_g = rho_g * por * YH2O * Sg;
-			auto CH4_w = rho_w * por * XCH4 * Sw;
-			auto SALT_w = rho_w * por * XC * Sw;
-			auto H2O_w = rho_w * por * (1. -XC - XCH4) * Sw;
-			auto CH4_g = rho_g * por * (1. - YH2O) * Sg;
+			auto H2O_g = rho_g * por * YH2O_old * Sg;
+			auto CH4_w = rho_w * por * XCH4_old * Sw;
+			auto SALT_w = rho_w * por * XC * Sw_old;
+			auto H2O_w = rho_w * por * (1. -XC - XCH4) * Sw_old;
+			auto CH4_g = rho_g * por * (1. - YH2O) * Sg_old;
 
 
 
 			// integrate (A grad u - bu)*grad phi_i + a*u*phi_i
-			RF factor = ip.weight() * geo.integrationElement(qp);
-			auto mass = por * (rho_g * Sg + rho_w * Sw );
+			RF factor = ip.weight() * geo.integrationElement(ip.position());
+			// auto mass = por * (rho_g * Sg + rho_w * Sw );
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
 				r.accumulate(lfsv_Sg, i, ((CH4_g + CH4_w) * psi_Pw[i]) * factor);//
