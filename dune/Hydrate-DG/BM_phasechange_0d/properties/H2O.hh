@@ -1,32 +1,37 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template<typename PTree>
+template <typename PTree>
 class Water
 {
 private:
 	CharacteristicValues characteristicValue;
-	const PTree& ptree;
+	const PTree &ptree;
 	Parameters<PTree> parameter;
+
 public:
-
-	Water (const PTree& ptree_  )
-	 : ptree(ptree_),
-	 parameter(ptree_)
-  	{}
-
-	double CriticalTemperature( ) const {
-		return 647.096 ; /* [K] */
+	Water(const PTree &ptree_)
+		: ptree(ptree_),
+		  parameter(ptree_)
+	{
 	}
 
-	double CriticalPressure( ) const {
-		return 22.064 * 1.0e6 ; /* [Pa] */
+	double CriticalTemperature() const
+	{
+		return 647.096; /* [K] */
 	}
 
-	double MolarMass( ) const {
+	double CriticalPressure() const
+	{
+		return 22.064 * 1.0e6; /* [Pa] */
+	}
+
+	double MolarMass() const
+	{
 		/* unit -> kg/mol */
-		return 18.0/1000;
+		return 18.0 / 1000;
 	}
 
-	double Density( double T, double Pw, double S ) const {
+	double Density(double T, double Pw, double S) const
+	{
 
 		double rho;
 		/* rho: unit -> kg/m^3 */
@@ -44,55 +49,54 @@ public:
 		double T_0 = 10.;
 		double S_0 = 0.035;
 		double alpha_T = -0.15;
-		double alpha_S = 108.523972603;//0.78*1e3;
+		double alpha_S = 108.523972603;
 		double alpha_P = 0.0045;
 
 #ifdef STATEINDEPENDENTPROPERTIES
 		double T_ref = parameter.RefT();
 		double P_ref = parameter.RefP();
 		double S_ref = parameter.RefSal();
-		T  = T_ref;
+		T = T_ref;
 		Pw = P_ref;
-		S  = S_ref;
+		S = S_ref;
 #endif
 
-		rho = rho_0
-			+ (   alpha_P*(Pw*1.e-4)
-				+ alpha_T*((T-273.15)-T_0)
-				+ alpha_S*(S-S_0)
-			  );
+		rho = rho_0 + (alpha_P * (Pw * 1.e-4) + alpha_T * ((T - 273.15) - T_0) + alpha_S * (S - S_0));
 
-		return rho/characteristicValue.density_c;
+		return rho / characteristicValue.density_c;
 	}
 
-	double MolarDensity(double T, double Pw, double S)const{
-		return Density( T,Pw,S)*characteristicValue.density_c/MolarMass();
+	double MolarDensity(double T, double Pw, double S) const
+	{
+		return Density(T, Pw, S) * characteristicValue.density_c / MolarMass();
 	}
 
-	double DynamicViscosity( double T, double Pw, double S ) const {
+	double DynamicViscosity(double T, double Pw, double S) const
+	{
 		double mu;
 		/* mu: unit -> Pa.s */
 
 		// REFERENCE:
-		double mu_0 = 0.001792 ; // kg/m/s
-		double a = - 1.94 ;
-		double b = - 4.80 ;
-		double c =  6.74 ;
-		double T0 = 273.15 ; // K
+		double mu_0 = 0.001792; // kg/m/s
+		double a = -1.94;
+		double b = -4.80;
+		double c = 6.74;
+		double T0 = 273.15; // K
 
 #ifdef STATEINDEPENDENTPROPERTIES
 		double T_ref = parameter.RefT();
-		double Tr = T0/T_ref ;
+		double Tr = T0 / T_ref;
 #else
-		double Tr = T0/T ;
+		double Tr = T0 / T;
 #endif
 
-		mu = mu_0 * exp( a + b * Tr + c * Tr*Tr );
+		mu = mu_0 * exp(a + b * Tr + c * Tr * Tr);
 
-		return mu/characteristicValue.viscosity_c;
+		return mu / characteristicValue.viscosity_c;
 	}
 
-	double ThermalConductivity( double T, double Pw, double S ) const {
+	double ThermalConductivity(double T, double Pw, double S) const
+	{
 
 		double kth;
 		/* kth: unit -> W.m^-1 K^-1 */
@@ -101,39 +105,40 @@ public:
 		double T_ref = parameter.RefT();
 		double P_ref = parameter.RefP();
 		double S_ref = parameter.RefSal();
-		T  = T_ref;
+		T = T_ref;
 		Pw = P_ref;
-		S  = S_ref;
+		S = S_ref;
 #endif
 
-		kth = 0.57153*( 1 + 0.003*(T-273.15) - 1.025e-5*(T-273.15)*(T-273.15) + 6.53e-10*Pw - 0.0245650*S );
+		kth = 0.57153 * (1 + 0.003 * (T - 273.15) - 1.025e-5 * (T - 273.15) * (T - 273.15) + 6.53e-10 * Pw - 0.0245650 * S);
 
-		return kth/characteristicValue.thermalconductivity_c;
+		return kth / characteristicValue.thermalconductivity_c;
 	}
 
-	double Cp( double T, double Pw, double S ) const {
+	double Cp(double T, double Pw, double S) const
+	{
 		double Cp;
 		/* Cp: unit -> J*kg^-1*K^-1 */
 
-		Cp = 3945.0 ;
+		Cp = 3945.0;
 
-		return Cp/characteristicValue.specificheat_c;
-
+		return Cp / characteristicValue.specificheat_c;
 	}
 
-	double Cv( double T, double Pw, double S ) const {
+	double Cv(double T, double Pw, double S) const
+	{
 		double Cv;
 		/* mu: unit -> J*kg^-1*K^-1 */
 
-		Cv = Cp( T, Pw, S )*characteristicValue.specificheat_c ;
+		Cv = Cp(T, Pw, S) * characteristicValue.specificheat_c;
 
-		return Cv/characteristicValue.volumetricheat_c;
-
+		return Cv / characteristicValue.volumetricheat_c;
 	}
 
-	double SaturatedVaporPressure( double T /*K*/,double S ) const {
+	double SaturatedVaporPressure(double T /*K*/, double S) const
+	{
 
-		double psat;   /* [Pa] */
+		double psat; /* [Pa] */
 
 #ifdef STATEINDEPENDENTPROPERTIES
 		double T_ref = parameter.RefT();
@@ -142,9 +147,9 @@ public:
 
 		// REF: SUGAR TOOLBOX
 
-		double Pc = CriticalPressure(); // in Pa
+		double Pc = CriticalPressure();	   // in Pa
 		double Tc = CriticalTemperature(); // in K
-		double Tr = T/Tc;
+		double Tr = T / Tc;
 
 		double c1 = -7.85951783;
 		double c2 = 1.84408259;
@@ -153,16 +158,10 @@ public:
 		double c5 = -15.9618719;
 		double c6 = 1.80122502;
 
-		double lnppc = 1./Tr * (  c1*(1-Tr)
-								+ c2*pow((1-Tr),1.5)
-								+ c3*pow((1-Tr),3)
-								+ c4*pow((1-Tr),3.5)
-								+ c5*pow((1-Tr),4)
-								+ c6*pow((1-Tr),7.5) );
+		double lnppc = 1. / Tr * (c1 * (1 - Tr) + c2 * pow((1 - Tr), 1.5) + c3 * pow((1 - Tr), 3) + c4 * pow((1 - Tr), 3.5) + c5 * pow((1 - Tr), 4) + c6 * pow((1 - Tr), 7.5));
 
-		psat = Pc * exp(lnppc);   /* [Pa] */
+		psat = Pc * exp(lnppc); /* [Pa] */
 
-		return psat/characteristicValue.P_c;
+		return psat / characteristicValue.P_c;
 	}
-
 };

@@ -1,30 +1,30 @@
-template<typename GV, typename PTree>
+template< typename PTree>
 class HydratePhaseChangeKinetics
 {
 private:
-		const GV& gv;
+		// const GV& gv;
 		const PTree& ptree;
 
-		const static int dim = GV::dimension;
+		
 
 		CharacteristicValues characteristicValue;
 
 		Parameters<PTree> parameter;
 		Methane<PTree> methane;
 		Water<PTree> water;
-		Hydrate<GV, PTree> hydrate;
+		Hydrate< PTree> hydrate;
+		// const static int dim = GV::dimension;
 
 public:
 
   //! construct from grid view
-  HydratePhaseChangeKinetics ( const GV& gv_ , 
-		  	  	  	  	  	   const PTree& ptree_  )
-  : gv( gv_ ), 
+  HydratePhaseChangeKinetics ( const PTree& ptree_  )
+  : 
 	ptree(ptree_),
 	parameter(ptree_),
 	water(ptree_),
 	methane(ptree_),
-	hydrate(gv_, ptree_)
+	hydrate( ptree_)
   {}
 
 	// EQULIBRIUM CONDITIONS FOR HYDRATE:
@@ -138,6 +138,6 @@ public:
       return Q_decomp ;
 	}
   //! get a reference to the grid view
-  inline const GV& getGridView () {return gv;}
+//   inline const GV& getGridView () {return gv;}
 
 };

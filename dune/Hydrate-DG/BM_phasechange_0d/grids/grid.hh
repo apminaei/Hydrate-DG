@@ -35,5 +35,9 @@ public:
 	const int X_cells = ptree.get("grid.yasp.NX",(int)10);
 	const double Y_length = 1.;	//only if dim=3
 	const int Y_cells = 1.; //only for dim==3
+
+	int getdim( ) const{
+		return dimension;
+	}
 	
 };

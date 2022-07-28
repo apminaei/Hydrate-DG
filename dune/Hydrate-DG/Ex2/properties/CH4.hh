@@ -60,12 +60,12 @@ public:
 		double mu;
 		/* mu: unit -> Pa.s */
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.ReferenceTemperature();
-		double P_ref = parameter.ReferencePressure();
-		T = T_ref;
-		Pg = P_ref;
-#endif
+// #ifdef STATEINDEPENDENTPROPERTIES
+// 		double T_ref = parameter.ReferenceTemperature();
+// 		double P_ref = parameter.ReferencePressure();
+// 		T = T_ref;
+// 		Pg = P_ref;
+// #endif
 		// when Pg = 20 mPa, then 9.6268, 16.6876,  58.5856,   
 		// Sutherland Correlation:  
 		// ref: http://portal.tpu.ru/SHARED/n/NATASHA/Material/Tab3/Glava_1.pdf

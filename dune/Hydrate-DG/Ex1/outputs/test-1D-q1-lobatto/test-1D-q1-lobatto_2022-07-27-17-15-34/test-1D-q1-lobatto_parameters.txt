@@ -1,0 +1,4 @@
+penalty coeff.  1	1	1	1	1	1
+ S=-1, N=0, I=1,  0.000000	0.000000	0.000000	0.000000	0.000000
+ dissCoeff 1e-17	 formCoeff 1e-17
+Xc_Permeability= 1e-13	Xc_gravity= 1	X_source_mass= 31104	X_source_heat= 0.31104	X_dispersivity= 1e-09	X_specific_heat= 1000

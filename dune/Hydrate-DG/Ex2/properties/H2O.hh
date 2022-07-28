@@ -23,7 +23,7 @@ public:
 
 	double MolarMass( ) const {
 		/* unit -> kg/mol */
-		return 18.0/1000;
+		return 18.0/1000.;
 	}
 
 	double Density( double T, double Pw, double S ) const {

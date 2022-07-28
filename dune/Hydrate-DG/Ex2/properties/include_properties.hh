@@ -37,10 +37,10 @@ public:
   	Water<PTree> water;
   	Salt salt;
   	Mixture<PTree> mixture;
-  	Hydrate<GV, PTree> hydrate;
+  	Hydrate< PTree> hydrate;
   	Soil<GV,Parameters<PTree>,MeshParameters<PTree>> soil;
   	HydraulicProperties<GV,Parameters<PTree>, MeshParameters<PTree>> hydraulicProperty;
-  	HydratePhaseChangeKinetics<GV,PTree> kinetics;
+  	HydratePhaseChangeKinetics<PTree> kinetics;
   	
   	//! construct from grid view
   	Properties ( const GV& gv_ , 
@@ -53,10 +53,10 @@ public:
 	  eos(ptree_),
 	  water(ptree_),
 	  mixture(ptree_),
-	  hydrate(gv_,ptree_),
+	  hydrate(ptree_),
 	  soil(gv_,parameter,mesh),
 	  hydraulicProperty(gv_,parameter,mesh),
-	  kinetics(gv_,ptree_)
+	  kinetics(ptree_)
   	{}
 	
 	double dt_initial = ptree.get("time.dt_initial",(double)1.);

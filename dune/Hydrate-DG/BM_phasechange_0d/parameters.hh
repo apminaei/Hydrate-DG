@@ -1,14 +1,14 @@
 /*
  * parameters.hh
  *
- * 
+ *
  */
 
-template<typename PTree>
+template <typename PTree>
 class Parameters
 {
 private:
-	const PTree& ptree;
+	const PTree &ptree;
 	const double pi = 3.14159265358979323846;
 	const static int dim = MeshParameters<PTree>::dimension;
 	CharacteristicValues X_c;
@@ -35,7 +35,7 @@ private:
 	double kf;
 	int numMaterials;
 	int numProps;
-	std::vector<std::vector<double> > prop;
+	std::vector<std::vector<double>> prop;
 
 	double ref_salinity;
 	double ref_saltconcentration;
@@ -46,191 +46,205 @@ private:
 	double g_magnitude;
 
 public:
+	//! constructor
+	Parameters(const PTree &ptree_)
+		: ptree(ptree_)
+	{
+		Sg_t0 = ptree.get("initial.Sg", (double)0.0);
+		Pw_t0 = ptree.get("initial.Pw", (double)2.e6);
+		Pg_t0 = ptree.get("initial.Pg", (double)2.0848e6);
+		T_t0 = ptree.get("initial.T", (double)4.); // in Celcius
+		Sh_t0 = ptree.get("initial.Sh", (double)0.3);
+		YH2O_t0 = ptree.get("initial.YH2O", (double)0.0005);
+		XCH4_t0 = ptree.get("initial.XCH4", (double)0.);
+		XC_t0 = ptree.get("initial.XC", (double)5.5e-3);
+		t_END = ptree.get("time.time_end", (double)2.16e6);
+		Pw_x0 = ptree.get("boundary.Pw_at_left", (double)2.e6);
+		Sgin_x0 = ptree.get("boundary.Sg_at_inlet", (double)0.0);
 
-  //! constructor
-  Parameters (const PTree& ptree_)
-  :ptree(ptree_)
-  {
-		Sg_t0 = ptree.get("initial.Sg",(double)0.0);
-		Pw_t0 = ptree.get("initial.Pw",(double)2.e6);
-		Pg_t0 = ptree.get("initial.Pg",(double)2.0848e6);
-		T_t0 = ptree.get("initial.T",(double)4.) ; // in Celcius
-		Sh_t0 = ptree.get("initial.Sh",(double)0.3);
-		YH2O_t0 = ptree.get("initial.YH2O",(double)0.0005);
-		XCH4_t0 = ptree.get("initial.XCH4",(double)0.);
-		XC_t0 = ptree.get("initial.XC",(double)5.5e-3);
-		t_END = ptree.get("time.time_end",(double)2.16e6);
-		Pw_x0 = ptree.get("boundary.Pw_at_left",(double)2.e6);
-		Sgin_x0 = ptree.get("boundary.Sg_at_inlet",(double)0.0);
-		
-		numMaterials = ptree.get("sediment.number_of_materials",(int)1);
+		numMaterials = ptree.get("sediment.number_of_materials", (int)1);
 
 		numProps = 8;
-		prop = std::vector<std::vector<double> > (numMaterials,std::vector<double>(numProps, 0.));
-		for(int n_mat=0; n_mat<numMaterials; n_mat++ ){
-			std::string name = "sediment.material"+std::to_string(n_mat);
-			prop[n_mat][0] = ptree.get(name+".por",	(double)0.3);
-			prop[n_mat][1] = ptree.get(name+".K",	(double)1.e-12);
-			prop[n_mat][2] = ptree.get(name+".pentry",(double)5.e4);
-			prop[n_mat][3] = ptree.get(name+".lambda",(double)1.2);
-			prop[n_mat][4] = ptree.get(name+".swr",	(double)0.);
-			prop[n_mat][5] = ptree.get(name+".sgr",	(double)0.);
-			prop[n_mat][6] = ptree.get(name+".m",	(double)3.);
-			prop[n_mat][7] = ptree.get(name+".beta",(double)1.);
+		prop = std::vector<std::vector<double>>(numMaterials, std::vector<double>(numProps, 0.));
+		for (int n_mat = 0; n_mat < numMaterials; n_mat++)
+		{
+			std::string name = "sediment.material" + std::to_string(n_mat);
+			prop[n_mat][0] = ptree.get(name + ".por", (double)0.3);
+			prop[n_mat][1] = ptree.get(name + ".K", (double)1.e-12);
+			prop[n_mat][2] = ptree.get(name + ".pentry", (double)5.e4);
+			prop[n_mat][3] = ptree.get(name + ".lambda", (double)1.2);
+			prop[n_mat][4] = ptree.get(name + ".swr", (double)0.);
+			prop[n_mat][5] = ptree.get(name + ".sgr", (double)0.);
+			prop[n_mat][6] = ptree.get(name + ".m", (double)3.);
+			prop[n_mat][7] = ptree.get(name + ".beta", (double)1.);
 		}
 
-		//reference state
-		ref_salinity = ptree.get("reference_state.salinity",(double)0.);
-		ref_saltconcentration = ref_salinity * (18.0/58.4); /*MolarMass_H2O/MolarMass_salt*/
-		ref_temperature = (273.15+ptree.get("reference_state.temperature",(double)0.));/*K*/
-		ref_pressure = ptree.get("reference_state.pressure",(double)1.01e5);
+		// reference state
+		ref_salinity = ptree.get("reference_state.salinity", (double)0.);
+		ref_saltconcentration = ref_salinity * (18.0 / 58.4);							   /*MolarMass_H2O/MolarMass_salt*/
+		ref_temperature = (273.15 + ptree.get("reference_state.temperature", (double)0.)); /*K*/
+		ref_pressure = ptree.get("reference_state.pressure", (double)1.01e5);
 
+		kd = ptree.get("hydrate_phase_change.dissociation_rate", (double)1.e-14);					 /*mol/m².Pa.s*/
+		kf = ptree.get("hydrate_phase_change.formation_rate", (double)1.e-13);						 /*mol/m².Pa.s*/
+		time_initial_problem = ptree.get("initial_problem.time_end", (double)5.);					 /*years*/
+		time_initial_problem *= (1000. * 364. * 24. * 60. * 60.);									 /*convert to seconds*/
+		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate", (double)1.e-13);	 /*mol/m².Pa.s*/
+		kd_initial_problem = ptree.get("initial_problem.hydrate_dissociation_rate", (double)1.e-14); /*mol/m².Pa.s*/
 
-		kd = ptree.get("hydrate_phase_change.dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
-		kf = ptree.get("hydrate_phase_change.formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
-		time_initial_problem = ptree.get("initial_problem.time_end",(double)5.); /*years*/
-		time_initial_problem *= (1000.*364.*24.*60.*60.); /*convert to seconds*/
-		kf_initial_problem = ptree.get("initial_problem.hydrate_formation_rate",(double)1.e-13);/*mol/m².Pa.s*/
-		kd_initial_problem = ptree.get("initial_problem.hydrate_dissociation_rate",(double)1.e-14);/*mol/m².Pa.s*/
-
-		//gravity
-		gravity_flag = ptree.get("gravity.flag",(bool)true);
-		g_magnitude = ptree.get("gravity.magnitude",(double)9.81);
-  }
+		// gravity
+		gravity_flag = ptree.get("gravity.flag", (bool)true);
+		g_magnitude = ptree.get("gravity.magnitude", (double)9.81);
+	}
 
 	/**********************************************************************
 	 * INPUTS
 	 **********
 	 * z_domain : height of the computational domain [m]
 	 * z_cells	: no. of cells along Z-axis
-	 * 
+	 *
 	 *
 	 *
 	 *
 	 **********************************************************************/
 
-	//2. Initial Values
+	// 2. Initial Values
 
-	double InitialSg(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialSg(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Sg = Sg_t0;
 		return Sg;
 	}
 
-	double InitialPw(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialPw(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Pw = 20.0 * ReferencePressure();
 		return Pw; /* Pa */
 	}
 
-	double InitialPg(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialPg(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Pg = Pg_t0;
-		return Pg;/* Pa */
+		return Pg; /* Pa */
 	}
 
-	double InitialT(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialT(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double T = T_t0 + ReferenceTemperature(); /*K*/
-		return T; /* K */
+		return T;								  /* K */
 	}
-	double InitialSh(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialSh(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Sh = Sh_t0;
 		return Sh;
 	}
 
-	double InitialXCH4(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialXCH4(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double XCH4 = XCH4_t0;
 		return XCH4;
 	}
-	double InitialYH2O(Dune::FieldVector< double,dim > xglobal) const {
+	double InitialYH2O(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double YH2O = YH2O_t0;
 		return YH2O;
 	}
 
-	double InitialXC(Dune::FieldVector< double,dim > xglobal) const {
-		double XC = 0.02 * 16.04 / 58.4 ;
+	double InitialXC(Dune::FieldVector<double, dim> xglobal) const
+	{
+		double XC = 0.02 * 16.04 / 58.4;
 		return XC;
 	}
 
-	//3. Boundary values
-	double InletSg(Dune::FieldVector< double,dim > xglobal) const {
+	// 3. Boundary values
+	double InletSg(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Sg = Sgin_x0;
 		return Sg;
 	}
 
-	double LeftPw(Dune::FieldVector< double,dim > xglobal) const {
+	double LeftPw(Dune::FieldVector<double, dim> xglobal) const
+	{
 		double Pw = Pw_x0;
 		return Pw; /* Pa */
 	}
 
-
-	//4. Material properties
-	std::vector< std::vector<double> > layer_properties() const {
+	// 4. Material properties
+	std::vector<std::vector<double>> layer_properties() const
+	{
 		return prop;
 	}
 
 	/**********************************************************************/
 	/* REFERENCE STATE VALUES */
-	double ReferenceSalinity() const {
+	double ReferenceSalinity() const
+	{
 		return ref_salinity;
 	}
-	double ReferenceTemperature() const {
+	double ReferenceTemperature() const
+	{
 		return ref_temperature; /*K*/
 	}
-	double ReferencePressure() const {
+	double ReferencePressure() const
+	{
 		return ref_pressure; /*Pa*/
 	}
-	double HydrateDissociationRateConstant() const {
-		return kd ;
+	double HydrateDissociationRateConstant() const
+	{
+		return kd;
 	}
-	double HydrateFormationRateConstant() const {
-		return kf ;
+	double HydrateFormationRateConstant() const
+	{
+		return kf;
 	}
-	double time_end() const {
+	double time_end() const
+	{
 		return t_END;
 	}
 
 #ifdef STATEINDEPENDENTPROPERTIES
 	// (P,T,sal) reference state for CASE1
-	double RefP() const {
-		return 20.*ReferencePressure(); /*Pa*/
+	double RefP() const
+	{
+		return 20. * ReferencePressure(); /*Pa*/
 	}
 
-	double RefT() const {
+	double RefT() const
+	{
 		return ReferenceTemperature() + 8.0; /*K*/
 	}
 
-	double RefSal() const {
-		return 0.02; /*kg/kg*/;
+	double RefSal() const
+	{
+		return 0.02; /*kg/kg*/
+		;
 	}
 #endif
 
-    /**********************************************************************/
-	Dune::FieldVector<double,dim>
-	SedimentVelocity ( double time, double dt ) const {
+	/**********************************************************************/
+	Dune::FieldVector<double, dim>
+	SedimentVelocity(double time, double dt) const
+	{
 
-		Dune::FieldVector<double,dim> vs( 0. );
-		vs[dim-1] = 0.;
+		Dune::FieldVector<double, dim> vs(0.);
+		vs[dim - 1] = 0.;
 		vs[0] = 0.;
 
 		return vs; /*m/s*/
 	}
 
 	/* GRAVITY VECTOR */
-	Dune::FieldVector<double,dim>
-	g( ) const {
-		Dune::FieldVector<double,dim> gravity( 0. );
+	Dune::FieldVector<double, dim>
+	g() const
+	{
+		Dune::FieldVector<double, dim> gravity(0.);
 		double g = 0.;
-		if(gravity_flag) g = -g_magnitude;
-		gravity[dim-1] = g;
+		if (gravity_flag)
+			g = -g_magnitude;
+		gravity[dim - 1] = g;
 		gravity[0] = 0.;
 		return gravity; /*N/kg*/
 	}
 
-	
 	/**********************************************************************/
-
 };
-
-
-
-
-
-

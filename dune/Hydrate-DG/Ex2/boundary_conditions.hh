@@ -218,7 +218,7 @@ public :
 			bcvalue[Indices::BCId_water] = Pw_top ;
 			bcvalue[Indices::BCId_salt ] = xc_top ;
 			bcvalue[Indices::BCId_heat ] = T_top  ;
-			bcvalue[Indices::BCId_gas ] = Sg_top  ;
+			// bcvalue[Indices::BCId_gas ] = Sg_top  ;
 
 		}
 		if( property.mesh.isBottomBoundary(globalPos) ){

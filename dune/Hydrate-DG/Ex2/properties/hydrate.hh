@@ -1,21 +1,21 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template<typename GV, typename PTree>
+template< typename PTree>
 class Hydrate {
 
 private:
 	CharacteristicValues characteristicValue;
 	const PTree& ptree;
-	const GV& gv;
+	// const GV& gv;
 	Parameters<PTree> parameter;
 public:
 
-	Hydrate (const GV& gv_, const PTree& ptree_  )
-	 : ptree(ptree_), gv(gv_),
+	Hydrate ( const PTree& ptree_  )
+	 : ptree(ptree_),
 	 parameter(ptree_)
   	{}
 
 	double Density( ) const {
-		/* unit -> kg/m^3 */
+		/* unit -> kg/m^3 const GV& gv_, */
 
 		double rho_h = 920.0 ;
 

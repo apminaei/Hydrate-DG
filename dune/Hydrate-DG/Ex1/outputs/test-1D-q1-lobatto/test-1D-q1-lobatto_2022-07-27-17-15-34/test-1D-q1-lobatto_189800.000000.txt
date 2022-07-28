@@ -1,0 +1,4 @@
+ time [s] = 189800	 dt [s] = 100	 total no. of newton iterations = 2	 Norm two= 617.148	 Norm one  = 22190.9	 Norm inf = 21.7669	100*500
+0	47.4793
+1	0.00808224
+2	1.44852e-06
