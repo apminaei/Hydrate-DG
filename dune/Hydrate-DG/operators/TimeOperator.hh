@@ -220,11 +220,11 @@ public:
 			auto mass = por * (rho_g * Sg + rho_w * Sw);
 			for (size_type i = 0; i < lfsv_Sg.size(); i++)
 			{
-				r.accumulate(lfsv_Sg, i, ((CH4_g + CH4_w) * psi_Pw[i]) * factor); //
+				r.accumulate(lfsv_Sg, i, ((CH4_g + CH4_w) * psi_Sg[i]) * factor); //
 			}
 			for (size_type i = 0; i < lfsv_XC.size(); i++)
 			{
-				r.accumulate(lfsv_XC, i, (SALT_w * psi_Pw[i]) * factor);
+				r.accumulate(lfsv_XC, i, (SALT_w * psi_XC[i]) * factor);
 			}
 			for (size_type i = 0; i < lfsv_Pw.size(); i++)
 			{

@@ -30,6 +30,7 @@ public:
 
 		std::vector<int> bctype(Indices::numOfPVs, -1);
 		bctype[indices.PVId_T] = indices.BCId_dirichlet;
+		bctype[indices.PVId_Sh] = indices.BCId_dirichlet;
 		if ((time >= 0) and (time < (2.00 * Xc_time)))
 		{
 			bctype[indices.PVId_Pw] = indices.BCId_dirichlet;

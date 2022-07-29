@@ -1,36 +1,39 @@
 /* ALL PARAMETERS ARE NONDIMENSIONAL */
-template< typename PTree>
-class Hydrate {
+template <typename PTree>
+class Hydrate
+{
 
 private:
 	CharacteristicValues characteristicValue;
-	const PTree& ptree;
+	const PTree &ptree;
 	// const GV& gv;
 	Parameters<PTree> parameter;
+
 public:
+	Hydrate(const PTree &ptree_)
+		: ptree(ptree_),
+		  parameter(ptree_)
+	{
+	}
 
-	Hydrate ( const PTree& ptree_  )
-	 : ptree(ptree_),
-	 parameter(ptree_)
-  	{}
-
-	double Density( ) const {
+	double Density() const
+	{
 		/* unit -> kg/m^3 const GV& gv_, */
 
-		double rho_h = 920.0 ;
+		double rho_h = 920.0;
 
-		return rho_h/characteristicValue.density_c;
-
+		return rho_h / characteristicValue.density_c;
 	}
 
 	double MolarMass() const
 	{
 		/* unit -> kg/mol */
-		return 119.5/1000;
+		return 119.5 / 1000;
 	}
 
-	double MolarDensity() const {
-		return Density()*characteristicValue.density_c/MolarMass();
+	double MolarDensity() const
+	{
+		return Density() * characteristicValue.density_c / MolarMass();
 	}
 
 	double HydrationNumber() const
@@ -38,17 +41,17 @@ public:
 		return 5.90;
 	}
 
-	double ThermalConductivity( double T, double P ) const
+	double ThermalConductivity(double T, double P) const
 	{
 		double kth;
 		/* kth: unit -> W.m^-1 K^-1 */
 
-		kth = 0.5 ;
+		kth = 0.5;
 
-		return kth/characteristicValue.thermalconductivity_c;
+		return kth / characteristicValue.thermalconductivity_c;
 	}
 
-	double Cp( double T, double P ) const
+	double Cp(double T, double P) const
 	{
 		double Cp;
 		/* Cp: unit -> J/kg.K */
@@ -58,22 +61,18 @@ public:
 		T = T_ref;
 #endif
 
-		Cp = ( 1.9370547e-05*T*T*T - 1.5151760e-02*T*T + 3.9553876*T - 342.70565 )*1.0e3;
+		Cp = (1.9370547e-05 * T * T * T - 1.5151760e-02 * T * T + 3.9553876 * T - 342.70565) * 1.0e3;
 
-
-	
-		return Cp/characteristicValue.specificheat_c;
-
+		return Cp / characteristicValue.specificheat_c;
 	}
 
-	double Cv( double T, double P ) const
+	double Cv(double T, double P) const
 	{
 		double Cv;
 		/* Cv: unit -> J/kg.K */
 
-		Cv = Cp( T, P )*characteristicValue.specificheat_c ;
+		Cv = Cp(T, P) * characteristicValue.specificheat_c;
 
-		return Cv/characteristicValue.volumetricheat_c;
-
+		return Cv / characteristicValue.volumetricheat_c;
 	}
 };
