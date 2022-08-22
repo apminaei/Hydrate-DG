@@ -52,9 +52,9 @@ public:
 		double alpha_S = 0.96706917808 * 1e2;
 		double alpha_P = 0.0045;
 
-		rho = rho_0 + (alpha_P * (Pw * 1.e-4) + alpha_T * ((T - 273.15) - T_0) + alpha_S * (S - S_0));
+		rho = 1030.21; //rho_0 + (alpha_P * (Pw * 1.e-4) + alpha_T * ((T - 273.15) - T_0) + alpha_S * (S - S_0));
 
-		return 1030.21 / characteristicValue.density_c;
+		return rho / characteristicValue.density_c;
 	}
 
 	double MolarDensity(double T, double Pw, double S) const
@@ -76,7 +76,7 @@ public:
 
 		double Tr = T0 / T;
 
-		mu = mu_0 * exp(a + b * Tr + c * Tr * Tr);
+		mu = 0.00136; //mu_0 * exp(a + b * Tr + c * Tr * Tr);
 
 		return mu / characteristicValue.viscosity_c;
 	}
@@ -87,7 +87,7 @@ public:
 		double kth;
 		/* kth: unit -> W.m^-1 K^-1 */
 
-		kth = 0.57153 * (1 + 0.003 * (T - 273.15) - 1.025e-5 * (T - 273.15) * (T - 273.15) + 6.53e-10 * Pw - 0.29 * S); // 0.024565
+		kth = 0.59; //0.57153 * (1 + 0.003 * (T - 273.15) - 1.025e-5 * (T - 273.15) * (T - 273.15) + 6.53e-10 * Pw - 0.29 * S); // 0.024565
 
 		return kth / characteristicValue.thermalconductivity_c;
 	}

@@ -200,7 +200,7 @@ void driver(const GV &gv,			// GridView
 	double alpha_x = ptree.get("penalty_coeff.XC", (double)1.e3);
 	double alpha_y = ptree.get("penalty_coeff.YH2O", (double)1.e3);
 
-	int intorder = 2 * (degree_P + 1) - 3; // ptree.get("quadrature.order",(int)6); // 15;
+	int intorder =  ptree.get("quadrature.order",(int)6); // 15;2 * (degree_P + 1) - 3; //
 
 	typedef ProblemBoundaryConditions<GV, Properties> BoundaryConditions;
 	BoundaryConditions bc(gv, property);

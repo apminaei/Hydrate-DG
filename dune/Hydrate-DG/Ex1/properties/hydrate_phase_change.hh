@@ -84,7 +84,7 @@ public:
 	{
 
 		double gas_gen = 0.0;
-		double A = 38.592, B = 8533.8, C = 16.32;
+		double A = 38.592, B = 8533.8, C = 16.32; // 4.4824;//
 		double P_eq = 1.e3 * exp(A - B / (T) + C * S); // defined in Pascals
 		double Peq = P_eq;
 
@@ -118,7 +118,7 @@ public:
 	// heat of hydrate dissociation:
 	double HeatOfDissociation(double gasGenRate, double T) const
 	{
-		double Q_decomp /*[W/m³]*/ = -(gasGenRate / methane.MolarMass()) * (56599.0 - 16.744 * (T));
+		double Q_decomp /*[W/m³]*/ = -(gasGenRate / methane.MolarMass()) * (56599.0 - 16.744 * (T)) * 6.; // hydrate.HydrationNumber();
 
 		return Q_decomp;
 	}

@@ -46,7 +46,7 @@ public:
 		/* rho: unit -> kg/m^3 */
 
 		double R_CH4 = Ru / MolarMass();
-		rho = Pg / (z_CH4 * R_CH4 * T);
+		rho =  0.002756 * Pg/T; //Pg / (z_CH4 * R_CH4 * T); //
 
 		return rho / characteristicValue.density_c;
 	}
@@ -73,7 +73,7 @@ public:
 		// 									- 7.3232e-28 * Pg * Pg * Pg )
 		// 		); // Pa.s -> ref: Frauenhofer Comsol Model
 		mu_0 = 1.0707e-5 - 4.8134e-14 * Pg - 4.1719e-21 * Pg * Pg + 7.3232e-28 * Pg * Pg * Pg; // Pa.s -> ref: Frauenhofer Comsol Model
-		mu = 1.4055e-5;																		   // mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;//
+		mu = 1.4055e-5; // mu_0 * (273.15 + C ) * ( pow( (T/273.15), 1.5) / ( T + C ) ) ;//
 
 		return mu / characteristicValue.viscosity_c;
 	}
@@ -92,7 +92,7 @@ public:
 		double A2 = -0.6997019196 * 1.e-6;
 		double A3 = 0.1224609018 * 1.e-8;
 
-		kth = A0 + A1 * T + A2 * T * T + A3 * T * T * T;
+		kth = 0.3121;//A0 + A1 * T + A2 * T * T + A3 * T * T * T;
 		return kth / characteristicValue.thermalconductivity_c;
 	}
 
@@ -154,7 +154,7 @@ public:
 		// REFERENCE:
 		double Cp; /* [J/(kg*K)] */
 
-		Cp = Cp_ideal(T, Pg) + Cp_res(T, Pg, z_CH4); /* [J/(kg*K)] */
+		Cp = 2168.65;//Cp_ideal(T, Pg) + Cp_res(T, Pg, z_CH4); /* [J/(kg*K)] */
 
 		return Cp / characteristicValue.specificheat_c;
 	}

@@ -26,7 +26,8 @@ public:
 	MeshParameters<PTree> mesh;
 	Parameters<PTree> parameter;
 	Methane<PTree> gas;
-	PengRobinson<PTree> eos;
+	// PengRobinson<PTree> eos;
+	BaseEoS<PTree> eos;
 	Water<PTree> water;
 	Salt salt;
 	Mixture<PTree> mixture;

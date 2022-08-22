@@ -74,12 +74,8 @@ public:
 		double c = 6.74;
 		double T0 = 273.15; // K
 
-#ifdef STATEINDEPENDENTPROPERTIES
-		double T_ref = parameter.ReferenceTemperature();
-		double Tr = T0 / T_ref;
-#else
 		double Tr = T0 / T;
-#endif
+
 
 		mu = mu_0 * exp(a + b * Tr + c * Tr * Tr);
 

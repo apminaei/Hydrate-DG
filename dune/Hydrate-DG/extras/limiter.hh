@@ -253,7 +253,7 @@ namespace Dune
           for (int i = 0; i < dim; i++)
           {
             RF cnew = minmod(c[i + 1], (avgup[i] - c[0]) / jac[i][i], (c[0] - avgdn[i]) / jac[i][i]);
-            if (std::abs(cnew - c[i + 1]) > 1e-16)
+            if (std::abs(cnew - c[i + 1]) > 1.e-12)
             {
               limityes = true;
               c[i + 1] = cnew;

@@ -1161,11 +1161,32 @@ public:
       RF omegaup_g_s, omegaup_g_n;
       omegaup_g_s = 0.5;
       omegaup_g_n = 0.5;
+      if (normalflux_g >= 0.)
+      {
+        omegaup_g_s = 1.;
+        omegaup_g_n = 0.;
+      }
+      if (normalflux_g < 0.)
+      {
+        omegaup_g_s = 0.;
+        omegaup_g_n = 1.;
+      }
 
       // upwinding wrt water-phase velocity
       RF omegaup_w_s, omegaup_w_n;
       omegaup_w_s = 0.5;
       omegaup_w_n = 0.5;
+      if (normalflux_w >= 0.)
+      {
+        omegaup_w_s = 1.;
+        omegaup_w_n = 0.;
+      }
+      if (normalflux_w < 0.)
+      {
+        omegaup_w_s = 0.;
+        omegaup_w_n = 1.;
+      }
+
 
       RF omegaup_xch4_s, omegaup_xch4_n;
       if (normaldiff_xch4 >= 0.0)
@@ -1997,31 +2018,31 @@ public:
       RF omegaup_g_s, omegaup_g_n;
       omegaup_g_s = 0.5;
       omegaup_g_n = 0.5;
-      // if (normalflux_g >= 0.)
-      // {
-      //   omegaup_g_s = 1.;
-      //   omegaup_g_n = 0.;
-      // }
-      // if (normalflux_g < 0.)
-      // {
-      //   omegaup_g_s = 0.;
-      //   omegaup_g_n = 1.;
-      // }
+      if (normalflux_g >= 0.)
+      {
+        omegaup_g_s = 1.;
+        omegaup_g_n = 0.;
+      }
+      if (normalflux_g < 0.)
+      {
+        omegaup_g_s = 0.;
+        omegaup_g_n = 1.;
+      }
 
       // upwinding wrt water-phase velocity
       RF omegaup_w_s, omegaup_w_n;
       omegaup_w_s = 0.5;
       omegaup_w_n = 0.5;
-      // if (normalflux_w >= 0.)
-      // {
-      //   omegaup_w_s = 1.;
-      //   omegaup_w_n = 0.;
-      // }
-      // if (normalflux_w < 0.)
-      // {
-      //   omegaup_w_s = 0.;
-      //   omegaup_w_n = 1.;
-      // }
+      if (normalflux_w >= 0.)
+      {
+        omegaup_w_s = 1.;
+        omegaup_w_n = 0.;
+      }
+      if (normalflux_w < 0.)
+      {
+        omegaup_w_s = 0.;
+        omegaup_w_n = 1.;
+      }
 
       RF omegaup_xch4_s, omegaup_xch4_n;
       if (normaldiff_xch4 >= 0.0)
