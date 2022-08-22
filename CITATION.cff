@@ -1,11 +1,23 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-authors:
-- family-names: "Peiraviminaei"
-  given-names: "Amir"
-  orcid: "https://orcid.org/0000-0002-1040-4063"
-title: "Gas Hydrate Simulation"
-version: 1.0
-doi: 10.5281/zenodo.6924591
-date-released: 2022
-url: "https://doi.org/10.5281/zenodo.6924591"
+message: "If you use this software, please cite the corresponding paper and the software as below."
+Software:
+	authors:
+		- family-names: "Peiraviminaei"
+  		given-names: "Amir"
+  		orcid: "https://orcid.org/0000-0002-1040-4063"
+		title: "Gas Hydrate Simulation"
+		version: 1.0
+		doi: 10.5281/zenodo.6924591
+		date-released: 2022
+		url: "https://doi.org/10.5281/zenodo.6924591"
+Paper:
+@article{10.1002/essoar.10511609.1,
+author = {Peiraviminaei, Amir and Gupta, Shubhangi and Wohlmuth, Barbara},
+title = {Numerical modeling of gas hydrate recycling in complex media: Implications for gas migration through strongly anisotropic layers},
+journal = {Earth and Space Science Open Archive},
+pages = {37},
+year = {2022},
+DOI = {10.1002/essoar.10511609.1},
+url = {https://www.essoar.org/doi/abs/10.1002/essoar.10511609.1},
+abstract = {Burial driven recycling is an important process in the natural gas hydrate (GH) systems worldwide, characterized by complex multiphysics interactions like gas migration through an evolving gas hydrate stability zone (GHSZ), competing gas-water-hydrate (i.e. fluid-fluid-solid) phase transitions, locally appearing and disappearing phases, and evolving sediment properties (e.g., permeability, reaction surface area, and capillary entry pressure). Such a recycling process is typically studied in homogeneous or layered sediments. However, there is mounting evidence that structural heterogeneity and anisotropy linked to normal and inclined fault systems or anomalous sediment layers have a strong impact on the GH dynamics. Here, we consider the impacts of such a structurally complex media on the recycling process. To capture the properties of the anomalous layers accurately, we introduce a fully mass conservative, high-order, discontinuous Galerkin (DG) finite element based numerical scheme. Moreover, to handle the rapidly switching thermodynamic phase states robustly, we cast the problem of phase transitions as a set of variational inequalities, and combine our DG discretization scheme with a semismooth Newton solver. Here, we present our new simulator, and demonstrate using synthetic geological scenarios, a) how the presence of an anomalous high-permeability layer, like a fracture or brecciated sediment, can alter the recycling process through flow-localization, and more importantly, b) how an incorrect or incomplete approximation of the properties of such a layer can lead to large errors in the overall prediction of the recycling process.}
+}
