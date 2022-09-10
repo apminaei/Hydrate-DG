@@ -4,6 +4,8 @@ Software:
 	authors:
 		- family-names: "Peiraviminaei"
   		given-names: "Amir"
+		- family-names: "Gupta"
+  		given-names: "Shubhangi"
   		orcid: "https://orcid.org/0000-0002-1040-4063"
 		title: "Gas Hydrate Simulation"
 		version: 1.0
