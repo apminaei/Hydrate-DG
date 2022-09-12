@@ -53,3 +53,27 @@ for further options.
 
 
 The full build system is described in the dune-common/doc/buildsystem (Git version) or under share/doc/dune-common/buildsystem if you installed DUNE!
+
+
+############################################### How to use this code? ###################################################
+This code requires DUNE-PDELab version > 2.7, which is an open-source toolbox for solving systems of partial differential equations, available freely at: https://gitlab.dune-project.org/pdelab/
+
+The source code depends on following dune modules: common, grid, geometry, istl, localfunctions, uggrid, alugrid, grid, functions, typetree, pdelab.
+After installation of these modules, the necessary libraries are included in the source code through includeDUNE.hh.
+
+- source file including main program for each simulation scenario is in the src folder.
+- driver.hh defines function space and solvers needed for each simulation scenario and is included in Hydrate-DG/dune/Hydrate-DG/CorrespondingScenario
+- whithin each folder of simulation scenarios there exist following folders:
+  - properties: include material properties
+  - grid: include domain discretization, boundaries
+  - input: include input data such as numerical parameters, initial and boundary conditions, ...
+  
+
+############################################### Numerical Setting #######################################################
+
+1. BM_phasechange_0d : Artifitially designed example to validate phase change for our numerical scheme
+2. 1D scenario are simulated with a pre-existing hydrate layer located at GHSZ. 
+  This simulation test is considered to show MHR proces in a homogeneous geological setting.
+
+3. 2D scenarios are simulated to show the impact of existence of an anomalous material layer within geological setting.
+
